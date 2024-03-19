@@ -9,8 +9,8 @@ import { ContextMenuTool } from '../components/context-menu'
 TODO:
 [x] Embedding by Drag and Drop: https://x6.antv.antgroup.com/en/examples/node/group/#embedding-by-dnd
 [x] Delete Button: https://x6.antv.antgroup.com/en/examples/node/tool/#button-remove
-[ ] Detaching node: https://x6.antv.antgroup.com/en/examples/edge/tool/#context-menu
 [ ] Collapse/Expand the Parent Node: https://x6.antv.antgroup.com/en/examples/node/group/#collapsable
+[ ] Detaching node: https://x6.antv.antgroup.com/en/examples/edge/tool/#context-menu
 [ ] Auto Expand/Shrink the Parent Node: https://x6.antv.antgroup.com/en/examples/node/group/#expand-shrink
 [ ] Ajusting arrowheads: https://x6.antv.antgroup.com/en/examples/edge/tool#arrowheads
 [ ] Updating edges: https://x6.antv.antgroup.com/tutorial/basic/events

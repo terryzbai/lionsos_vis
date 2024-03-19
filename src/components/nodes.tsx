@@ -1,11 +1,6 @@
 // import { Graph } from '@antv/x6';
 
 const commonAttrs = {
-  body: {
-    fill: '#fff',
-    stroke: '#8f8f8f',
-    strokeWidth: 1,
-  },
   ports: {
     groups: {
       bottom: {
@@ -64,6 +59,13 @@ const custom_nodes = {
 		data: {
 			parent: true,
 		},
+		attrs: {
+			body: {
+				fill: '#efdbff',
+				stroke: '#9254de',
+				strokeWidth: 1,
+			},
+		},
     ...commonAttrs,
   }, {
 		name: 'vm',
@@ -73,6 +75,13 @@ const custom_nodes = {
 		width: 30,
 		height: 20,
 		label: 'VM',
+		attrs: {
+			body: {
+				fill: '#ffd591',
+				stroke: '#ffa940',
+				strokeWidth: 1,
+			},
+		},
 		...commonAttrs
 	}],
 	'Advanced': [{

@@ -3,8 +3,6 @@ import { Dropdown } from 'antd'
 import { ToolsView, EdgeView } from '@antv/x6'
 import type { MenuProps } from 'antd'
 
-// 如果项目中使用的是 antd@4，使用方式参考：https://codesandbox.io/s/contextmenu-z8gpq3
-
 export class ContextMenuTool extends ToolsView.ToolItem<
   EdgeView,
   ContextMenuToolOptions
