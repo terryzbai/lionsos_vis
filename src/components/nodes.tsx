@@ -1,4 +1,3 @@
-// import { Graph } from '@antv/x6';
 
 const commonAttrs = {
   ports: {
@@ -15,26 +14,6 @@ const commonAttrs = {
       },
     },
   },
-	// tools: [
-  //   {
-  //     name: 'contextmenu',
-  //     args: [
-	// 			{
-	// 				key: 'copy',
-	// 				label: '复制',
-	// 			},
-	// 			{
-	// 				key: 'paste',
-	// 				label: '粘贴',
-	// 			},
-	// 			{
-	// 				key: 'delete',
-	// 				label: '删除',
-	// 				type: 'danger',
-	// 			},
-	// 		],
-  //   },
-  // ],
 }
 
 const stencil_group = [
@@ -49,7 +28,7 @@ const stencil_group = [
 
 const custom_nodes = {
 	'Basic': [{
-		name: 'pd',
+		...commonAttrs,
     shape: 'rect',
     x: 40,
     y: 40,
@@ -66,9 +45,8 @@ const custom_nodes = {
 				strokeWidth: 1,
 			},
 		},
-    ...commonAttrs,
   }, {
-		name: 'vm',
+		...commonAttrs,
 		shape: 'rect',
 		x: 100,
 		y: 40,
@@ -76,24 +54,82 @@ const custom_nodes = {
 		height: 20,
 		label: 'VM',
 		attrs: {
+			text: {
+				textAnchor: "middle",
+			},
 			body: {
 				fill: '#ffd591',
 				stroke: '#ffa940',
 				strokeWidth: 1,
 			},
 		},
-		...commonAttrs
 	}],
 	'Advanced': [{
-		name: 'sDDF',
+		...commonAttrs,
 		shape: 'rect',
 		x: 40,
 		y: 40,
 		width: 80,
 		height: 40,
 		label: 'sDDF',
-		...commonAttrs,
 	}]
 };
 
-export { stencil_group, custom_nodes }
+const custom_group = {
+	'PD': {
+		...commonAttrs,
+    id: 'PD',
+    shape: 'rect',
+    width: 200,
+    height: 120,
+		data: {
+			parent: true,
+		},
+		attrs: {
+			label: {
+				text: 'PD',
+				fontSize: 18,
+				fill: "#000000",
+			},
+			text: {
+				textAnchor: "middle",
+				x: 10,
+				y: 12,
+			},
+			body: {
+				fill: '#efdbff',
+				stroke: '#9254de',
+				strokeWidth: 1,
+			},
+		},
+	},
+	'VM': {
+		...commonAttrs,
+		id: 'VM',
+		shape: 'rect',
+		x: 100,
+		y: 40,
+		width: 80,
+		height: 40,
+		label: 'VM',
+		attrs: {
+			label: {
+				text: 'VM',
+				fontSize: 18,
+				fill: "#000000",
+			},
+			text: {
+				textAnchor: "middle",
+				x: 10,
+				y: 12,
+			},
+			body: {
+				fill: '#ffd591',
+				stroke: '#ffa940',
+				strokeWidth: 1,
+			},
+		},
+	}
+}
+
+export { stencil_group, custom_nodes, custom_group }

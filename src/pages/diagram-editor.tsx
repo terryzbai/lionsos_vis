@@ -2,16 +2,17 @@ import React from 'react';
 import { Graph } from '@antv/x6'
 import { Snapline } from '@antv/x6-plugin-snapline'
 import { Stencil } from '@antv/x6-plugin-stencil'
-import { stencil_group, custom_nodes } from '../components/nodes'
+import { stencil_group, custom_nodes, custom_group } from '../components/nodes'
 import { ContextMenuTool } from '../components/context-menu'
+import { Group } from '../components/group'
 
 /*
 TODO:
 [x] Embedding by Drag and Drop: https://x6.antv.antgroup.com/en/examples/node/group/#embedding-by-dnd
 [x] Delete Button: https://x6.antv.antgroup.com/en/examples/node/tool/#button-remove
-[ ] Collapse/Expand the Parent Node: https://x6.antv.antgroup.com/en/examples/node/group/#collapsable
-[ ] Detaching node: https://x6.antv.antgroup.com/en/examples/edge/tool/#context-menu
-[ ] Auto Expand/Shrink the Parent Node: https://x6.antv.antgroup.com/en/examples/node/group/#expand-shrink
+[x] Auto Expand/Shrink the Parent Node: https://x6.antv.antgroup.com/en/examples/node/group/#expand-shrink
+[x] Collapse/Expand the Parent Node: https://x6.antv.antgroup.com/en/examples/node/group/#collapsable
+[x] Detaching node: https://x6.antv.antgroup.com/en/examples/edge/tool/#context-menu
 [ ] Ajusting arrowheads: https://x6.antv.antgroup.com/en/examples/edge/tool#arrowheads
 [ ] Updating edges: https://x6.antv.antgroup.com/tutorial/basic/events
 */
@@ -19,6 +20,7 @@ TODO:
 export default class DiagramEditor extends React.Component<{openDrawer : Function}> {
   private container: HTMLDivElement
   private stencilContainer: HTMLDivElement
+  private ctrlPressed: boolean
 
   componentDidMount() {
     const graph = new Graph({
@@ -84,13 +86,17 @@ export default class DiagramEditor extends React.Component<{openDrawer : Functio
       stencilGraphHeight: 0,
       groups: stencil_group,
       getDropNode(node) {
-        const { width, height } = node.size()
-				node.addPort({
+        const node_name = node.getAttrs().text.text
+        console.log(node)
+        // const { width, height } = node.size()
+        
+        // return node.clone().size(width * 2, height * 2)
+        const group = new Group(custom_group[String(node_name)])
+				group.addPort({
 					id: 'port_1',
           group: 'bottom',
 				})
-
-        return node.clone().size(width * 2, height * 2)
+        return group
       },
     })
 
@@ -123,6 +129,97 @@ export default class DiagramEditor extends React.Component<{openDrawer : Functio
     
     graph.on('node:mouseleave', ({ node }) => {
       node.removeTools()
+    })
+
+    this.ctrlPressed = false
+    graph.on('node:embedding', ({ e }: { e }) => {
+      this.ctrlPressed = e.metaKey || e.ctrlKey
+    })
+    
+    graph.on('node:embedded', () => {
+      this.ctrlPressed = false
+    })
+
+    graph.on('node:change:size', ({ node, options }) => {
+      if (options.skipParentHandler) {
+        return
+      }
+    
+      const children = node.getChildren()
+      if (children && children.length) {
+        node.prop('originSize', node.getSize())
+      }
+    })
+    
+    const embedPadding = 20
+    graph.on('node:change:position', ({ node, options }) => {
+      if (options.skipParentHandler || this.ctrlPressed) {
+        return
+      }
+    
+      const children = node.getChildren()
+      if (children && children.length) {
+        node.prop('originPosition', node.getPosition())
+      }
+    
+      const parent = node.getParent()
+      if (parent && parent.isNode()) {
+        let originSize = parent.prop('originSize')
+        if (originSize == null) {
+          originSize = parent.getSize()
+          parent.prop('originSize', originSize)
+        }
+    
+        let originPosition = parent.prop('originPosition')
+        if (originPosition == null) {
+          originPosition = parent.getPosition()
+          parent.prop('originPosition', originPosition)
+        }
+    
+        let x = originPosition.x
+        let y = originPosition.y
+        let cornerX = originPosition.x + originSize.width
+        let cornerY = originPosition.y + originSize.height
+        let hasChange = false
+    
+        const children = parent.getChildren()
+        if (children) {
+          children.forEach((child) => {
+            const bbox = child.getBBox().inflate(embedPadding)
+            const corner = bbox.getCorner()
+    
+            if (bbox.x < x) {
+              x = bbox.x
+              hasChange = true
+            }
+    
+            if (bbox.y < y) {
+              y = bbox.y
+              hasChange = true
+            }
+    
+            if (corner.x > cornerX) {
+              cornerX = corner.x
+              hasChange = true
+            }
+    
+            if (corner.y > cornerY) {
+              cornerY = corner.y
+              hasChange = true
+            }
+          })
+        }
+    
+        if (hasChange) {
+          parent.prop(
+            {
+              position: { x, y },
+              size: { width: cornerX - x, height: cornerY - y },
+            },
+            { skipParentHandler: true },
+          )
+        }
+      }
     })
 
     ContextMenuTool.config({
