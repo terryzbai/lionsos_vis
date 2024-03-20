@@ -15,8 +15,8 @@ TODO:
 [x] Detaching node: https://x6.antv.antgroup.com/en/examples/edge/tool/#context-menu
 [x] Ajusting arrowheads: https://x6.antv.antgroup.com/en/examples/edge/tool#arrowheads
 [ ] Export configurations
-[ ] Toobar
-[ ] 
+[ ] zIndex issue
+[ ] Toobar: 
 [ ] Updating edges: https://x6.antv.antgroup.com/tutorial/basic/events
 */
 
@@ -174,7 +174,7 @@ export default class DiagramEditor extends React.Component<{openDrawer : Functio
     
       collapse(node)
     })
-    
+
     graph.on('edge:mouseenter', ({ cell }) => {
       cell.addTools([
         {
@@ -258,6 +258,13 @@ export default class DiagramEditor extends React.Component<{openDrawer : Functio
             { skipParentHandler: true },
           )
         }
+      }
+    })
+
+    graph.on('edge:connected', ({ isNew, edge }) => {
+      if (isNew) {
+        const sourceNode = edge.getSourceNode()
+        edge.setSource(sourceNode)
       }
     })
 

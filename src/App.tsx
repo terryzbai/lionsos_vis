@@ -1,6 +1,7 @@
 import React from 'react';
 import { Tabs } from 'antd';
 import DiagramEditor from './pages/diagram-editor';
+import MemoryEditor from './pages/memory-editor';
 import './App.css';
 import ComponentDrawer from './components/component-drawer';
 
@@ -45,7 +46,7 @@ export default class App extends React.Component<{}, { drawerOpen: boolean, data
             {
               key: '2',
               label: 'Schedule',
-              children: 'Content of Tab Pane 2',
+              children: <MemoryEditor />,
             },
             {
               key: '3',
