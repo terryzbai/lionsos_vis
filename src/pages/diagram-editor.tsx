@@ -14,6 +14,9 @@ TODO:
 [x] Collapse/Expand the Parent Node: https://x6.antv.antgroup.com/en/examples/node/group/#collapsable
 [x] Detaching node: https://x6.antv.antgroup.com/en/examples/edge/tool/#context-menu
 [x] Ajusting arrowheads: https://x6.antv.antgroup.com/en/examples/edge/tool#arrowheads
+[ ] Export configurations
+[ ] Toobar
+[ ] 
 [ ] Updating edges: https://x6.antv.antgroup.com/tutorial/basic/events
 */
 
@@ -147,6 +150,31 @@ export default class DiagramEditor extends React.Component<{openDrawer : Functio
         node.prop('originSize', node.getSize())
       }
     })
+    graph.on('node:collapse', ({ node }: { node: Group }) => {
+      node.toggleCollapse()
+      const collapsed = node.isCollapsed()
+      const collapse = (parent: Group) => {
+        const cells = parent.getChildren()
+        if (cells) {
+          cells.forEach((cell) => {
+            if (collapsed) {
+              cell.hide()
+            } else {
+              cell.show()
+            }
+    
+            if (cell instanceof Group) {
+              if (!cell.isCollapsed()) {
+                collapse(cell)
+              }
+            }
+          })
+        }
+      }
+    
+      collapse(node)
+    })
+    
     graph.on('edge:mouseenter', ({ cell }) => {
       cell.addTools([
         {

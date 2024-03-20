@@ -50,8 +50,8 @@ const custom_nodes = {
 		shape: 'rect',
 		x: 100,
 		y: 40,
-		width: 30,
-		height: 20,
+		width: 60,
+		height: 50,
 		label: 'VM',
 		attrs: {
 			text: {
@@ -78,7 +78,6 @@ const custom_nodes = {
 const custom_group = {
 	'PD': {
 		...commonAttrs,
-    id: 'PD',
     shape: 'rect',
     width: 200,
     height: 120,
@@ -105,10 +104,7 @@ const custom_group = {
 	},
 	'VM': {
 		...commonAttrs,
-		// id: 'VM',
 		shape: 'rect',
-		x: 100,
-		y: 40,
 		width: 80,
 		height: 60,
 		label: 'VM',

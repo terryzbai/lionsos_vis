@@ -1,6 +1,12 @@
 // import React, { useState } from 'react';
 import { Drawer } from 'antd';
 
+/*
+TODO:
+[ ] form layout and data bindings
+[ ] update data to parent component
+*/
+
 export default function ComponentDrawer({closeDrawer , drawerOpen, data}) {
 
   return (

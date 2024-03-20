@@ -18,6 +18,7 @@ class Group extends Node {
       this.attr('buttonSign', { d: 'M 1 5 9 5 M 5 1 5 9' })
       this.expandSize = this.getSize()
       this.resize(100, 32)
+      console.log("Hello")
     } else {
       this.attr('buttonSign', { d: 'M 2 5 8 5' })
       if (this.expandSize) {
