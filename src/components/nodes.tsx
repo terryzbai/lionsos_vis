@@ -105,12 +105,12 @@ const custom_group = {
 	},
 	'VM': {
 		...commonAttrs,
-		id: 'VM',
+		// id: 'VM',
 		shape: 'rect',
 		x: 100,
 		y: 40,
 		width: 80,
-		height: 40,
+		height: 60,
 		label: 'VM',
 		attrs: {
 			label: {

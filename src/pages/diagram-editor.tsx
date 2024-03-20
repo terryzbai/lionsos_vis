@@ -13,7 +13,7 @@ TODO:
 [x] Auto Expand/Shrink the Parent Node: https://x6.antv.antgroup.com/en/examples/node/group/#expand-shrink
 [x] Collapse/Expand the Parent Node: https://x6.antv.antgroup.com/en/examples/node/group/#collapsable
 [x] Detaching node: https://x6.antv.antgroup.com/en/examples/edge/tool/#context-menu
-[ ] Ajusting arrowheads: https://x6.antv.antgroup.com/en/examples/edge/tool#arrowheads
+[x] Ajusting arrowheads: https://x6.antv.antgroup.com/en/examples/edge/tool#arrowheads
 [ ] Updating edges: https://x6.antv.antgroup.com/tutorial/basic/events
 */
 
@@ -87,10 +87,7 @@ export default class DiagramEditor extends React.Component<{openDrawer : Functio
       groups: stencil_group,
       getDropNode(node) {
         const node_name = node.getAttrs().text.text
-        console.log(node)
-        // const { width, height } = node.size()
-        
-        // return node.clone().size(width * 2, height * 2)
+
         const group = new Group(custom_group[String(node_name)])
 				group.addPort({
 					id: 'port_1',
@@ -150,8 +147,22 @@ export default class DiagramEditor extends React.Component<{openDrawer : Functio
         node.prop('originSize', node.getSize())
       }
     })
+    graph.on('edge:mouseenter', ({ cell }) => {
+      cell.addTools([
+        {
+          name: 'source-arrowhead',
+        },
+        {
+          name: 'target-arrowhead',
+        },
+      ])
+    })
+
+    graph.on('edge:mouseleave', ({ cell }) => {
+      cell.removeTools()
+    })
     
-    const embedPadding = 20
+    const embedPadding = 40
     graph.on('node:change:position', ({ node, options }) => {
       if (options.skipParentHandler || this.ctrlPressed) {
         return
