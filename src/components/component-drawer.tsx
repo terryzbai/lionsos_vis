@@ -9,7 +9,7 @@ TODO:
 [ ] update data to parent component
 */
 
-export default function ComponentDrawer({closeDrawer , drawerOpen, data}) {
+export default function ComponentDrawer({closeDrawer , drawerOpen, updateNode, data}) {
 
   const [priority, setPriority] = useState<string | number | null>('1')
 
@@ -24,7 +24,7 @@ export default function ComponentDrawer({closeDrawer , drawerOpen, data}) {
           style={{ maxWidth: 600 }}
           initialValues={{ remember: true }}
           layout="vertical"
-          // onFinish={onFinish}
+          onFinish={updateNode}
           // onFinishFailed={onFinishFailed}
           autoComplete="off"
         >

@@ -1,25 +1,28 @@
-import React from 'react';
+import React from 'react'
 import { Graph } from '@antv/x6'
 import { Snapline } from '@antv/x6-plugin-snapline'
 import { Stencil } from '@antv/x6-plugin-stencil'
 import { stencil_group, custom_nodes, custom_group } from '../components/nodes'
 import { ContextMenuTool } from '../components/context-menu'
 import { Group } from '../components/group'
+import ComponentDrawer from '../components/component-drawer'
 import { Menu, Toolbar } from '@antv/x6-react-components'
 import '@antv/x6-react-components/es/menu/style/index.css'
 import '@antv/x6-react-components/es/toolbar/style/index.css'
-import '../App.css';
+import '../App.css'
 import {
   ZoomInOutlined,
   ZoomOutOutlined,
   RedoOutlined,
   UndoOutlined,
   DeleteOutlined,
-  BoldOutlined,
-  ItalicOutlined,
-  StrikethroughOutlined,
-  UnderlineOutlined,
+  // BoldOutlined,
+  // ItalicOutlined,
+  // StrikethroughOutlined,
+  // UnderlineOutlined,
 } from '@ant-design/icons'
+import { useAppDispatch } from '../app/hooks'
+import { addPD } from '../features/configSlice'
 
 /*
 TODO:
@@ -29,7 +32,7 @@ TODO:
 [x] Collapse/Expand the Parent Node: https://x6.antv.antgroup.com/en/examples/node/group/#collapsable
 [x] Detaching node: https://x6.antv.antgroup.com/en/examples/edge/tool/#context-menu
 [x] Ajusting arrowheads: https://x6.antv.antgroup.com/en/examples/edge/tool#arrowheads
-[ ] Toobar
+[ ] Toolbar
 [ ] Export configurations
 [ ] zIndex issue
 [ ] Updating edges: https://x6.antv.antgroup.com/tutorial/basic/events
@@ -38,10 +41,42 @@ TODO:
 const Item = Toolbar.Item // eslint-disable-line
 const ToolbarGroup = Toolbar.Group // eslint-disable-line
 
-export default class DiagramEditor extends React.Component<{openDrawer : Function}> {
+export default class DiagramEditor extends React.Component<{}, {drawerOpen: boolean, data: any }> {
   private container: HTMLDivElement
   private stencilContainer: HTMLDivElement
   private ctrlPressed: boolean
+
+  constructor(props) {
+    super(props);
+    this.showDrawer = this.showDrawer.bind(this)
+    this.closeDrawer = this.closeDrawer.bind(this)
+    this.state = {
+      drawerOpen: false,
+      data: {
+        name: '1',
+        title: '2'
+      }
+    };
+  }
+
+  showDrawer(node_id) {
+    console.log(node_id)
+    this.setState({ data: {name: node_id }} )
+    this.setState({ drawerOpen: true })
+  }
+
+  closeDrawer() {
+    this.setState({ drawerOpen: false })
+  }
+
+  updateNode(data) {
+    console.log(data)
+  }
+
+  addNode(node_id : string) {
+    // useAppDispatch()(addPD(node_id))
+    console.log("add node:", node_id)
+  }
 
   componentDidMount() {
     const graph = new Graph({
@@ -95,6 +130,7 @@ export default class DiagramEditor extends React.Component<{openDrawer : Functio
 
     console.log(graph.model)
 
+    const that = this
     const stencil = new Stencil({
       title: 'Components',
       target: graph,
@@ -114,6 +150,9 @@ export default class DiagramEditor extends React.Component<{openDrawer : Functio
 					id: 'port_1',
           group: 'bottom',
 				})
+
+        // useAppDispatch()(addPD('name'))
+        that.addNode("fdsafdsafdaf")
         return group
       },
     })
@@ -131,7 +170,7 @@ export default class DiagramEditor extends React.Component<{openDrawer : Functio
     })
 
     graph.on('node:dblclick', (ev) => {
-      this.props.openDrawer(ev.node.id)
+      this.showDrawer(ev.node.id)
     })
 
     graph.on('node:mouseenter', ({ node }) => {
@@ -384,6 +423,7 @@ export default class DiagramEditor extends React.Component<{openDrawer : Functio
           <div className="app-content" ref={this.refContainer}>
           </div>
         </div>
+        <ComponentDrawer closeDrawer={this.closeDrawer} drawerOpen={this.state.drawerOpen} updateNode={this.updateNode} data={this.state.data} />
       </div>
     )
   }
