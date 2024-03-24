@@ -2,22 +2,31 @@
 import { Drawer } from 'antd'
 import { useState } from 'react'
 import { InputNumber, Form, Input, Button } from 'antd'
-
+import { useAppSelector, useAppDispatch } from '../app/hooks'
+import { PDState, getPDList, closeNodeEditor, getNodeEditorStatus } from '../features/configSlice'
 /*
 TODO:
 [ ] form layout and data bindings
 [ ] update data to parent component
 */
 
-export default function ComponentDrawer({closeDrawer , drawerOpen, updateNode, data}) {
+export default function ComponentDrawer() {
 
   const [priority, setPriority] = useState<string | number | null>('1')
 
+  const dispatch = useAppDispatch()
+  const pd_data : PDState = useAppSelector(getPDList)[0]
+  const nodeEditorVisible : boolean = useAppSelector(getNodeEditorStatus)
+
+  const updateNode = (data) => {
+    dispatch(closeNodeEditor())
+    console.log(data)
+  }
+
   return (
     <>
-      <Drawer title={data ? data.name : "Basic Drawer"} onClose={closeDrawer} open={drawerOpen}>
-        <p>{data?.name}</p>
-        <p>{data?.title}</p>
+      <Drawer title={pd_data ? pd_data.name : "Basic Drawer"} onClose={() => dispatch(closeNodeEditor())} open={nodeEditorVisible}>
+        <p>{pd_data?.name}</p>
         <Form
           name="basic"
           wrapperCol={{ span: 16 }}

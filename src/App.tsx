@@ -3,6 +3,7 @@ import { Tabs } from 'antd';
 import DiagramEditor from './pages/diagram-editor';
 import MemoryEditor from './pages/memory-editor';
 import './App.css';
+import { TestEditor } from './pages/test-editor';
 
 const onChange = (key: any) => {
   console.log(key);
@@ -18,7 +19,7 @@ export default class App extends React.Component {
             {
               key: '1',
               label: 'Design',
-              children: <DiagramEditor />,
+              children: <TestEditor />,
             },
             {
               key: '2',

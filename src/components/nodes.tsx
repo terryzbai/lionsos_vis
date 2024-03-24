@@ -86,13 +86,13 @@ const custom_group = {
 		},
 		attrs: {
 			label: {
-				text: 'PD',
+				text: 'Untitled PD',
 				fontSize: 18,
 				fill: "#000000",
 			},
 			text: {
 				textAnchor: "middle",
-				x: 10,
+				x: 40,
 				y: 12,
 			},
 			body: {

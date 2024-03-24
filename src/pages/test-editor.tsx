@@ -1,12 +1,11 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Graph } from '@antv/x6'
-import { Snapline } from '@antv/x6-plugin-snapline'
 import { Stencil } from '@antv/x6-plugin-stencil'
-import { stencil_group, custom_nodes, custom_group } from '../components/nodes'
-import { ContextMenuTool } from '../components/context-menu'
+import { Snapline } from '@antv/x6-plugin-snapline'
 import { Group } from '../components/group'
-import ComponentDrawer from '../components/component-drawer'
 import { Toolbar } from '@antv/x6-react-components'
+import ComponentDrawer from '../components/component-drawer'
+import { stencil_group, custom_nodes, custom_group } from '../components/nodes'
 import '@antv/x6-react-components/es/menu/style/index.css'
 import '@antv/x6-react-components/es/toolbar/style/index.css'
 import '../App.css'
@@ -21,144 +20,109 @@ import {
   // StrikethroughOutlined,
   // UnderlineOutlined,
 } from '@ant-design/icons'
-// import { useAppDispatch } from '../app/hooks'
-// import { addPD } from '../features/configSlice'
-
-/*
-TODO:
-[x] Embedding by Drag and Drop: https://x6.antv.antgroup.com/en/examples/node/group/#embedding-by-dnd
-[x] Delete Button: https://x6.antv.antgroup.com/en/examples/node/tool/#button-remove
-[x] Auto Expand/Shrink the Parent Node: https://x6.antv.antgroup.com/en/examples/node/group/#expand-shrink
-[x] Collapse/Expand the Parent Node: https://x6.antv.antgroup.com/en/examples/node/group/#collapsable
-[x] Detaching node: https://x6.antv.antgroup.com/en/examples/edge/tool/#context-menu
-[x] Ajusting arrowheads: https://x6.antv.antgroup.com/en/examples/edge/tool#arrowheads
-[ ] Toolbar
-[ ] Export configurations
-[ ] zIndex issue
-[ ] Updating edges: https://x6.antv.antgroup.com/tutorial/basic/events
-*/
+import { useAppSelector, useAppDispatch } from '../app/hooks'
+import { addPD, getPDList, openNodeEditor } from '../features/configSlice'
 
 const Item = Toolbar.Item // eslint-disable-line
 const ToolbarGroup = Toolbar.Group // eslint-disable-line
 
-export default class DiagramEditor extends React.Component<{}, {drawerOpen: boolean, data: any }> {
-  private container: HTMLDivElement
-  private stencilContainer: HTMLDivElement
-  private ctrlPressed: boolean
+export const TestEditor = () => {
+  const refGraphContainer = React.createRef<HTMLDivElement>()
+  const refStencilContainer = React.createRef<HTMLDivElement>()
+	const [ ctrlPressed, setCtrlPressed ] = useState(false)
 
-  constructor(props) {
-    super(props);
-    this.showDrawer = this.showDrawer.bind(this)
-    this.closeDrawer = this.closeDrawer.bind(this)
-    this.state = {
-      drawerOpen: false,
-      data: {
-        name: '1',
-        title: '2'
-      }
-    };
-  }
-
-  showDrawer(node_id) {
-    console.log(node_id)
-    this.setState({ data: {name: node_id }} )
-    this.setState({ drawerOpen: true })
-  }
-
-  closeDrawer() {
-    this.setState({ drawerOpen: false })
-  }
-
-  updateNode(data) {
-    console.log(data)
-  }
-
-  addNode(node_id : string) {
-    // useAppDispatch()(addPD(node_id))
-    console.log("add node:", node_id)
-  }
-
-  componentDidMount() {
-    console.log(this.container)
-    const graph = new Graph({
-      container: this.container,
-      background: {
-        color: '#F2F7FA',
-      },
-			connecting: {
-				allowEdge: true,
-				allowBlank: true,
-				allowPort: false,
-				allowMulti: false,
-				allowLoop: false,
-        router: 'manhattan',
+	const graph_config = {
+		background: {
+			color: '#F2F7FA',
+		},
+		connecting: {
+			allowEdge: true,
+			allowBlank: true,
+			allowPort: false,
+			allowMulti: false,
+			allowLoop: false,
+			router: 'manhattan',
+		},
+		embedding: {
+			enabled: true,
+			findParent({ node }) {
+				const bbox = node.getBBox()
+				return this.getNodes().filter((node) => {
+					const data = node.getData()
+					if (data && data.parent) {
+						const targetBBox = node.getBBox()
+						return bbox.isIntersectWithRect(targetBBox)
+					}
+					return false
+				})
 			},
-      embedding: {
-        enabled: true,
-        findParent({ node }) {
-          const bbox = node.getBBox()
-          return this.getNodes().filter((node) => {
-            const data = node.getData<any>()
-            if (data && data.parent) {
-              const targetBBox = node.getBBox()
-              return bbox.isIntersectWithRect(targetBBox)
-            }
-            return false
-          })
-        },
-      },
-      highlighting: {
-        embedding: {
-          name: 'stroke',
-          args: {
-            padding: -1,
-            attrs: {
-              stroke: '#73d13d',
-            },
-          },
-        },
-      },
-    })
-    
+		},
+		highlighting: {
+			embedding: {
+				name: 'stroke',
+				args: {
+					padding: -1,
+					attrs: {
+						stroke: '#73d13d',
+					},
+				},
+			},
+		},
+	}
+
+	const stencil_config = {
+		title: 'Components',
+		// target: graph,
+		search(cell, keyword) {
+			return cell.shape.indexOf(keyword) !== -1
+		},
+		placeholder: 'Search by component name',
+		notFoundText: 'Not Found',
+		collapsable: false,
+		stencilGraphHeight: 0,
+		groups: stencil_group,
+		getDropNode(node) {
+			const node_name = node.getAttrs().text.text
+
+			const group = new Group(custom_group[String(node_name)])
+			group.addPort({
+				id: 'port_1',
+				group: 'bottom',
+			})
+
+			addNode(group.id)
+			return group
+		},
+	}
+
+	const pds = useAppSelector(getPDList)
+	const dispatch = useAppDispatch()
+	const addNode = (node_id) => {
+		dispatch(addPD(node_id))
+		console.log(node_id)
+		console.log(pds)
+	}
+
+  useEffect(() => {
+    const graph = new Graph({
+			...graph_config,
+			container: refGraphContainer.current,
+		})
+  
     graph.use(
       new Snapline({
         enabled: true,
         sharp: true,
       }),
     )
-
     graph.centerContent()
 
-    console.log(graph.model)
-
-    const that = this
     const stencil = new Stencil({
-      title: 'Components',
-      target: graph,
-      search(cell, keyword) {
-        return cell.shape.indexOf(keyword) !== -1
-      },
-      placeholder: 'Search by component name',
-      notFoundText: 'Not Found',
-      collapsable: false,
-      stencilGraphHeight: 0,
-      groups: stencil_group,
-      getDropNode(node) {
-        const node_name = node.getAttrs().text.text
+			...stencil_config,
+			target: graph,
+		})
 
-        const group = new Group(custom_group[String(node_name)])
-				group.addPort({
-					id: 'port_1',
-          group: 'bottom',
-				})
-
-        // useAppDispatch()(addPD('name'))
-        that.addNode("fdsafdsafdaf")
-        return group
-      },
-    })
-
-    this.stencilContainer.appendChild(stencil.container)
+    refStencilContainer.current.appendChild(stencil.container)
 
     // Render components on tool bar
     Object.keys(custom_nodes).forEach((group_name) => {
@@ -171,7 +135,7 @@ export default class DiagramEditor extends React.Component<{}, {drawerOpen: bool
     })
 
     graph.on('node:dblclick', (ev) => {
-      this.showDrawer(ev.node.id)
+			dispatch(openNodeEditor(ev.node.id))
     })
 
     graph.on('node:mouseenter', ({ node }) => {
@@ -189,13 +153,13 @@ export default class DiagramEditor extends React.Component<{}, {drawerOpen: bool
       node.removeTools()
     })
 
-    this.ctrlPressed = false
+		setCtrlPressed(false)
     graph.on('node:embedding', ({ e }: { e }) => {
-      this.ctrlPressed = e.metaKey || e.ctrlKey
+			setCtrlPressed(e.metaKey || e.ctrlKey)
     })
     
     graph.on('node:embedded', () => {
-      this.ctrlPressed = false
+			setCtrlPressed(false)
     })
 
     graph.on('node:change:size', ({ node, options }) => {
@@ -250,7 +214,7 @@ export default class DiagramEditor extends React.Component<{}, {drawerOpen: bool
     
     const embedPadding = 40
     graph.on('node:change:position', ({ node, options }) => {
-      if (options.skipParentHandler || this.ctrlPressed) {
+      if (options.skipParentHandler || ctrlPressed) {
         return
       }
     
@@ -376,56 +340,40 @@ export default class DiagramEditor extends React.Component<{}, {drawerOpen: bool
       }
     })
 
-    ContextMenuTool.config({
-      tagName: 'div',
-      isSVGElement: false,
-    })
-    Graph.registerEdgeTool('contextmenu', ContextMenuTool, true)
-    Graph.registerNodeTool('contextmenu', ContextMenuTool, true)
+  }, [])
 
-  }
 
-  refContainer = (container: HTMLDivElement) => {
-    this.container = container
-  }
-
-  refStencil = (container: HTMLDivElement) => {
-    this.stencilContainer = container
-  }
-
-  onClick = (name: string) => {
-    console.log(`${name} clicked`, 10)
-  }
-
-  render() {
-    return (
-      <div>
-        <Toolbar className="toolbar" onClick={this.onClick} >
-          <ToolbarGroup>
-            <Item name="zoomIn" tooltip="Zoom In (Cmd +)" icon={<ZoomInOutlined />} />
-            <Item name="zoomOut" tooltip="Zoom Out (Cmd -)" icon={<ZoomOutOutlined />} />
-          </ToolbarGroup>
-          <ToolbarGroup>
-            <Item name="undo" tooltip="Undo (Cmd + Z)" icon={<UndoOutlined />} />
-            <Item name="redo" tooltip="Redo (Cmd + Shift + Z)" icon={<RedoOutlined />} />
-          </ToolbarGroup>
-          <ToolbarGroup>
-            <Item name="delete" icon={<DeleteOutlined />} disabled={true} tooltip="Delete (Delete)" />
-          </ToolbarGroup>
-          {/* <ToolbarGroup>
-            <Item name="bold" icon={<BoldOutlined />} active={true} tooltip="Bold (Cmd + B)" />
-            <Item name="italic" icon={<ItalicOutlined />} tooltip="Italic (Cmd + I)" />
-            <Item name="strikethrough" icon={<StrikethroughOutlined />} tooltip="Strikethrough (Cmd + Shift + x)" />
-            <Item name="underline" icon={<UnderlineOutlined />} tooltip="Underline (Cmd + U)" />
-          </ToolbarGroup> */}
-        </Toolbar>
-        <div className="stencil-app">
-          <div className="app-stencil" ref={this.refStencil} />
-          <div className="app-content" ref={this.refContainer}>
-          </div>
+  return (
+    <div>
+      <Toolbar className="toolbar" >
+        <ToolbarGroup>
+          <Item name="zoomIn" tooltip="Zoom In (Cmd +)" icon={<ZoomInOutlined />} />
+          <Item name="zoomOut" tooltip="Zoom Out (Cmd -)" icon={<ZoomOutOutlined />} />
+        </ToolbarGroup>
+        <ToolbarGroup>
+          <Item name="undo" tooltip="Undo (Cmd + Z)" icon={<UndoOutlined />} />
+          <Item name="redo" tooltip="Redo (Cmd + Shift + Z)" icon={<RedoOutlined />} />
+        </ToolbarGroup>
+        <ToolbarGroup>
+          <Item name="delete" icon={<DeleteOutlined />} disabled={true} tooltip="Delete (Delete)" />
+        </ToolbarGroup>
+        {/* <ToolbarGroup>
+          <Item name="bold" icon={<BoldOutlined />} active={true} tooltip="Bold (Cmd + B)" />
+          <Item name="italic" icon={<ItalicOutlined />} tooltip="Italic (Cmd + I)" />
+          <Item name="strikethrough" icon={<StrikethroughOutlined />} tooltip="Strikethrough (Cmd + Shift + x)" />
+          <Item name="underline" icon={<UnderlineOutlined />} tooltip="Underline (Cmd + U)" />
+        </ToolbarGroup> */}
+      </Toolbar>
+      <div className="stencil-app">
+        <div className="app-stencil" ref={refStencilContainer} />
+        <div className="app-content" ref={refGraphContainer}>
         </div>
-        {/* <ComponentDrawer closeDrawer={this.closeDrawer} drawerOpen={this.state.drawerOpen} updateNode={this.updateNode} data={this.state.data} /> */}
       </div>
-    )
-  }
+      <ComponentDrawer />
+			<div>{pds.length}</div>
+			{pds.map(function (x, i) {
+				return <div key={i}>hello{x.id}</div>;
+			})}
+    </div>
+  )
 }
