@@ -4,7 +4,7 @@ import { Stencil } from '@antv/x6-plugin-stencil'
 import { Snapline } from '@antv/x6-plugin-snapline'
 import { Group } from '../components/group'
 import { Toolbar } from '@antv/x6-react-components'
-import ComponentDrawer from '../components/component-drawer'
+import NodeEditor from '../components/node-editor'
 import { stencil_group, custom_nodes, custom_group } from '../components/nodes'
 import '@antv/x6-react-components/es/menu/style/index.css'
 import '@antv/x6-react-components/es/toolbar/style/index.css'
@@ -95,15 +95,15 @@ export const TestEditor = () => {
 		},
 	}
 
-	const pds = useAppSelector(getPDList)
+	const pds = useAppSelector(state => state.config.pds)
 	const dispatch = useAppDispatch()
 	const addNode = (node_id) => {
 		dispatch(addPD(node_id))
-		console.log(node_id)
 		console.log(pds)
 	}
 
   useEffect(() => {
+		console.log(111111)
     const graph = new Graph({
 			...graph_config,
 			container: refGraphContainer.current,
@@ -153,9 +153,11 @@ export const TestEditor = () => {
       node.removeTools()
     })
 
-		setCtrlPressed(false)
+		// setCtrlPressed(false)
     graph.on('node:embedding', ({ e }: { e }) => {
 			setCtrlPressed(e.metaKey || e.ctrlKey)
+			// setCtrlPressed(true)
+			// console.log(ctrlPressed, e.metaKey || e.ctrlKey)
     })
     
     graph.on('node:embedded', () => {
@@ -214,6 +216,8 @@ export const TestEditor = () => {
     
     const embedPadding = 40
     graph.on('node:change:position', ({ node, options }) => {
+			console.log(options)
+
       if (options.skipParentHandler || ctrlPressed) {
         return
       }
@@ -369,11 +373,12 @@ export const TestEditor = () => {
         <div className="app-content" ref={refGraphContainer}>
         </div>
       </div>
-      <ComponentDrawer />
+      <NodeEditor />
 			<div>{pds.length}</div>
 			{pds.map(function (x, i) {
-				return <div key={i}>hello{x.id}</div>;
+				return <div key={i}>{x.id} & <span>{x.name}</span></div>;
 			})}
+			<div>{ctrlPressed ? "B": "a"}</div>
     </div>
   )
 }

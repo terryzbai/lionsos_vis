@@ -1,5 +1,5 @@
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { RootState } from '../app/store'
+import { createAsyncThunk, createSlice, isAction, PayloadAction } from '@reduxjs/toolkit'
+import { store, RootState } from '../app/store'
 
 export interface VMState {
   name: string
@@ -11,7 +11,7 @@ export interface PDState {
   id: string,
   name: string
   priority: number
-  budge: number
+  budget: number
   period: number
   pp: number
   prog_img: string
@@ -34,21 +34,29 @@ export interface CCState {
   end2: string
 }
 
+export interface NodeEditorState {
+  visible: boolean
+  node_id: string
+}
 
 export interface ConfigState {
   mrs: MRState[]
   pds: PDState[]
   ccs: CCState[]
   graph: PDState[]
-  nodeEditorVisible: boolean
+  nodeEditor: NodeEditorState
 }
+
 
 const initialState: ConfigState = {
   mrs: [],
   pds: [],
   ccs: [],
   graph: [],
-  nodeEditorVisible: false
+  nodeEditor: {
+    visible: false,
+    node_id: ''
+  }
 }
 
 export const configSlice = createSlice({
@@ -61,7 +69,7 @@ export const configSlice = createSlice({
         id: action.payload,
         name: 'Untitled PD',
         priority: 0,
-        budge: 0,
+        budget: 0,
         period: 0,
         pp: 0,
         prog_img: '',
@@ -75,10 +83,26 @@ export const configSlice = createSlice({
     },
     openNodeEditor: (state, action: PayloadAction<string>) => {
       console.log(action.payload)
-      state.nodeEditorVisible = true
+      state.nodeEditor.visible = true
+      state.nodeEditor.node_id = action.payload
     },
     closeNodeEditor: (state) => {
-      state.nodeEditorVisible = false
+      state.nodeEditor.visible = false
+    },
+    updateNode: (state, action: PayloadAction<PDState>) => {
+      const newNodeData = action.payload
+      const oldNode = state.pds.find(pd => pd.id === newNodeData.id)
+      const index = state.pds.indexOf(oldNode)
+      if (index >= 0) {
+        state.pds[index].name = newNodeData.name
+      } else {
+        console.log("Invalid node_id")
+      }
+
+      // List all nodes
+
+      // Update label
+      // graph_node.attr('label/text', newNodeData.name)
     }
     // increment: state => {
     //   // Redux Toolkit allows us to write "mutating" logic in reducers. It
@@ -112,12 +136,27 @@ export const configSlice = createSlice({
   // }
 })
 
-export const { addPD, openNodeEditor, closeNodeEditor } = configSlice.actions
+export const { addPD, openNodeEditor, closeNodeEditor, updateNode } = configSlice.actions
 
 export const getPDList = (state: RootState) => state.config.pds
-export const getNodeEditorStatus = (state: RootState) => state.config.nodeEditorVisible
-export const getPDInfo = (state: RootState, node_id: string) => {
-  return state.config.pds[0]
+export const getNodeEditorStatus = (state: RootState) => state.config.nodeEditor.visible
+export const getCurrentPD = (state: RootState) => {
+  return state.config.pds.find(pd => pd.id === state.config.nodeEditor.node_id)
 }
+
+// console.log(store.getState())
+
+// store.subscribe(() => {
+//   console.log(store.getState())
+// })
+
+// export const incrementIfOdd =
+//   (amount: number): AppThunk =>
+//   (dispatch, getState) => {
+//     const currentValue = selectCount(getState())
+//     if (currentValue % 2 === 1) {
+//       dispatch(incrementByAmount(amount))
+//     }
+//   }
 
 export default configSlice.reducer
