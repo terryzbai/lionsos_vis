@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice, isAction, PayloadAction } from '@reduxjs/toolkit'
 import { store, RootState } from '../app/store'
+import { init_node_data } from '../components/nodes'
 
 export interface VMState {
   name: string
@@ -64,25 +65,16 @@ export const configSlice = createSlice({
   initialState,
   // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
-    addPD: (state, action: PayloadAction<string>) => {
+    addNodeIntoList: (state, action: PayloadAction<{id: string, shape: string}>) => {
       const new_pd : PDState = {
-        id: action.payload,
-        name: 'Untitled PD',
-        priority: 0,
-        budget: 0,
-        period: 0,
-        pp: 0,
-        prog_img: '',
-        mappings: [],
-        pds: [],
-        vms: [],
-        parent: '',
+        id: action.payload.id,
+        ...init_node_data[action.payload.shape]
       }
       state.pds.push(new_pd)
-      console.log("Add a pd")
+      console.log("Add a", action.payload.shape, action.payload.id)
     },
     openNodeEditor: (state, action: PayloadAction<string>) => {
-      console.log(action.payload)
+      console.log("open node:", action.payload)
       state.nodeEditor.visible = true
       state.nodeEditor.node_id = action.payload
     },
@@ -136,11 +128,12 @@ export const configSlice = createSlice({
   // }
 })
 
-export const { addPD, openNodeEditor, closeNodeEditor, updateNode } = configSlice.actions
+export const { addNodeIntoList, openNodeEditor, closeNodeEditor, updateNode } = configSlice.actions
 
 export const getPDList = (state: RootState) => state.config.pds
 export const getNodeEditorStatus = (state: RootState) => state.config.nodeEditor.visible
 export const getCurrentPD = (state: RootState) => {
+  // console.log("Get current node: ", state.config.nodeEditor.node_id)
   return state.config.pds.find(pd => pd.id === state.config.nodeEditor.node_id)
 }
 

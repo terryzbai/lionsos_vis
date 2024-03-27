@@ -21,7 +21,15 @@ import {
   // UnderlineOutlined,
 } from '@ant-design/icons'
 import { useAppSelector, useAppDispatch } from '../app/hooks'
-import { addPD, getPDList, openNodeEditor } from '../features/configSlice'
+import { addNodeIntoList, openNodeEditor } from '../features/configSlice'
+
+
+/*
+TODO:
+[ ] Set highest zIndex for the node being dragged
+[ ] Update states for embedded/detached nodes 
+[ ] 
+*/
 
 const Item = Toolbar.Item // eslint-disable-line
 const ToolbarGroup = Toolbar.Group // eslint-disable-line
@@ -90,15 +98,18 @@ export const TestEditor = () => {
 				group: 'bottom',
 			})
 
-			addNode(group.id)
+			console.log(group)
+
+			addNode({id: group.id, shape: node_name})
 			return group
 		},
 	}
 
 	const pds = useAppSelector(state => state.config.pds)
 	const dispatch = useAppDispatch()
-	const addNode = (node_id) => {
-		dispatch(addPD(node_id))
+	const addNode = (node_info : { id: string, shape: string}) => {
+		console.log(node_info.shape)
+		dispatch(addNodeIntoList(node_info))
 		console.log(pds)
 	}
 
@@ -216,8 +227,6 @@ export const TestEditor = () => {
     
     const embedPadding = 40
     graph.on('node:change:position', ({ node, options }) => {
-			console.log(options)
-
       if (options.skipParentHandler || ctrlPressed) {
         return
       }
