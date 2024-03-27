@@ -108,13 +108,11 @@ export const TestEditor = () => {
 	const pds = useAppSelector(state => state.config.pds)
 	const dispatch = useAppDispatch()
 	const addNode = (node_info : { id: string, shape: string}) => {
-		console.log(node_info.shape)
 		dispatch(addNodeIntoList(node_info))
 		console.log(pds)
 	}
 
   useEffect(() => {
-		console.log(111111)
     const graph = new Graph({
 			...graph_config,
 			container: refGraphContainer.current,

@@ -1,6 +1,6 @@
 // import React, { useState } from 'react';
 import { Drawer } from 'antd'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { InputNumber, Form, Input, Button } from 'antd'
 import { useAppSelector, useAppDispatch } from '../app/hooks'
 import { PDState, updateNode, getCurrentPD, closeNodeEditor, getNodeEditorStatus } from '../features/configSlice'
@@ -21,23 +21,16 @@ export default function NodeEditor() {
 
   const saveNodeInfo = (data : PDState) => {
     dispatch(closeNodeEditor())
-    console.log(data)
     dispatch(updateNode(data))
   }
 
   useEffect(() => {
     form.setFieldsValue(pd_data)
-    console.log("update form data")
   })
 
   return (
     <>
       <Drawer title={pd_data ? pd_data.name : "Basic Drawer"} forceRender onClose={() => dispatch(closeNodeEditor())} open={nodeEditorVisible}>
-        <div>{ pd_data?.id }</div>
-        <div>{ pd_data?.name }</div>
-        <div>{ pd_data?.priority }</div>
-        <div>{ pd_data?.budget }</div>
-        <div>{ pd_data?.period }</div>
         <Form
           name="basic"
           form={ form }
@@ -60,7 +53,6 @@ export default function NodeEditor() {
             label="Name"
             name="name"
             rules={[{ required: true }]}
-            // initialValue={ form?.name }
           >
             <Input />
           </Form.Item>
@@ -68,7 +60,6 @@ export default function NodeEditor() {
             label="Priority"
             name="priority"
             rules={[{ required: true, message: 'Please input your username!' }]}
-            // initialValue={ pd_data?.priority }
           >
             <InputNumber min={1} max={256} />
           </Form.Item>
@@ -76,7 +67,6 @@ export default function NodeEditor() {
             label="Budget"
             name="budget"
             rules={[{ required: false }]}
-            // initialValue={ pd_data?.budget }
           >
             <InputNumber min={1} max={256} />
           </Form.Item>
@@ -84,7 +74,6 @@ export default function NodeEditor() {
             label="Period"
             name="period"
             rules={[{ required: false }]}
-            // initialValue={ pd_data?.period }
           >
             <InputNumber min={1} max={256} />
           </Form.Item>
@@ -92,15 +81,13 @@ export default function NodeEditor() {
             label="pp"
             name="pp"
             rules={[{ required: false }]}
-            // initialValue={ pd_data?.pp }
           >
             <InputNumber min={1} max={256} />
           </Form.Item>
           <Form.Item
             label="Program Image"
-            name="progimg"
+            name="prog_img"
             rules={[{ required: false }]}
-            // initialValue={ pd_data?.prog_img }
           >
             <Input />
           </Form.Item>
@@ -117,11 +104,6 @@ export default function NodeEditor() {
         <p>maps</p>
         <p>maps</p>
         <p>maps</p>
-        <p>maps</p>
-        <p>maps</p>
-        <p>maps</p>
-        <p>maps</p>
-
       </Drawer>
     </>
   )

@@ -86,7 +86,8 @@ export const configSlice = createSlice({
       const oldNode = state.pds.find(pd => pd.id === newNodeData.id)
       const index = state.pds.indexOf(oldNode)
       if (index >= 0) {
-        state.pds[index].name = newNodeData.name
+        // state.pds[index].name = newNodeData.name
+        state.pds[index] = {...newNodeData}
       } else {
         console.log("Invalid node_id")
       }
