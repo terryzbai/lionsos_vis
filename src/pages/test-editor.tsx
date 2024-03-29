@@ -27,7 +27,7 @@ import {
   // UnderlineOutlined,
 } from '@ant-design/icons'
 import { useAppSelector, useAppDispatch } from '../app/hooks'
-import { addNodeIntoList, openNodeEditor, getSDFContent } from '../features/configSlice'
+import { addNodeIntoList, openNodeEditor, getSDFContent, getPDList, deleteNode } from '../features/configSlice'
 import { Modal } from 'antd'
 
 
@@ -44,9 +44,11 @@ const ToolbarGroup = Toolbar.Group // eslint-disable-line
 export const TestEditor = () => {
   const refGraphContainer = React.createRef<HTMLDivElement>()
   const refStencilContainer = React.createRef<HTMLDivElement>()
+	const [ globalGraph, setGlobalGraph ] = useState<Graph>(null)
 	const [ ctrlPressed, setCtrlPressed ] = useState(false)
 	const [ SDFEditorOpen, setSDFEditorOpen ] = useState(false)
 	const SDFContent = useAppSelector(getSDFContent)
+	const pdList = useAppSelector(getPDList)
 
 	const graph_config = {
 		background: {
@@ -130,6 +132,7 @@ export const TestEditor = () => {
 			...graph_config,
 			container: refGraphContainer.current,
 		})
+		setGlobalGraph(graph)
   
     graph.use(
       new Snapline({
@@ -167,6 +170,15 @@ export const TestEditor = () => {
           x: '100%',
           y: 0,
           offset: { x: -10, y: 10 },
+					onClick(t) {
+						// TODO: remove node from global states
+						dispatch(deleteNode(t.cell.id))
+
+						// source code of built-in button-remove
+						var e=t.view, n=t.btn
+						n.parent.remove()
+						e.cell.remove({ui:!0, toolId:n.cid})
+					}
         },
       })
     })
@@ -194,6 +206,7 @@ export const TestEditor = () => {
         node.prop('originSize', node.getSize())
       }
     })
+
     graph.on('node:collapse', ({ node }: { node: Group }) => {
       node.toggleCollapse()
       const collapsed = node.isCollapsed()
@@ -404,6 +417,18 @@ export const TestEditor = () => {
 
   }, [])
 
+	useEffect(() => {
+		console.log("pdList updated: ", pdList)
+
+		if (globalGraph != null) {
+			const nodes = globalGraph.getNodes()
+			pdList.map((pd) => {
+				// Update group name
+				nodes.find(node => node.id === pd.id)?.setAttrs({ label: { text: pd.name } })
+			})
+		}
+	}, [pdList])
+
 
   return (
     <div>
@@ -421,7 +446,7 @@ export const TestEditor = () => {
         </ToolbarGroup>
 				<ToolbarGroup>
 					<Item name="previewDiagram" icon={<FileImageOutlined />} tooltip="Preview Diagram"></Item>
-					<Item name="uploadeSDF" icon={<FolderOpenOutlined />} tooltip="Upload Diagram"></Item>
+					<Item name="uploadeSDF" icon={<FolderOpenOutlined />} tooltip="Open Diagram"></Item>
 					<Item name="downloadDiagram" icon={<SaveOutlined />} tooltip="Save Diagram"></Item>
 				</ToolbarGroup>
 				<ToolbarGroup>

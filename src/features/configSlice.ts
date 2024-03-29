@@ -86,7 +86,12 @@ export const configSlice = createSlice({
       const index = state.pds.indexOf(oldNode)
       if (index >= 0) {
         // state.pds[index].name = newNodeData.name
-        state.pds[index] = {...newNodeData}
+        state.pds[index].name = newNodeData.name
+        state.pds[index].priority = newNodeData.priority
+        state.pds[index].budget = newNodeData.budget
+        state.pds[index].period = newNodeData.period
+        state.pds[index].pp = newNodeData.pp
+        state.pds[index].prog_img = newNodeData.prog_img
       } else {
         console.log("Invalid node_id")
       }
@@ -95,6 +100,17 @@ export const configSlice = createSlice({
 
       // Update label
       // graph_node.attr('label/text', newNodeData.name)
+    },
+    deleteNode: (state, action: PayloadAction<string>) => {
+      const node_id = action.payload
+      const nodeToDelete = state.pds.find(pd => pd.id === node_id)
+      const index = state.pds.indexOf(nodeToDelete)
+      if (index >= 0) {
+        delete state.pds[index]
+        state.pds.splice(index, 1)
+      } else {
+        console.log("Invalid node_id to delete")
+      }
     }
     // increment: state => {
     //   // Redux Toolkit allows us to write "mutating" logic in reducers. It
@@ -128,7 +144,7 @@ export const configSlice = createSlice({
   // }
 })
 
-export const { addNodeIntoList, openNodeEditor, closeNodeEditor, updateNode } = configSlice.actions
+export const { addNodeIntoList, openNodeEditor, closeNodeEditor, updateNode, deleteNode } = configSlice.actions
 
 export const getPDList = (state: RootState) => state.config.pds
 export const getNodeEditorStatus = (state: RootState) => state.config.nodeEditor.visible
