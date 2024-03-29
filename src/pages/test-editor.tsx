@@ -15,20 +15,27 @@ import {
   RedoOutlined,
   UndoOutlined,
   DeleteOutlined,
+	FileImageOutlined,
+	SaveOutlined,
+	FolderOpenOutlined,
+	EditOutlined,
+	DownloadOutlined,
+	UploadOutlined,
   // BoldOutlined,
   // ItalicOutlined,
   // StrikethroughOutlined,
   // UnderlineOutlined,
 } from '@ant-design/icons'
 import { useAppSelector, useAppDispatch } from '../app/hooks'
-import { addNodeIntoList, openNodeEditor } from '../features/configSlice'
+import { addNodeIntoList, openNodeEditor, getSDFContent } from '../features/configSlice'
+import { Modal } from 'antd'
 
 
 /*
 TODO:
 [ ] Set highest zIndex for the node being dragged
 [ ] Update states for embedded/detached nodes 
-[ ] 
+[ ] Display endpoints when mouse is over the edge
 */
 
 const Item = Toolbar.Item // eslint-disable-line
@@ -38,6 +45,8 @@ export const TestEditor = () => {
   const refGraphContainer = React.createRef<HTMLDivElement>()
   const refStencilContainer = React.createRef<HTMLDivElement>()
 	const [ ctrlPressed, setCtrlPressed ] = useState(false)
+	const [ SDFEditorOpen, setSDFEditorOpen ] = useState(false)
+	const SDFContent = useAppSelector(getSDFContent)
 
 	const graph_config = {
 		background: {
@@ -112,6 +121,10 @@ export const TestEditor = () => {
 		console.log(pds)
 	}
 
+	const editSDF = () => {
+		setSDFEditorOpen(true)
+	}
+
   useEffect(() => {
     const graph = new Graph({
 			...graph_config,
@@ -165,8 +178,6 @@ export const TestEditor = () => {
 		// setCtrlPressed(false)
     graph.on('node:embedding', ({ e }: { e }) => {
 			setCtrlPressed(e.metaKey || e.ctrlKey)
-			// setCtrlPressed(true)
-			// console.log(ctrlPressed, e.metaKey || e.ctrlKey)
     })
     
     graph.on('node:embedded', () => {
@@ -305,49 +316,89 @@ export const TestEditor = () => {
           },
         })
         console.log(edge)
-        // edge.setLabels([
-        //   {
-        //     markup: [
-        //       {
-        //         tagName: 'rect',
-        //         selector: 'labelBody',
-        //       },
-        //       {
-        //         tagName: 'text',
-        //         selector: 'labelText',
-        //       },
-        //     ],
-        //     attrs: {
-        //       labelText: {
-        //         text: 'Label 1',
-        //         fill: '#ffa940',
-        //         textAnchor: 'middle',
-        //         textVerticalAnchor: 'middle',
-        //       },
-        //       labelBody: {
-        //         ref: 'labelText',
-        //         refX: -8,
-        //         refY: -5,
-        //         refWidth: '100%',
-        //         refHeight: '100%',
-        //         refWidth2: 16,
-        //         refHeight2: 10,
-        //         stroke: '#ffa940',
-        //         fill: '#fff',
-        //         strokeWidth: 2,
-        //         rx: 5,
-        //         ry: 5,
-        //       },
-        //     },
-        //     position: {
-        //       distance: 0.3,
-        //       args: {
-        //         keepGradient: true,
-        //         ensureLegibility: true,
-        //       },
-        //     },
-        //   },
-        // ])
+        edge.setLabels([
+          {
+            markup: [
+              {
+                tagName: 'rect',
+                selector: 'labelBody',
+              },
+              {
+                tagName: 'text',
+                selector: 'labelText',
+              },
+            ],
+            attrs: {
+              labelText: {
+                text: 'id1',
+                fill: '#ffa940',
+                textAnchor: 'middle',
+                textVerticalAnchor: 'middle',
+              },
+              labelBody: {
+                ref: 'labelText',
+                refX: -8,
+                refY: -5,
+                refWidth: '100%',
+                refHeight: '100%',
+                refWidth2: 16,
+                refHeight2: 10,
+                stroke: '#ffa940',
+                fill: '#fff',
+                strokeWidth: 2,
+                rx: 5,
+                ry: 5,
+              },
+            },
+            position: {
+              distance: 8,
+              args: {
+                keepGradient: true,
+                ensureLegibility: true,
+              },
+            },
+          }, {
+            markup: [
+              {
+                tagName: 'rect',
+                selector: 'labelBody',
+              },
+              {
+                tagName: 'text',
+                selector: 'labelText',
+              },
+            ],
+            attrs: {
+              labelText: {
+                text: 'id1',
+                fill: '#ffa940',
+                textAnchor: 'middle',
+                textVerticalAnchor: 'middle',
+              },
+              labelBody: {
+                ref: 'labelText',
+                refX: -8,
+                refY: -5,
+                refWidth: '100%',
+                refHeight: '100%',
+                refWidth2: 16,
+                refHeight2: 10,
+                stroke: '#ffa940',
+                fill: '#fff',
+                strokeWidth: 2,
+                rx: 5,
+                ry: 5,
+              },
+            },
+            position: {
+              distance: -8,
+              args: {
+                keepGradient: true,
+                ensureLegibility: true,
+              },
+            },
+          },
+        ])
       }
     })
 
@@ -368,12 +419,16 @@ export const TestEditor = () => {
         <ToolbarGroup>
           <Item name="delete" icon={<DeleteOutlined />} disabled={true} tooltip="Delete (Delete)" />
         </ToolbarGroup>
-        {/* <ToolbarGroup>
-          <Item name="bold" icon={<BoldOutlined />} active={true} tooltip="Bold (Cmd + B)" />
-          <Item name="italic" icon={<ItalicOutlined />} tooltip="Italic (Cmd + I)" />
-          <Item name="strikethrough" icon={<StrikethroughOutlined />} tooltip="Strikethrough (Cmd + Shift + x)" />
-          <Item name="underline" icon={<UnderlineOutlined />} tooltip="Underline (Cmd + U)" />
-        </ToolbarGroup> */}
+				<ToolbarGroup>
+					<Item name="previewDiagram" icon={<FileImageOutlined />} tooltip="Preview Diagram"></Item>
+					<Item name="uploadeSDF" icon={<FolderOpenOutlined />} tooltip="Upload Diagram"></Item>
+					<Item name="downloadDiagram" icon={<SaveOutlined />} tooltip="Save Diagram"></Item>
+				</ToolbarGroup>
+				<ToolbarGroup>
+					<Item name="editSDF" icon={<EditOutlined />} tooltip="Edit SDF" onClick={editSDF}></Item>
+					<Item name="uploadeSDF" icon={<UploadOutlined />} tooltip="Upload SDF"></Item>
+					<Item name="downloadSDF" icon={<DownloadOutlined />} tooltip="Download SDF"></Item>
+				</ToolbarGroup>
       </Toolbar>
       <div className="stencil-app">
         <div className="app-stencil" ref={refStencilContainer} />
@@ -381,6 +436,16 @@ export const TestEditor = () => {
         </div>
       </div>
       <NodeEditor />
+			<Modal
+        title="Modal 1000px width"
+        centered
+        open={SDFEditorOpen}
+        onOk={() => setSDFEditorOpen(false)}
+        onCancel={() => setSDFEditorOpen(false)}
+        width={1000}
+      >
+        <textarea value={SDFContent} readOnly></textarea>
+      </Modal>
 			<div>{pds.length}</div>
 			{pds.map(function (x, i) {
 				return <div key={i}>{x.id} & <span>{x.name}</span></div>;

@@ -74,7 +74,6 @@ export const configSlice = createSlice({
       console.log("Add a", action.payload.shape, action.payload.id)
     },
     openNodeEditor: (state, action: PayloadAction<string>) => {
-      console.log("open node:", action.payload)
       state.nodeEditor.visible = true
       state.nodeEditor.node_id = action.payload
     },
@@ -134,15 +133,25 @@ export const { addNodeIntoList, openNodeEditor, closeNodeEditor, updateNode } = 
 export const getPDList = (state: RootState) => state.config.pds
 export const getNodeEditorStatus = (state: RootState) => state.config.nodeEditor.visible
 export const getCurrentPD = (state: RootState) => {
-  // console.log("Get current node: ", state.config.nodeEditor.node_id)
   return state.config.pds.find(pd => pd.id === state.config.nodeEditor.node_id)
 }
 
-// console.log(store.getState())
-
-// store.subscribe(() => {
-//   console.log(store.getState())
-// })
+export const getSDFContent = (state: RootState) => {
+  console.log("Get current pds: ", state.config.pds)
+  const pds_content = state.config.pds.map((pd) => {
+    if (pd.parent == "") {
+      let attrs = ''
+      attrs += pd.name ? ` name="${pd.name}"` : ''
+      attrs += pd.priority ? ` priority="${pd.priority}"` : ''
+      attrs += pd.budget ? ` budget="${pd.budget}"` : ''
+      return `\t<protection_domain${attrs}>\n\t</protection_domain>`
+    }
+    return ''
+  })
+  const content = '<?xml version="1.0" encoding="UTF-8"?>\n<system>\n' + pds_content.join('\n') + "\n</system>"
+  console.log(content)
+  return content
+}
 
 // export const incrementIfOdd =
 //   (amount: number): AppThunk =>
