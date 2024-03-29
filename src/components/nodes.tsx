@@ -63,7 +63,8 @@ const custom_nodes = {
         strokeWidth: 1,
       },
     },
-  }],
+  },
+	],
   'Advanced': [{
     ...commonAttrs,
     shape: 'rect',
@@ -125,7 +126,7 @@ const custom_group = {
         strokeWidth: 1,
       },
     },
-  }
+  },
 }
 
 export const init_node_data = {

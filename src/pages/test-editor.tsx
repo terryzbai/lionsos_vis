@@ -125,6 +125,8 @@ export const TestEditor = () => {
 
 	const editSDF = () => {
 		setSDFEditorOpen(true)
+
+		console.log(globalGraph.toJSON())
 	}
 
   useEffect(() => {
@@ -232,19 +234,94 @@ export const TestEditor = () => {
       collapse(node)
     })
 
-    graph.on('edge:mouseenter', ({ cell }) => {
-      cell.addTools([
-        {
-          name: 'source-arrowhead',
-        },
-        {
-          name: 'target-arrowhead',
-        },
-      ])
+    graph.on('edge:mouseenter', ({ edge }) => {
+			edge.setLabels([
+				{
+					markup: [
+						{
+							tagName: 'rect',
+							selector: 'labelBody',
+						},
+						{
+							tagName: 'text',
+							selector: 'labelText',
+						},
+					],
+					attrs: {
+						labelText: {
+							text: 'id1',
+							fill: '#ffa940',
+							textAnchor: 'middle',
+							textVerticalAnchor: 'middle',
+						},
+						labelBody: {
+							ref: 'labelText',
+							refX: -8,
+							refY: -5,
+							refWidth: '100%',
+							refHeight: '100%',
+							refWidth2: 16,
+							refHeight2: 10,
+							stroke: '#ffa940',
+							fill: '#fff',
+							strokeWidth: 2,
+							rx: 5,
+							ry: 5,
+						},
+					},
+					position: {
+						distance: 80,
+						args: {
+							keepGradient: true,
+							ensureLegibility: true,
+						},
+					},
+				}, {
+					markup: [
+						{
+							tagName: 'rect',
+							selector: 'labelBody',
+						},
+						{
+							tagName: 'text',
+							selector: 'labelText',
+						},
+					],
+					attrs: {
+						labelText: {
+							text: 'id1',
+							fill: '#ffa940',
+							textAnchor: 'middle',
+							textVerticalAnchor: 'middle',
+						},
+						labelBody: {
+							ref: 'labelText',
+							refX: -8,
+							refY: -5,
+							refWidth: '100%',
+							refHeight: '100%',
+							refWidth2: 16,
+							refHeight2: 10,
+							stroke: '#ffa940',
+							fill: '#fff',
+							strokeWidth: 2,
+							rx: 5,
+							ry: 5,
+						},
+					},
+					position: {
+						distance: -80,
+						args: {
+							keepGradient: true,
+							ensureLegibility: true,
+						},
+					},
+				},
+			])
     })
 
-    graph.on('edge:mouseleave', ({ cell }) => {
-      cell.removeTools()
+    graph.on('edge:mouseleave', ({ edge }) => {
+      edge.setLabels({})
     })
     
     const embedPadding = 40
@@ -329,89 +406,7 @@ export const TestEditor = () => {
           },
         })
         console.log(edge)
-        edge.setLabels([
-          {
-            markup: [
-              {
-                tagName: 'rect',
-                selector: 'labelBody',
-              },
-              {
-                tagName: 'text',
-                selector: 'labelText',
-              },
-            ],
-            attrs: {
-              labelText: {
-                text: 'id1',
-                fill: '#ffa940',
-                textAnchor: 'middle',
-                textVerticalAnchor: 'middle',
-              },
-              labelBody: {
-                ref: 'labelText',
-                refX: -8,
-                refY: -5,
-                refWidth: '100%',
-                refHeight: '100%',
-                refWidth2: 16,
-                refHeight2: 10,
-                stroke: '#ffa940',
-                fill: '#fff',
-                strokeWidth: 2,
-                rx: 5,
-                ry: 5,
-              },
-            },
-            position: {
-              distance: 8,
-              args: {
-                keepGradient: true,
-                ensureLegibility: true,
-              },
-            },
-          }, {
-            markup: [
-              {
-                tagName: 'rect',
-                selector: 'labelBody',
-              },
-              {
-                tagName: 'text',
-                selector: 'labelText',
-              },
-            ],
-            attrs: {
-              labelText: {
-                text: 'id1',
-                fill: '#ffa940',
-                textAnchor: 'middle',
-                textVerticalAnchor: 'middle',
-              },
-              labelBody: {
-                ref: 'labelText',
-                refX: -8,
-                refY: -5,
-                refWidth: '100%',
-                refHeight: '100%',
-                refWidth2: 16,
-                refHeight2: 10,
-                stroke: '#ffa940',
-                fill: '#fff',
-                strokeWidth: 2,
-                rx: 5,
-                ry: 5,
-              },
-            },
-            position: {
-              distance: -8,
-              args: {
-                keepGradient: true,
-                ensureLegibility: true,
-              },
-            },
-          },
-        ])
+
       }
     })
 
