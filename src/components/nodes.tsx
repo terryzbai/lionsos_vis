@@ -36,7 +36,8 @@ const custom_nodes = {
     height: 40,
     label: 'PD',
     data: {
-      parent: true,
+			name: 'PD',
+			cellType: 'group',
     },
     attrs: {
       body: {
@@ -52,7 +53,11 @@ const custom_nodes = {
     y: 40,
     width: 60,
     height: 50,
-    label: 'VM',
+		label: 'VM',
+		data: {
+			name: 'VM',
+			cellType: 'group',
+		},
     attrs: {
       text: {
         textAnchor: "middle",

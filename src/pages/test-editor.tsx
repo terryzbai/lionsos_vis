@@ -101,14 +101,13 @@ export const TestEditor = () => {
 		stencilGraphHeight: 0,
 		groups: stencil_group,
 		getDropNode(node) {
-			const node_name = node.getAttrs().text.text
+			const node_name = node.data?.name
 
 			const group = new Group(custom_group[String(node_name)])
 			group.addPort({
 				id: 'port_1',
 				group: 'bottom',
 			})
-
 			console.log(group)
 
 			addNode({id: group.id, shape: node_name})
@@ -235,93 +234,102 @@ export const TestEditor = () => {
     })
 
     graph.on('edge:mouseenter', ({ edge }) => {
-			edge.setLabels([
+			edge.addTools([
 				{
-					markup: [
-						{
-							tagName: 'rect',
-							selector: 'labelBody',
-						},
-						{
-							tagName: 'text',
-							selector: 'labelText',
-						},
-					],
-					attrs: {
-						labelText: {
-							text: 'id1',
-							fill: '#ffa940',
-							textAnchor: 'middle',
-							textVerticalAnchor: 'middle',
-						},
-						labelBody: {
-							ref: 'labelText',
-							refX: -8,
-							refY: -5,
-							refWidth: '100%',
-							refHeight: '100%',
-							refWidth2: 16,
-							refHeight2: 10,
-							stroke: '#ffa940',
-							fill: '#fff',
-							strokeWidth: 2,
-							rx: 5,
-							ry: 5,
-						},
-					},
-					position: {
-						distance: 80,
-						args: {
-							keepGradient: true,
-							ensureLegibility: true,
-						},
-					},
-				}, {
-					markup: [
-						{
-							tagName: 'rect',
-							selector: 'labelBody',
-						},
-						{
-							tagName: 'text',
-							selector: 'labelText',
-						},
-					],
-					attrs: {
-						labelText: {
-							text: 'id1',
-							fill: '#ffa940',
-							textAnchor: 'middle',
-							textVerticalAnchor: 'middle',
-						},
-						labelBody: {
-							ref: 'labelText',
-							refX: -8,
-							refY: -5,
-							refWidth: '100%',
-							refHeight: '100%',
-							refWidth2: 16,
-							refHeight2: 10,
-							stroke: '#ffa940',
-							fill: '#fff',
-							strokeWidth: 2,
-							rx: 5,
-							ry: 5,
-						},
-					},
-					position: {
-						distance: -80,
-						args: {
-							keepGradient: true,
-							ensureLegibility: true,
-						},
-					},
+					name: 'source-arrowhead',
+				},
+				{
+					name: 'target-arrowhead',
 				},
 			])
+			// edge.setLabels([
+			// 	{
+			// 		markup: [
+			// 			{
+			// 				tagName: 'rect',
+			// 				selector: 'labelBody',
+			// 			},
+			// 			{
+			// 				tagName: 'text',
+			// 				selector: 'labelText',
+			// 			},
+			// 		],
+			// 		attrs: {
+			// 			labelText: {
+			// 				text: 'id1',
+			// 				fill: '#ffa940',
+			// 				textAnchor: 'middle',
+			// 				textVerticalAnchor: 'middle',
+			// 			},
+			// 			labelBody: {
+			// 				ref: 'labelText',
+			// 				refX: -8,
+			// 				refY: -5,
+			// 				refWidth: '100%',
+			// 				refHeight: '100%',
+			// 				refWidth2: 16,
+			// 				refHeight2: 10,
+			// 				stroke: '#ffa940',
+			// 				fill: '#fff',
+			// 				strokeWidth: 2,
+			// 				rx: 5,
+			// 				ry: 5,
+			// 			},
+			// 		},
+			// 		position: {
+			// 			distance: 80,
+			// 			args: {
+			// 				keepGradient: true,
+			// 				ensureLegibility: true,
+			// 			},
+			// 		},
+			// 	}, {
+			// 		markup: [
+			// 			{
+			// 				tagName: 'rect',
+			// 				selector: 'labelBody',
+			// 			},
+			// 			{
+			// 				tagName: 'text',
+			// 				selector: 'labelText',
+			// 			},
+			// 		],
+			// 		attrs: {
+			// 			labelText: {
+			// 				text: 'id1',
+			// 				fill: '#ffa940',
+			// 				textAnchor: 'middle',
+			// 				textVerticalAnchor: 'middle',
+			// 			},
+			// 			labelBody: {
+			// 				ref: 'labelText',
+			// 				refX: -8,
+			// 				refY: -5,
+			// 				refWidth: '100%',
+			// 				refHeight: '100%',
+			// 				refWidth2: 16,
+			// 				refHeight2: 10,
+			// 				stroke: '#ffa940',
+			// 				fill: '#fff',
+			// 				strokeWidth: 2,
+			// 				rx: 5,
+			// 				ry: 5,
+			// 			},
+			// 		},
+			// 		position: {
+			// 			distance: -80,
+			// 			args: {
+			// 				keepGradient: true,
+			// 				ensureLegibility: true,
+			// 			},
+			// 		},
+			// 	},
+			// ])
     })
 
     graph.on('edge:mouseleave', ({ edge }) => {
-      edge.setLabels({})
+			edge.removeTools()
+      // edge.setLabels({})
     })
     
     const embedPadding = 40
@@ -399,14 +407,14 @@ export const TestEditor = () => {
       if (isNew) {
         const sourceNode = edge.getSourceNode()
         edge.setSource(sourceNode)
-        edge.setAttrs({
-          absoluteLabel: {
-            text: '150',
-            atConnectionLength: 20,
-          },
-        })
-        console.log(edge)
-
+				console.log('1111')
+				edge.attr('line/targetMarker', null)
+        // edge.setAttrs({
+        //   line: {
+				// 		sourceMarker: null,
+        //     targetMarker: null,
+        //   },
+        // })
       }
     })
 
