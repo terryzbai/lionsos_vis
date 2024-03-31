@@ -155,7 +155,7 @@ export const getCurrentPD = (state: RootState) => {
 export const getSDFContent = (state: RootState) => {
   console.log("Get current pds: ", state.config.pds)
   const pds_content = state.config.pds.map((pd) => {
-    if (pd.parent == "") {
+    if (pd.parent === "") {
       let attrs = ''
       attrs += pd.name ? ` name="${pd.name}"` : ''
       attrs += pd.priority ? ` priority="${pd.priority}"` : ''

@@ -87,10 +87,19 @@ const custom_group = {
     shape: 'rect',
     width: 200,
     height: 120,
-    data: {
-      parent: true,
-    },
     attrs: {
+			data: {
+				type: 'PD',
+				basic_info: {
+					name: 'Untitled PD',
+					priority: 0,
+					budget: 0,
+					period: 0,
+					pp: 0,
+					prog_img: 'default.image',
+				},
+				mappings: [],
+			},
       label: {
         text: 'Untitled PD',
         fontSize: 18,
@@ -115,6 +124,19 @@ const custom_group = {
     height: 60,
     label: 'VM',
     attrs: {
+			data: {
+				type: 'PD',
+				basic_info: {
+					name: 'Untitled VM',
+					id: 0,
+					priority: 0,
+					budget: 0,
+					period: 0,
+					pp: 0,
+					prog_img: 'default.image',
+				},
+				mappings: [],
+			},
       label: {
         text: 'VM',
         fontSize: 18,
