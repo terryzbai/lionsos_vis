@@ -21,10 +21,6 @@ import {
   EditOutlined,
   DownloadOutlined,
   UploadOutlined,
-  // BoldOutlined,
-  // ItalicOutlined,
-  // StrikethroughOutlined,
-  // UnderlineOutlined,
 } from '@ant-design/icons'
 import { useAppSelector, useAppDispatch } from '../app/hooks'
 import { addNodeIntoList, openNodeEditor, getSDFContent, getPDList, deleteNode } from '../features/configSlice'
@@ -50,6 +46,8 @@ export const DiagramEditor = () => {
   const [ SDFEditorOpen, setSDFEditorOpen ] = useState(false)
   const SDFContent = useAppSelector(getSDFContent)
   const pdList = useAppSelector(getPDList)
+  const [ nodeEditorOpen, setNodeEditorOpen ] = useState(false)
+  const [ currentNodeID, setCurrentNodeID ] = useState('')
 
   const graph_config = {
     background: {
@@ -130,6 +128,17 @@ export const DiagramEditor = () => {
     console.log(globalGraph.toJSON())
   }
 
+  const getNodeData = (node_id : string) => {
+
+    const node = globalGraph?.getNodes().find(node => node.id === node_id )
+
+    return node?.data
+  }
+
+  const updateNodeData = () => {
+    console.log('updateNodeData')
+  }
+
   useEffect(() => {
     const graph = new Graph({
       ...graph_config,
@@ -163,6 +172,9 @@ export const DiagramEditor = () => {
     })
 
     graph.on('node:dblclick', (ev) => {
+      console.log(ev.node)
+      setCurrentNodeID(ev.node.id)
+      setNodeEditorOpen(true)
       dispatch(openNodeEditor(ev.node.id))
     })
 
@@ -235,24 +247,6 @@ export const DiagramEditor = () => {
       collapse(node)
     })
 
-    graph.on('edge:mouseenter', ({ edge }) => {
-      edge.addTools([
-        {
-          name: 'source-arrowhead',
-        },
-        {
-          name: 'target-arrowhead',
-        },
-      ])
-      
-      edge.setLabels(channelLabelConfig(edge.data?.source_end_id, edge.data?.target_end_id))
-    })
-
-    graph.on('edge:mouseleave', ({ edge }) => {
-      edge.removeTools()
-      edge.setLabels({})
-    })
-    
     const embedPadding = 40
     graph.on('node:change:position', ({ node, options }) => {
       if (options.skipParentHandler || ctrlPressed) {
@@ -324,6 +318,24 @@ export const DiagramEditor = () => {
       }
     })
 
+    graph.on('edge:mouseenter', ({ edge }) => {
+      edge.addTools([
+        {
+          name: 'source-arrowhead',
+        },
+        {
+          name: 'target-arrowhead',
+        },
+      ])
+      
+      edge.setLabels(channelLabelConfig(edge.data?.source_end_id, edge.data?.target_end_id))
+    })
+
+    graph.on('edge:mouseleave', ({ edge }) => {
+      edge.removeTools()
+      edge.setLabels({})
+    })
+
     graph.on('edge:connected', ({ edge }) => {
       const sourceNode = edge.getSourceNode()
       const targetNode = edge.getTargetNode()
@@ -344,19 +356,9 @@ export const DiagramEditor = () => {
 
     })
 
-    graph.on('edge:change:source', ({ edge }) => {
-      console.log(edge.getSourceNode())
-    })
-
-    graph.on('edge:change:target', ({ edge }) => {
-      console.log(edge.getTargetNode())
-    })
-
   }, [])
 
   useEffect(() => {
-    console.log("pdList updated: ", pdList)
-
     if (globalGraph != null) {
       const nodes = globalGraph.getNodes()
       pdList.map((pd) => {
@@ -397,7 +399,7 @@ export const DiagramEditor = () => {
         <div className="app-content" ref={refGraphContainer}>
         </div>
       </div>
-      <NodeEditor />
+      <NodeEditor node_id={currentNodeID} nodeEditorOpen={nodeEditorOpen} setNodeEditorOpen={setNodeEditorOpen} getNodeData={getNodeData} updateNodeData={updateNodeData}/>
       <Modal
         title="Modal 1000px width"
         centered
@@ -408,11 +410,6 @@ export const DiagramEditor = () => {
       >
         <textarea value={SDFContent} readOnly></textarea>
       </Modal>
-      <div>{pds.length}</div>
-      {pds.map(function (x, i) {
-        return <div key={i}>{x.id} & <span>{x.name}</span></div>;
-      })}
-      <div>{ctrlPressed ? "B": "a"}</div>
     </div>
   )
 }

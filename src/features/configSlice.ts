@@ -153,7 +153,7 @@ export const getCurrentPD = (state: RootState) => {
 }
 
 export const getSDFContent = (state: RootState) => {
-  console.log("Get current pds: ", state.config.pds)
+  // console.log("Get current pds: ", state.config.pds)
   const pds_content = state.config.pds.map((pd) => {
     if (pd.parent === "") {
       let attrs = ''
@@ -165,7 +165,6 @@ export const getSDFContent = (state: RootState) => {
     return ''
   })
   const content = '<?xml version="1.0" encoding="UTF-8"?>\n<system>\n' + pds_content.join('\n') + "\n</system>"
-  console.log(content)
   return content
 }
 

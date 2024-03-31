@@ -1,71 +1,60 @@
-// import React, { useState } from 'react';
 import { Drawer } from 'antd'
 import { useEffect } from 'react'
 import { InputNumber, Form, Input, Button } from 'antd'
-import { useAppSelector, useAppDispatch } from '../app/hooks'
-import { PDState, updateNode, getCurrentPD, closeNodeEditor, getNodeEditorStatus } from '../features/configSlice'
-/*
-TODO:
-[ ] form layout and data bindings
-[ ] update data to parent component
-*/
+import { closeNodeEditor } from '../features/configSlice'
 
-export default function NodeEditor() {
+export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen, getNodeData, updateNodeData }) {
 
-  // const [ priority, setPriority ] = useState<number | string>('111')
-
-  const dispatch = useAppDispatch()
-  const pd_data : PDState = useAppSelector(getCurrentPD)
-  const [ form ] = Form.useForm<PDState>(null)
-  const nodeEditorVisible : boolean = useAppSelector(getNodeEditorStatus)
-
-  const saveNodeInfo = (data : PDState) => {
-    dispatch(closeNodeEditor())
-    dispatch(updateNode(data))
-  }
+  const node_data = getNodeData(node_id)
+  const node_attrs = node_data?.attrs
+  const [ form ] = Form.useForm(null)
 
   useEffect(() => {
-    form.setFieldsValue(pd_data)
+    form.setFieldsValue(node_attrs)
   })
 
   return (
     <>
-      <Drawer title={pd_data ? pd_data.name : "Basic Drawer"} forceRender onClose={() => dispatch(closeNodeEditor())} open={nodeEditorVisible}>
+      <Drawer title={"Basic Drawer"} forceRender open={nodeEditorOpen} onClose={() => setNodeEditorOpen(false)}>
+        <p>{node_id}</p>
         <Form
           name="basic"
           form={ form }
           wrapperCol={{ span: 16 }}
           style={{ maxWidth: 600 }}
-          initialValues={ pd_data }
+          initialValues={ node_attrs }
           layout="vertical"
-          onFinish={saveNodeInfo}
+          // onFinish={updateNodeData}
           // onFinishFailed={onFinishFailed}
           autoComplete="off"
         >
           <Form.Item
-            label="id"
-            name="id"
-            hidden={true}
+            label="Name"
+            name="name"
+            rules={[{ required: true }]}
+            hidden={ node_attrs && !('name' in node_attrs) }
           >
             <Input />
           </Form.Item>
           <Form.Item
-            label="Name"
-            name="name"
-            rules={[{ required: true }]}
+            label="ID"
+            name="id"
+            hidden={ node_attrs && !('id' in node_attrs) }
           >
             <Input />
           </Form.Item>
           <Form.Item
             label="Priority"
             name="priority"
-            rules={[{ required: true, message: 'Please input your username!' }]}
+            hidden={ node_attrs && !('priority' in node_attrs) }
+            rules={[{ required: false }]}
           >
             <InputNumber min={1} max={256} />
           </Form.Item>
           <Form.Item
             label="Budget"
             name="budget"
+            hidden={ node_attrs && !('budget' in node_attrs) }
             rules={[{ required: false }]}
           >
             <InputNumber min={1} max={256} />
@@ -73,6 +62,7 @@ export default function NodeEditor() {
           <Form.Item
             label="Period"
             name="period"
+            hidden={ !(node_attrs?.period) }
             rules={[{ required: false }]}
           >
             <InputNumber min={1} max={256} />
@@ -80,6 +70,7 @@ export default function NodeEditor() {
           <Form.Item
             label="pp"
             name="pp"
+            hidden={ node_attrs && !('pp' in node_attrs) }
             rules={[{ required: false }]}
           >
             <InputNumber min={1} max={256} />
@@ -87,6 +78,7 @@ export default function NodeEditor() {
           <Form.Item
             label="Program Image"
             name="prog_img"
+            hidden={ node_attrs && !('prog_img' in node_attrs) }
             rules={[{ required: false }]}
           >
             <Input />
@@ -94,16 +86,10 @@ export default function NodeEditor() {
           <Button htmlType="submit" type="primary">
             Save
           </Button>
-          <Button htmlType="button" style={{ margin: '0 8px' }} onClick={() => dispatch(closeNodeEditor())}>
+          <Button htmlType="button" style={{ margin: '0 8px' }} onClick={() => setNodeEditorOpen(false)}>
             Cancel
           </Button>
         </Form>
-        <p>maps</p>
-        <p>maps</p>
-        <p>maps</p>
-        <p>maps</p>
-        <p>maps</p>
-        <p>maps</p>
       </Drawer>
     </>
   )

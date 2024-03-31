@@ -36,8 +36,8 @@ const custom_nodes = {
     height: 40,
     label: 'PD',
     data: {
-			name: 'PD',
-			cellType: 'group',
+      name: 'PD',
+      cellType: 'group',
     },
     attrs: {
       body: {
@@ -53,11 +53,11 @@ const custom_nodes = {
     y: 40,
     width: 60,
     height: 50,
-		label: 'VM',
-		data: {
-			name: 'VM',
-			cellType: 'group',
-		},
+    label: 'VM',
+    data: {
+      name: 'VM',
+      cellType: 'group',
+    },
     attrs: {
       text: {
         textAnchor: "middle",
@@ -69,7 +69,7 @@ const custom_nodes = {
       },
     },
   },
-	],
+  ],
   'Advanced': [{
     ...commonAttrs,
     shape: 'rect',
@@ -87,19 +87,21 @@ const custom_group = {
     shape: 'rect',
     width: 200,
     height: 120,
+    data: {
+      type: 'PD',
+      parent: true,
+      attrs: {
+        name: 'Untitled PD',
+        priority: 0,
+        budget: 0,
+        period: 0,
+        pp: 0,
+        prog_img: 'default.image',
+      },
+      mappings: [],
+      irqs: [],
+    },
     attrs: {
-			data: {
-				type: 'PD',
-				basic_info: {
-					name: 'Untitled PD',
-					priority: 0,
-					budget: 0,
-					period: 0,
-					pp: 0,
-					prog_img: 'default.image',
-				},
-				mappings: [],
-			},
       label: {
         text: 'Untitled PD',
         fontSize: 18,
@@ -123,20 +125,21 @@ const custom_group = {
     width: 80,
     height: 60,
     label: 'VM',
+    data: {
+      type: 'PD',
+      parent: false,
+      attrs: {
+        name: 'Untitled VM',
+        id: 0,
+        priority: 0,
+        budget: 0,
+        period: 0,
+        pp: 0,
+      },
+      mappings: [],
+      irqs: [],
+    },
     attrs: {
-			data: {
-				type: 'PD',
-				basic_info: {
-					name: 'Untitled VM',
-					id: 0,
-					priority: 0,
-					budget: 0,
-					period: 0,
-					pp: 0,
-					prog_img: 'default.image',
-				},
-				mappings: [],
-			},
       label: {
         text: 'VM',
         fontSize: 18,
@@ -169,7 +172,7 @@ export const init_node_data = {
     vms: [],
     parent: '',
   },
-	'VM': {
+  'VM': {
     name: 'Untitled VM',
     priority: 0,
     budget: 0,
@@ -180,7 +183,7 @@ export const init_node_data = {
     pds: [],
     vms: [],
     parent: '',
-	},
+  },
 }
 
 export { stencil_group, custom_nodes, custom_group }
