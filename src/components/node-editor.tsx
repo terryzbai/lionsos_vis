@@ -1,13 +1,28 @@
 import { Drawer } from 'antd'
 import { useEffect } from 'react'
 import { InputNumber, Form, Input, Button } from 'antd'
-import { closeNodeEditor } from '../features/configSlice'
 
 export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen, getNodeData, updateNodeData }) {
 
   const node_data = getNodeData(node_id)
   const node_attrs = node_data?.attrs
   const [ form ] = Form.useForm(null)
+
+  const saveNodeData = (data : any) => {
+    let new_data = {...node_attrs}
+
+    Object.keys(new_data).forEach(key => {
+      new_data[key] = data[key]
+    })
+
+    updateNodeData(node_id, {
+      attrs: new_data,
+      mappings: ['test1', 'test2'],
+      irqs: ['test5'],
+    })
+
+    setNodeEditorOpen(false)
+  }
 
   useEffect(() => {
     form.setFieldsValue(node_attrs)
@@ -16,7 +31,6 @@ export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen,
   return (
     <>
       <Drawer title={"Basic Drawer"} forceRender open={nodeEditorOpen} onClose={() => setNodeEditorOpen(false)}>
-        <p>{node_id}</p>
         <Form
           name="basic"
           form={ form }
@@ -24,7 +38,7 @@ export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen,
           style={{ maxWidth: 600 }}
           initialValues={ node_attrs }
           layout="vertical"
-          // onFinish={updateNodeData}
+          onFinish={saveNodeData}
           // onFinishFailed={onFinishFailed}
           autoComplete="off"
         >
@@ -94,5 +108,3 @@ export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen,
     </>
   )
 }
-
-// export default ComponentDrawer

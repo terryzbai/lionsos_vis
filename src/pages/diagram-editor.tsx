@@ -130,13 +130,23 @@ export const DiagramEditor = () => {
 
   const getNodeData = (node_id : string) => {
 
-    const node = globalGraph?.getNodes().find(node => node.id === node_id )
+    const node = globalGraph?.getNodes().find(node => node.id === node_id)
 
     return node?.data
   }
 
-  const updateNodeData = () => {
-    console.log('updateNodeData')
+  const updateNodeData = (node_id : string, new_data : any) => {
+    console.log('updateNodeData', node_id, ':', new_data)
+    const node = globalGraph?.getNodes().find(node => node.id === node_id)
+
+    if (node) {
+      node.data = new_data
+      node.setAttrs({ label: { text: new_data.attrs.name } })
+      console.log(node)
+    } else {
+      console.log("Invalid node_id")
+    }
+
   }
 
   useEffect(() => {
