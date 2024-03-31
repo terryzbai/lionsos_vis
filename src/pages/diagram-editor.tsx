@@ -107,9 +107,8 @@ export const DiagramEditor = () => {
         id: 'port_1',
         group: 'bottom',
       })
-      // group.attr('data', { name: node_name })
+      
       console.log(group)
-
       addNode({id: group.id, shape: node_name})
       return group
     },
@@ -212,13 +211,23 @@ export const DiagramEditor = () => {
       node.removeTools()
     })
 
+    graph.on('node:mousedown', ({ node }) => {
+      node.setZIndex(999)
+    })
+
+    graph.on('node:mouseup', ({ node }) => {
+      node.setZIndex(1)
+    })
+
     // setCtrlPressed(false)
     graph.on('node:embedding', ({ e }: { e }) => {
       setCtrlPressed(e.metaKey || e.ctrlKey)
     })
     
-    graph.on('node:embedded', () => {
+    graph.on('node:embedded', ({ node, currentParent }) => {
       setCtrlPressed(false)
+      const parent_zIndex = currentParent.getZIndex()
+      node.setZIndex(parent_zIndex + 1)
     })
 
     graph.on('node:change:size', ({ node, options }) => {
