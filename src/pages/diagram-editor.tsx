@@ -29,7 +29,7 @@ import {
 import { useAppSelector, useAppDispatch } from '../app/hooks'
 import { addNodeIntoList, openNodeEditor, getSDFContent, getPDList, deleteNode } from '../features/configSlice'
 import { Modal } from 'antd'
-import { getValidEndID } from '../utils/helper'
+import { channelLabelConfig, getValidEndID } from '../utils/helper'
 
 
 /*
@@ -245,91 +245,7 @@ export const DiagramEditor = () => {
         },
       ])
       
-      if (edge.data) {
-        edge.setLabels([
-          {
-            markup: [
-              {
-                tagName: 'rect',
-                selector: 'labelBody',
-              },
-              {
-                tagName: 'text',
-                selector: 'labelText',
-              },
-            ],
-            attrs: {
-              labelText: {
-                text: edge.data.source_end_id,
-                fill: '#ffa940',
-                textAnchor: 'middle',
-                textVerticalAnchor: 'middle',
-              },
-              labelBody: {
-                ref: 'labelText',
-                refX: -8,
-                refY: -5,
-                refWidth: '100%',
-                refHeight: '100%',
-                refWidth2: 16,
-                refHeight2: 10,
-                stroke: '#ffa940',
-                fill: '#fff',
-                strokeWidth: 2,
-                rx: 5,
-                ry: 5,
-              },
-            },
-            position: {
-              distance: 40,
-              args: {
-                keepGradient: true,
-                ensureLegibility: true,
-              },
-            },
-          }, {
-            markup: [
-              {
-                tagName: 'rect',
-                selector: 'labelBody',
-              },
-              {
-                tagName: 'text',
-                selector: 'labelText',
-              },
-            ],
-            attrs: {
-              labelText: {
-                text: edge.data.target_end_id,
-                fill: '#ffa940',
-                textAnchor: 'middle',
-                textVerticalAnchor: 'middle',
-              },
-              labelBody: {
-                ref: 'labelText',
-                refX: -8,
-                refY: -5,
-                refWidth: '100%',
-                refHeight: '100%',
-                refWidth2: 16,
-                refHeight2: 10,
-                stroke: '#ffa940',
-                fill: '#fff',
-                strokeWidth: 2,
-                rx: 5,
-                ry: 5,
-              },
-            },
-            position: {
-              distance: -40,
-              args: {
-                keepGradient: true,
-                ensureLegibility: true,
-              },
-            },
-          },
-        ])
-      }
+      edge.setLabels(channelLabelConfig(edge.data?.source_end_id, edge.data?.target_end_id))
     })
 
     graph.on('edge:mouseleave', ({ edge }) => {
@@ -410,16 +326,30 @@ export const DiagramEditor = () => {
 
     graph.on('edge:connected', ({ edge }) => {
       const sourceNode = edge.getSourceNode()
-			const targetNode = edge.getTargetNode()
-      edge.setSource(sourceNode)
+      const targetNode = edge.getTargetNode()
+      if (sourceNode) {
+        edge.setSource(sourceNode)
+      }
+      if (targetNode) {
+        edge.setTarget(targetNode)
+      }
       edge.attr('line/targetMarker', null)
+      console.log('edge connected', sourceNode, targetNode)
       edge.data = { 
-        source_node: sourceNode.id,
-        source_end_id: getValidEndID(graph.getEdges(), sourceNode.id),
-        target_node: targetNode.id,
-        target_end_id: getValidEndID(graph.getEdges(), targetNode.id)
+        source_node: sourceNode ? sourceNode.id : null,
+        source_end_id: sourceNode ? getValidEndID(graph.getEdges(), sourceNode.id) : 'null',
+        target_node: targetNode ? targetNode.id : null,
+        target_end_id: targetNode ? getValidEndID(graph.getEdges(), targetNode.id) : 'null',
       }
 
+    })
+
+    graph.on('edge:change:source', ({ edge }) => {
+      console.log(edge.getSourceNode())
+    })
+
+    graph.on('edge:change:target', ({ edge }) => {
+      console.log(edge.getTargetNode())
     })
 
   }, [])
