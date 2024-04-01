@@ -26,6 +26,7 @@ import { useAppSelector, useAppDispatch } from '../app/hooks'
 import { addNodeIntoList, openNodeEditor, getSDFContent, getPDList, deleteNode } from '../features/configSlice'
 import { Modal } from 'antd'
 import { channelLabelConfig, getValidEndID } from '../utils/helper'
+import { SDFContent } from '../utils/translator'
 
 
 /*
@@ -44,7 +45,7 @@ export const DiagramEditor = () => {
   const [ globalGraph, setGlobalGraph ] = useState<Graph>(null)
   const [ ctrlPressed, setCtrlPressed ] = useState(false)
   const [ SDFEditorOpen, setSDFEditorOpen ] = useState(false)
-  const SDFContent = useAppSelector(getSDFContent)
+  // const SDFContent = useAppSelector(getSDFContent)
   const pdList = useAppSelector(getPDList)
   const [ nodeEditorOpen, setNodeEditorOpen ] = useState(false)
   const [ currentNodeID, setCurrentNodeID ] = useState('')
@@ -124,7 +125,7 @@ export const DiagramEditor = () => {
   const editSDF = () => {
     setSDFEditorOpen(true)
 
-    console.log(globalGraph.toJSON())
+    
   }
 
   const getNodeData = (node_id : string) => {
@@ -181,13 +182,13 @@ export const DiagramEditor = () => {
     })
 
     graph.on('node:dblclick', (ev) => {
-      console.log(ev.node)
       setCurrentNodeID(ev.node.id)
       setNodeEditorOpen(true)
-      dispatch(openNodeEditor(ev.node.id))
+      // dispatch(openNodeEditor(ev.node.id))
     })
 
     graph.on('node:mouseenter', ({ node }) => {
+      // node.setZIndex(999)
       node.addTools({
         name: 'button-remove',
         args: {
@@ -208,15 +209,8 @@ export const DiagramEditor = () => {
     })
     
     graph.on('node:mouseleave', ({ node }) => {
+      // node.setZIndex(1)
       node.removeTools()
-    })
-
-    graph.on('node:mousedown', ({ node }) => {
-      node.setZIndex(999)
-    })
-
-    graph.on('node:mouseup', ({ node }) => {
-      node.setZIndex(1)
     })
 
     // setCtrlPressed(false)
@@ -355,7 +349,7 @@ export const DiagramEditor = () => {
       edge.setLabels({})
     })
 
-    graph.on('edge:connected', ({ edge }) => {
+    graph.on('edge:changed', ({ edge }) => {
       const sourceNode = edge.getSourceNode()
       const targetNode = edge.getTargetNode()
       if (sourceNode) {
@@ -366,7 +360,8 @@ export const DiagramEditor = () => {
       }
       edge.attr('line/targetMarker', null)
       console.log('edge connected', sourceNode, targetNode)
-      edge.data = { 
+      edge.data = {
+        type: 'channel',
         source_node: sourceNode ? sourceNode.id : null,
         source_end_id: sourceNode ? getValidEndID(graph.getEdges(), sourceNode.id) : 'null',
         target_node: targetNode ? targetNode.id : null,
@@ -377,15 +372,15 @@ export const DiagramEditor = () => {
 
   }, [])
 
-  useEffect(() => {
-    if (globalGraph != null) {
-      const nodes = globalGraph.getNodes()
-      pdList.map((pd) => {
-        // Update group name
-        nodes.find(node => node.id === pd.id)?.setAttrs({ label: { text: pd.name } })
-      })
-    }
-  }, [pdList])
+  // useEffect(() => {
+  //   if (globalGraph != null) {
+  //     const nodes = globalGraph.getNodes()
+  //     pdList.map((pd) => {
+  //       // Update group name
+  //       nodes.find(node => node.id === pd.id)?.setAttrs({ label: { text: pd.name } })
+  //     })
+  //   }
+  // }, [pdList])
 
 
   return (
@@ -427,7 +422,7 @@ export const DiagramEditor = () => {
         onCancel={() => setSDFEditorOpen(false)}
         width={1000}
       >
-        <textarea value={SDFContent} readOnly></textarea>
+        <textarea value={SDFContent(globalGraph?.toJSON().cells)} readOnly></textarea>
       </Modal>
     </div>
   )

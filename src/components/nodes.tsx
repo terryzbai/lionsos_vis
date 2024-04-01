@@ -96,7 +96,7 @@ const custom_group = {
         budget: 0,
         period: 0,
         pp: 0,
-        prog_img: 'default.image',
+        prog_img: 'default.elf',
       },
       mappings: [],
       irqs: [],
@@ -108,8 +108,8 @@ const custom_group = {
         fill: "#000000",
       },
       text: {
-        textAnchor: "middle",
-        x: 40,
+        textAnchor: "left",
+        x: 0,
         y: 12,
       },
       body: {
@@ -124,7 +124,6 @@ const custom_group = {
     shape: 'rect',
     width: 80,
     height: 60,
-    label: 'VM',
     data: {
       type: 'PD',
       parent: false,
@@ -141,13 +140,13 @@ const custom_group = {
     },
     attrs: {
       label: {
-        text: 'VM',
+        text: 'Untitled VM',
         fontSize: 18,
         fill: "#000000",
       },
       text: {
-        textAnchor: "middle",
-        x: 10,
+        textAnchor: "left",
+        x: 0,
         y: 12,
       },
       body: {
@@ -166,7 +165,7 @@ export const init_node_data = {
     budget: 0,
     period: 0,
     pp: 0,
-    prog_img: 'default.image',
+    prog_img: 'default.elf',
     mappings: [],
     pds: [],
     vms: [],
@@ -178,7 +177,7 @@ export const init_node_data = {
     budget: 0,
     period: 0,
     pp: 0,
-    prog_img: 'default.image',
+    prog_img: 'default.elf',
     mappings: [],
     pds: [],
     vms: [],
