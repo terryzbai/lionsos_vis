@@ -125,7 +125,7 @@ const custom_group = {
     width: 80,
     height: 60,
     data: {
-      type: 'PD',
+      type: 'VM',
       parent: false,
       attrs: {
         name: 'Untitled VM',
