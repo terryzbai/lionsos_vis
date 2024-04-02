@@ -50,7 +50,7 @@ const getComponentXML = (cell : any, cells : any) => {
 }
 
 export const SDFContent = (cells : any ) => {
-  console.log("SDFContent", cells, typeof cells)
+  console.log(cells)
 
   if (cells == null) {
     return ''
@@ -61,7 +61,7 @@ export const SDFContent = (cells : any ) => {
     if (cell.shape === 'edge') {
       console.log(`Channel:${cell_data?.source_node}-${cell.data?.source_end_id} <--> ${cell_data?.target_node}-${cell_data?.target_end_id}`)
     } else if (cell.parent == '' || cell.parent == null){
-      const content = getPDXML(cell, cells)
+      const content = getComponentXML(cell, cells)
       return insertIndents(content)
     }
   })

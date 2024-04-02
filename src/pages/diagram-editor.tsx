@@ -28,7 +28,6 @@ import { Modal } from 'antd'
 import { channelLabelConfig, getValidEndID } from '../utils/helper'
 import { SDFContent } from '../utils/translator'
 
-
 /*
 TODO:
 [ ] Set highest zIndex for the node being dragged
@@ -358,8 +357,9 @@ export const DiagramEditor = () => {
       if (targetNode) {
         edge.setTarget(targetNode)
       }
-      edge.attr('line/targetMarker', null)
-      console.log('edge connected', sourceNode, targetNode)
+      edge.attr('line/targetMarker', { tagName: 'circle', r: 2 })
+      edge.attr('line/sourceMarker', { tagName: 'circle', r: 2 })
+      // edge.attrs.line.targetMarker = null
       edge.data = {
         type: 'channel',
         source_node: sourceNode ? sourceNode.id : null,
@@ -368,6 +368,7 @@ export const DiagramEditor = () => {
         target_end_id: targetNode ? getValidEndID(graph.getEdges(), targetNode.id) : 'null',
       }
 
+      console.log(edge)
     })
 
   }, [])
