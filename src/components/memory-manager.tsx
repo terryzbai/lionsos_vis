@@ -12,6 +12,7 @@ interface DragStatus {
   op : null | "left" | "middle" | "right"
   startX : number
   startLeft : number
+  startWidth : number
   indexOfMR : number | null
   rangeLimit : { min : number, max : number}
 }
@@ -36,6 +37,7 @@ export default function MemoryManager() {
     op: null,
     startX: 0,
     startLeft: 0,
+    startWidth: 0,
     indexOfMR: null,
     rangeLimit: null
   }
@@ -80,6 +82,7 @@ export default function MemoryManager() {
     dragStatus.startX = e.clientX
     dragStatus.startLeft = MRs[i].phyAddr
     dragStatus.rangeLimit = getRangeLimit(i)
+    dragStatus.startWidth = MRs[i].size
 
     const BORDER_SIZE = 5
     const relative_x = e.nativeEvent.offsetX
@@ -101,12 +104,11 @@ export default function MemoryManager() {
 
   // Handle dragging
   const handleDrag = (e) => {
-    console.log("Handle drag", dragStatus.op)
+    const currentMR = MRs[dragStatus.indexOfMR]
     if (dragStatus.op === "middle") {
-      const diff = e.clientX - dragStatus.startX
       const newPhyAddr = Math.min(
         Math.max(e.clientX - dragStatus.startX + dragStatus.startLeft, dragStatus.rangeLimit.min),
-        dragStatus.rangeLimit.max - MRs[dragStatus.indexOfMR].size
+        dragStatus.rangeLimit.max - currentMR.size
       )
       setMRs(oldMRs => {
         const newMRs = oldMRs.map((MR, index) => {
@@ -118,9 +120,34 @@ export default function MemoryManager() {
         return newMRs
       })
     } else if (dragStatus.op === "left") {
-      console.log('left drag')
+      const newPhyAddr = Math.min(
+        Math.max(e.clientX - dragStatus.startX + dragStatus.startLeft, dragStatus.rangeLimit.min),
+        currentMR.phyAddr + currentMR.size - currentMR.pageSize
+      )
+      const newSize = currentMR.phyAddr + currentMR.size - newPhyAddr
+      setMRs(oldMRs => {
+        const newMRs = oldMRs.map((MR, index) => {
+          if (index === dragStatus.indexOfMR) {
+            return {...MR, phyAddr: newPhyAddr, size: newSize}
+          }
+          return MR
+        })
+        return newMRs
+      })
     } else if (dragStatus.op === "right") {
-      console.log('right drag')
+      const newSize = Math.min(
+        Math.max(e.clientX - dragStatus.startX + dragStatus.startWidth, currentMR.pageSize),
+        dragStatus.rangeLimit.max - currentMR.phyAddr
+      )
+      setMRs(oldMRs => {
+        const newMRs = oldMRs.map((MR, index) => {
+          if (index === dragStatus.indexOfMR) {
+            return {...MR, size: newSize}
+          }
+          return MR
+        })
+        return newMRs
+      })
     }
   }
 
