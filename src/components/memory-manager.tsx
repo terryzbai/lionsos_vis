@@ -17,21 +17,22 @@ interface DragStatus {
   rangeLimit : { min : number, max : number}
 }
 
+interface FreeMRStatus {
+  phyAddr : number
+  size : number
+  visibility : "visible" | "hidden"
+}
+
 export default function MemoryManager() {
   const [ MRs, setMRs] = useState<Array<MemoryRegion>>([
     {name: 'test1', phyAddr: 0, size: 100, pageSize: 1},
     {name: 'test2', phyAddr: 200, size: 150, pageSize: 1}
   ])
-  // const [isDragging, setIsDragging] = useState(false)
-  // const [startX, setStartX] = useState(0)
-  // const [startLeft, setStartLeft] = useState(0)
-  // const [translateX, setTranslateX] = useState(0)
-  // const [ MR, setMR ] = useState<MemoryRegion>({name: 'test1', phyAddr: 0, size: 100, pageSize: 1})
-  // const [ currentMRIndex, setCurrentMRIndex ] = useState<number | null>(null)
-  // const [ op, setOP ] = useState<"null" | "left" | "middle" | "right">("null")
-
-  // let op : null | "left" | "middle" | "right" = null
-  // let currentMRIndex : number | null = null
+  const [ freeMRStatus, setFreeMRStatus ] = useState<FreeMRStatus>({
+    phyAddr: 0,
+    size: 0,
+    visibility: "hidden"
+  })
 
   const dragStatus : DragStatus = {
     op: null,
@@ -42,9 +43,11 @@ export default function MemoryManager() {
     rangeLimit: null
   }
 
-  const selectMR = (e) => {
+  const selectMR = (e, i : number) => {
     removeSelection()
     e.target.classList.add("selected-mr")
+    console.log("set", i)
+    dragStatus.indexOfMR = i
   }
 
   const removeSelection = () => {
@@ -54,25 +57,52 @@ export default function MemoryManager() {
     })
   }
 
-  const getRangeLimit = (indexOfMR : number) => {
+  const getRangeLimit = (targetX : number) => {
     const range_limit = {
       min: 0,
       max: 99999
     }
-    const targetMR = MRs[indexOfMR]
 
-    MRs.map((mr, index) => {
-      if (index === indexOfMR) return 
+    MRs.map(mr => {
+      if (mr.phyAddr <= targetX && mr.phyAddr + mr.size >= targetX) return
 
-      if (mr.phyAddr > targetMR.phyAddr && mr.phyAddr + mr.size < range_limit.max) {
+      if (mr.phyAddr > targetX && mr.phyAddr + mr.size < range_limit.max) {
         range_limit.max = mr.phyAddr
       }
-      if (mr.phyAddr < targetMR.phyAddr && mr.phyAddr + mr.size > range_limit.min) {
+      if (mr.phyAddr < targetX && mr.phyAddr + mr.size > range_limit.min) {
         range_limit.min = mr.phyAddr + mr.size
       }
     })
 
     return range_limit
+  }
+
+  const displayAvailableMR = (e, index : number | null) => {
+    if (index) return
+
+    if (e.target.classList.contains("mem-bar")) {
+      const rangeLimit = getRangeLimit(e.nativeEvent.offsetX)
+      const phyAddr = Math.max(e.nativeEvent.offsetX - 40, rangeLimit.min)
+      setFreeMRStatus({
+        visibility: "visible",
+        phyAddr: phyAddr,
+        size: Math.min(rangeLimit.max - phyAddr, 100)
+      })
+    }
+  }
+
+  const hideAvailableMR = () => {
+    setFreeMRStatus({
+      phyAddr: 0,
+      visibility: "hidden",
+      size: 0
+    })
+  }
+  
+  const createMR = () => {
+    setMRs([...MRs, {name: 'test3', phyAddr: freeMRStatus.phyAddr, size: freeMRStatus.size, pageSize: 1}])
+    console.log("create MR", MRs)
+    hideAvailableMR()
   }
 
   const startDrag = (e, i : number) => {
@@ -81,7 +111,7 @@ export default function MemoryManager() {
     dragStatus.indexOfMR = i
     dragStatus.startX = e.clientX
     dragStatus.startLeft = MRs[i].phyAddr
-    dragStatus.rangeLimit = getRangeLimit(i)
+    dragStatus.rangeLimit = getRangeLimit(MRs[i].phyAddr + 1)
     dragStatus.startWidth = MRs[i].size
 
     const BORDER_SIZE = 5
@@ -165,16 +195,23 @@ export default function MemoryManager() {
   }, [])
 
   return (
-    <div className='mem-bar'>
+    <div className='mem-bar' onMouseMove={(e) => displayAvailableMR(e, dragStatus.indexOfMR)} onMouseLeave={hideAvailableMR}>
       {MRs.map((MR, i) => {
-          return <div 
-          className='mem-region'
+        return (
+        <div 
+          className='allocated-mr'
           style={ {width: MR.size + 'px', left: MR.phyAddr} } 
+          onMouseEnter={hideAvailableMR}
           onMouseDown={(e) => {e.stopPropagation();startDrag(e, i)}}
-          onClick={selectMR}
+          onClick={(e) => {selectMR(e, i)}}
           key={i}
-          ></div>
+        ></div>)
       })}
+      <div
+        className='free-mr'
+        style={ {width: freeMRStatus.size + 'px', left: freeMRStatus.phyAddr + 'px', visibility: freeMRStatus.visibility} }
+        onDoubleClick={createMR}
+      ></div>
     </div>
   )
 }
