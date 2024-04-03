@@ -27,6 +27,7 @@ import { addNodeIntoList, openNodeEditor, getSDFContent, getPDList, deleteNode }
 import { Modal } from 'antd'
 import { channelLabelConfig, getValidEndID } from '../utils/helper'
 import { SDFContent } from '../utils/translator'
+import MemoryManager from '../components/memory-manager'
 
 /*
 TODO:
@@ -359,7 +360,6 @@ export const DiagramEditor = () => {
       }
       edge.attr('line/targetMarker', { tagName: 'circle', r: 2 })
       edge.attr('line/sourceMarker', { tagName: 'circle', r: 2 })
-      // edge.attrs.line.targetMarker = null
       edge.data = {
         type: 'channel',
         source_node: sourceNode ? sourceNode.id : null,
@@ -386,6 +386,7 @@ export const DiagramEditor = () => {
 
   return (
     <div>
+      <MemoryManager />
       <Toolbar className="toolbar" >
         <ToolbarGroup>
           <Item name="zoomIn" tooltip="Zoom In (Cmd +)" icon={<ZoomInOutlined />} />

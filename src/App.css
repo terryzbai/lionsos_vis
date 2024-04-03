@@ -39,3 +39,37 @@
 .toolbar .x6-toolbar-item {
   margin: 0 10px;
 }
+
+.mem-bar {
+  width: 100%;
+  height: 60px;
+  background-color: gray;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.mem-bar .mem-region {
+  height: 100%;
+  background-color: greenyellow;
+  position: absolute;
+}
+
+.selected-mr::before {
+  content: '';
+  background-color: #ccc;
+  position: absolute;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  cursor: ew-resize;
+}
+
+.selected-mr::after {
+  content: '';
+  background-color: #ccc;
+  position: absolute;
+  right: 0;
+  width: 4px;
+  height: 100%;
+  cursor: ew-resize;
+}
