@@ -55,7 +55,8 @@
 }
 
 .mem-bar .free-mr {
-  background-color: skyblue;
+  /* background-color: skyblue; */
+  background: linear-gradient(white, black, white);
   position: absolute;
   height: 100%;
 }

@@ -3,9 +3,10 @@ import '../App.css'
 
 interface MemoryRegion {
   name : string
-  phyAddr : number
   size: number
-  pageSize: number
+  phyAddr : number
+  pageSize : number | null
+  pageCount : number | null
 }
 
 interface DragStatus {
@@ -25,8 +26,8 @@ interface FreeMRStatus {
 
 export default function MemoryManager() {
   const [ MRs, setMRs] = useState<Array<MemoryRegion>>([
-    {name: 'test1', phyAddr: 0, size: 100, pageSize: 1},
-    {name: 'test2', phyAddr: 200, size: 150, pageSize: 1}
+    {name: 'test1', phyAddr: 0, size: 100, pageSize: 1, pageCount: null},
+    {name: 'test2', phyAddr: 200, size: 150, pageSize: 1, pageCount: null}
   ])
   const [ freeMRStatus, setFreeMRStatus ] = useState<FreeMRStatus>({
     phyAddr: 0,
@@ -100,7 +101,7 @@ export default function MemoryManager() {
   }
   
   const createMR = () => {
-    setMRs([...MRs, {name: 'test3', phyAddr: freeMRStatus.phyAddr, size: freeMRStatus.size, pageSize: 1}])
+    setMRs([...MRs, {name: 'test3', phyAddr: freeMRStatus.phyAddr, size: freeMRStatus.size, pageSize: 1, pageCount: null}])
     console.log("create MR", MRs)
     hideAvailableMR()
   }
