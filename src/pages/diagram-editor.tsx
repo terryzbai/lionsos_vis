@@ -29,6 +29,7 @@ import { channelLabelConfig, getValidEndID } from '../utils/helper'
 import { SDFContent } from '../utils/translator'
 import { MemoryRegion } from '../utils/element'
 import MemoryManager from '../components/memory-manager'
+import MappingEditor from '../components/mapping-table'
 
 /*
 TODO:
