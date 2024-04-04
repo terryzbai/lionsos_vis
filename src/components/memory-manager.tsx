@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
+import { Popover } from 'antd'
 import '../App.css'
 
 interface MemoryRegion {
@@ -106,6 +107,10 @@ export default function MemoryManager() {
     hideAvailableMR()
   }
 
+  const editMR = (e, i : number) => {
+    console.log("edit MR", i)
+  }
+
   const startDrag = (e, i : number) => {
     const this_mr = e.target
 
@@ -199,14 +204,18 @@ export default function MemoryManager() {
     <div className='mem-bar' onMouseMove={(e) => displayAvailableMR(e, dragStatus.indexOfMR)} onMouseLeave={hideAvailableMR}>
       {MRs.map((MR, i) => {
         return (
-        <div 
-          className='allocated-mr'
-          style={ {width: MR.size + 'px', left: MR.phyAddr} } 
-          onMouseEnter={hideAvailableMR}
-          onMouseDown={(e) => {e.stopPropagation();startDrag(e, i)}}
-          onClick={(e) => {selectMR(e, i)}}
-          key={i}
-        ></div>)
+          <Popover placement="bottom" title={MR.name} content={'Addr:' + MR.phyAddr + '-' + (MR.phyAddr + MR.size)} key={i}>
+            <div 
+              className='allocated-mr'
+              style={ {width: MR.size + 'px', left: MR.phyAddr} } 
+              onMouseEnter={hideAvailableMR}
+              onMouseDown={(e) => {e.stopPropagation();startDrag(e, i)}}
+              onClick={(e) => {selectMR(e, i)}}
+              onDoubleClick={(e) => {editMR(e, i)}}
+              key={i}
+              ></div>
+          </Popover>
+        )
       })}
       <div
         className='free-mr'
