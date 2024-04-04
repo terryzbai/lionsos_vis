@@ -81,6 +81,14 @@
   height: 100%;
 }
 
+.selected-mr {
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 60px;
+  text-align: center;
+  opacity: 0.8;
+}
+
 .selected-mr::before {
   content: '';
   background-color: gray;

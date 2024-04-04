@@ -3,9 +3,9 @@
 export interface MemoryRegion {
 	name: string
 	size: number
-	phyAddr: number
-	pageSize?: number
-	pageCount: number
+	phys_addr: number
+	page_size?: number
+	page_count: number
 }
 
 export interface ProtectionDomain {

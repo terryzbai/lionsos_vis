@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react'
-import { Popover } from 'antd'
+import { useEffect, useState, useRef } from 'react'
+import { Popover, Modal, Form, Input, InputNumber } from 'antd'
 import '../App.css'
 
 interface MemoryRegion {
   name : string
   size: number
-  phyAddr : number
-  pageSize : number | null
-  pageCount : number | null
+  phys_addr : number
+  page_size : number | null
+  page_count : number | null
 }
 
 interface DragStatus {
@@ -20,22 +20,29 @@ interface DragStatus {
 }
 
 interface FreeMRStatus {
-  phyAddr : number
+  phys_addr : number
   size : number
   visibility : "visible" | "hidden"
 }
 
 export default function MemoryManager() {
   const [ MRs, setMRs] = useState<Array<MemoryRegion>>([
-    {name: 'test1', phyAddr: 0, size: 100, pageSize: 1, pageCount: null},
-    {name: 'test2', phyAddr: 200, size: 150, pageSize: 1, pageCount: null}
+    {name: 'test1', phys_addr: 0, size: 100, page_size: 1, page_count: null},
+    {name: 'test2', phys_addr: 200, size: 150, page_size: 1, page_count: null}
   ])
   const [ freeMRStatus, setFreeMRStatus ] = useState<FreeMRStatus>({
-    phyAddr: 0,
+    phys_addr: 0,
     size: 0,
     visibility: "hidden"
   })
   const [ indexOfMR, setIndexOfMR ] = useState<number | null>(null)
+  const [ form ] = Form.useForm(null)
+  const [ editorOpen, _setEditorOpen ] = useState<boolean>(false)
+  const myStateRef = useRef(editorOpen)
+  const setEditorOpen = data => {
+    myStateRef.current = data
+    _setEditorOpen(data)
+  }
 
   const dragStatus : DragStatus = {
     op: null,
@@ -48,13 +55,13 @@ export default function MemoryManager() {
 
   const selectMR = (e, i : number) => {
     removeSelection()
-    // e.target.classList.add("selected-mr")
-    // console.log("set", i)
     dragStatus.indexOfMR = i
     setIndexOfMR(i)
   }
 
   const removeSelection = () => {
+    if (myStateRef.current) return
+
     dragStatus.indexOfMR = null
     setIndexOfMR(null)
   }
@@ -66,13 +73,13 @@ export default function MemoryManager() {
     }
 
     MRs.map(mr => {
-      if (mr.phyAddr <= targetX && mr.phyAddr + mr.size >= targetX) return
+      if (mr.phys_addr <= targetX && mr.phys_addr + mr.size >= targetX) return
 
-      if (mr.phyAddr > targetX && mr.phyAddr + mr.size < range_limit.max) {
-        range_limit.max = mr.phyAddr
+      if (mr.phys_addr > targetX && mr.phys_addr + mr.size < range_limit.max) {
+        range_limit.max = mr.phys_addr
       }
-      if (mr.phyAddr < targetX && mr.phyAddr + mr.size > range_limit.min) {
-        range_limit.min = mr.phyAddr + mr.size
+      if (mr.phys_addr < targetX && mr.phys_addr + mr.size > range_limit.min) {
+        range_limit.min = mr.phys_addr + mr.size
       }
     })
 
@@ -85,31 +92,40 @@ export default function MemoryManager() {
 
     if (e.target.classList.contains("mem-bar")) {
       const rangeLimit = getRangeLimit(e.nativeEvent.offsetX)
-      const phyAddr = Math.max(e.nativeEvent.offsetX - 40, rangeLimit.min)
+      const phys_addr = Math.max(e.nativeEvent.offsetX - 40, rangeLimit.min)
       setFreeMRStatus({
         visibility: "visible",
-        phyAddr: phyAddr,
-        size: Math.min(rangeLimit.max - phyAddr, 100)
+        phys_addr: phys_addr,
+        size: Math.min(rangeLimit.max - phys_addr, 100)
       })
     }
   }
 
   const hideAvailableMR = () => {
     setFreeMRStatus({
-      phyAddr: 0,
+      phys_addr: 0,
       visibility: "hidden",
       size: 0
     })
   }
   
   const createMR = () => {
-    setMRs([...MRs, {name: 'test3', phyAddr: freeMRStatus.phyAddr, size: freeMRStatus.size, pageSize: 1, pageCount: null}])
+    setMRs([...MRs, {name: 'Untitled', phys_addr: freeMRStatus.phys_addr, size: freeMRStatus.size, page_size: 1, page_count: null}])
     console.log("create MR", MRs)
     hideAvailableMR()
   }
 
-  const editMR = (e, i : number) => {
-    console.log("edit MR", i)
+  const editMR = () => {
+    console.log("edit MR", form.getFieldsValue())
+    setMRs(oldMRs => {
+      const newMRs = oldMRs.map((MR, index) => {
+        if (index === indexOfMR) {
+          return form.getFieldsValue()
+        }
+        return MR
+      })
+      return newMRs
+    })
   }
 
   const startDrag = (e, i : number) => {
@@ -119,8 +135,8 @@ export default function MemoryManager() {
 
     dragStatus.indexOfMR = i
     dragStatus.startX = e.clientX
-    dragStatus.startLeft = MRs[i].phyAddr
-    dragStatus.rangeLimit = getRangeLimit(MRs[i].phyAddr + 1)
+    dragStatus.startLeft = MRs[i].phys_addr
+    dragStatus.rangeLimit = getRangeLimit(MRs[i].phys_addr + 1)
     dragStatus.startWidth = MRs[i].size
 
     const BORDER_SIZE = 5
@@ -145,29 +161,29 @@ export default function MemoryManager() {
   const handleDrag = (e) => {
     const currentMR = MRs[dragStatus.indexOfMR]
     if (dragStatus.op === "middle") {
-      const newPhyAddr = Math.min(
+      const newphys_addr = Math.min(
         Math.max(e.clientX - dragStatus.startX + dragStatus.startLeft, dragStatus.rangeLimit.min),
         dragStatus.rangeLimit.max - currentMR.size
       )
       setMRs(oldMRs => {
         const newMRs = oldMRs.map((MR, index) => {
           if (index === dragStatus.indexOfMR) {
-            return {...MR, phyAddr: newPhyAddr}
+            return {...MR, phys_addr: newphys_addr}
           }
           return MR
         })
         return newMRs
       })
     } else if (dragStatus.op === "left") {
-      const newPhyAddr = Math.min(
+      const newphys_addr = Math.min(
         Math.max(e.clientX - dragStatus.startX + dragStatus.startLeft, dragStatus.rangeLimit.min),
-        currentMR.phyAddr + currentMR.size - currentMR.pageSize
+        currentMR.phys_addr + currentMR.size - currentMR.page_size
       )
-      const newSize = currentMR.phyAddr + currentMR.size - newPhyAddr
+      const newSize = currentMR.phys_addr + currentMR.size - newphys_addr
       setMRs(oldMRs => {
         const newMRs = oldMRs.map((MR, index) => {
           if (index === dragStatus.indexOfMR) {
-            return {...MR, phyAddr: newPhyAddr, size: newSize}
+            return {...MR, phys_addr: newphys_addr, size: newSize}
           }
           return MR
         })
@@ -175,8 +191,8 @@ export default function MemoryManager() {
       })
     } else if (dragStatus.op === "right") {
       const newSize = Math.min(
-        Math.max(e.clientX - dragStatus.startX + dragStatus.startWidth, currentMR.pageSize),
-        dragStatus.rangeLimit.max - currentMR.phyAddr
+        Math.max(e.clientX - dragStatus.startX + dragStatus.startWidth, currentMR.page_size),
+        dragStatus.rangeLimit.max - currentMR.phys_addr
       )
       setMRs(oldMRs => {
         const newMRs = oldMRs.map((MR, index) => {
@@ -203,28 +219,88 @@ export default function MemoryManager() {
     document.addEventListener('mousedown', removeSelection)
   }, [])
 
+  useEffect(() => {
+    form.setFieldsValue(MRs[indexOfMR])
+  })
+
   return (
     <div className='mem-bar' onMouseMove={(e) => displayAvailableMR(e, dragStatus.indexOfMR)} onMouseLeave={hideAvailableMR}>
       {MRs.map((MR, i) => {
         return (
-          <Popover placement="bottom" title={MR.name} content={'Addr:' + MR.phyAddr + '-' + (MR.phyAddr + MR.size)} key={i}>
+          <Popover placement="bottom" title={MR.name} content={'Addr:' + MR.phys_addr + '-' + (MR.phys_addr + MR.size)} key={i}>
             <div 
               className={'unallocated-mr' + (i === indexOfMR ? ' selected-mr' : '')}
-              style={ {width: MR.size + 'px', left: MR.phyAddr} } 
+              style={ {width: MR.size + 'px', left: MR.phys_addr} } 
               onMouseEnter={hideAvailableMR}
               onMouseDown={(e) => {e.stopPropagation();startDrag(e, i)}}
               onClick={(e) => {selectMR(e, i)}}
-              onDoubleClick={(e) => {editMR(e, i)}}
+              onDoubleClick={() => {setEditorOpen(true)}}
               key={i}
-              ></div>
+              >
+              </div>
           </Popover>
         )
       })}
       <div
         className='free-mr'
-        style={ {width: freeMRStatus.size + 'px', left: freeMRStatus.phyAddr + 'px', visibility: freeMRStatus.visibility} }
+        style={ {width: freeMRStatus.size + 'px', left: freeMRStatus.phys_addr + 'px', visibility: freeMRStatus.visibility} }
         onDoubleClick={createMR}
       >DblClick to new</div>
+      <Modal
+        title="Edit memory region"
+        centered
+        open={editorOpen}
+        onOk={(e) => {e.stopPropagation();setEditorOpen(false);editMR()}}
+        onCancel={(e) => {e.stopPropagation();setEditorOpen(false)}}
+      >
+        <Form
+          name="basic"
+          form={ form }
+          wrapperCol={{ span: 16 }}
+          style={{ maxWidth: 600 }}
+          initialValues={ MRs[indexOfMR] }
+          layout="vertical"
+          onFinish={editMR}
+          // onFinishFailed={onFinishFailed}
+          autoComplete="off"
+        >
+          <Form.Item
+            label="name"
+            name="name"
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="size"
+            name="size"
+            rules={[{ required: true }]}
+          >
+            <InputNumber min={1} max={256} />
+          </Form.Item>
+          <Form.Item
+            label="phys_addr"
+            name="phys_addr"
+            rules={[{ required: true }]}
+          >
+            <InputNumber min={1} max={256} />
+          </Form.Item>
+          <Form.Item
+            label="page_size"
+            name="page_size"
+            rules={[{ required: true }]}
+          >
+            <InputNumber min={1} max={256} />
+          </Form.Item>
+          <Form.Item
+            label="page_count"
+            name="page_count"
+            rules={[{ required: true }]}
+          >
+            <InputNumber min={1} max={256} />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   )
 }
