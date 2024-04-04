@@ -35,6 +35,7 @@ export default function MemoryManager() {
     size: 0,
     visibility: "hidden"
   })
+  const [ indexOfMR, setIndexOfMR ] = useState<number | null>(null)
 
   const dragStatus : DragStatus = {
     op: null,
@@ -47,16 +48,15 @@ export default function MemoryManager() {
 
   const selectMR = (e, i : number) => {
     removeSelection()
-    e.target.classList.add("selected-mr")
-    console.log("set", i)
+    // e.target.classList.add("selected-mr")
+    // console.log("set", i)
     dragStatus.indexOfMR = i
+    setIndexOfMR(i)
   }
 
   const removeSelection = () => {
-    const mrs = Array.from(document.getElementsByClassName('selected-mr'))
-    mrs.map((mr) => {
-      mr.classList.remove('selected-mr')
-    })
+    dragStatus.indexOfMR = null
+    setIndexOfMR(null)
   }
 
   const getRangeLimit = (targetX : number) => {
@@ -80,7 +80,8 @@ export default function MemoryManager() {
   }
 
   const displayAvailableMR = (e, index : number | null) => {
-    if (index) return
+    if (index != null) return
+    if (indexOfMR != null) return
 
     if (e.target.classList.contains("mem-bar")) {
       const rangeLimit = getRangeLimit(e.nativeEvent.offsetX)
@@ -112,6 +113,8 @@ export default function MemoryManager() {
   }
 
   const startDrag = (e, i : number) => {
+    if (i !== indexOfMR) return
+
     const this_mr = e.target
 
     dragStatus.indexOfMR = i
@@ -206,7 +209,7 @@ export default function MemoryManager() {
         return (
           <Popover placement="bottom" title={MR.name} content={'Addr:' + MR.phyAddr + '-' + (MR.phyAddr + MR.size)} key={i}>
             <div 
-              className='allocated-mr'
+              className={'unallocated-mr' + (i === indexOfMR ? ' selected-mr' : '')}
               style={ {width: MR.size + 'px', left: MR.phyAddr} } 
               onMouseEnter={hideAvailableMR}
               onMouseDown={(e) => {e.stopPropagation();startDrag(e, i)}}
@@ -221,7 +224,7 @@ export default function MemoryManager() {
         className='free-mr'
         style={ {width: freeMRStatus.size + 'px', left: freeMRStatus.phyAddr + 'px', visibility: freeMRStatus.visibility} }
         onDoubleClick={createMR}
-      ></div>
+      >DblClick to new</div>
     </div>
   )
 }

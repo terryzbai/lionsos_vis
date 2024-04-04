@@ -43,7 +43,7 @@
 .mem-bar {
   width: 100%;
   height: 60px;
-  background-color: gray;
+  background-color: rgb(166, 163, 163);
   margin-bottom: 10px;
   position: relative;
 }
@@ -55,15 +55,35 @@
 }
 
 .mem-bar .free-mr {
-  /* background-color: skyblue; */
-  background: linear-gradient(white, black, white);
+  /* background-color: white;
+  background-image:
+    linear-gradient(45deg, black 25%, transparent 0),
+    linear-gradient(-45deg, black 25%, transparent 0),
+    linear-gradient(45deg, transparent 75%, black 0),
+    linear-gradient(-45deg, transparent 75%, black 0);
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+  background-size: 20px 20px; */
+
+  /* background-image:
+    radial-gradient(circle, rgb(203 213 225) 2px, #fff 2px);
+  background-size: 4px 4px;
+  background-position: center center; */
+
+  user-select: none;
+  background-color: gray;
+  font-size: 10px;
+  overflow: hidden;
+  vertical-align: middle;
+  line-height: 60px;
+  text-align: center;
   position: absolute;
+  cursor: pointer;
   height: 100%;
 }
 
 .selected-mr::before {
   content: '';
-  background-color: #ccc;
+  background-color: gray;
   position: absolute;
   left: 0;
   width: 4px;
@@ -73,10 +93,21 @@
 
 .selected-mr::after {
   content: '';
-  background-color: #ccc;
+  background-color: gray;
   position: absolute;
   right: 0;
   width: 4px;
   height: 100%;
   cursor: ew-resize;
+}
+
+.unallocated-mr {
+  height: 100%;
+  position: absolute;
+  background-image:
+    radial-gradient(circle, gray 1px, #eee 1px);
+  background-size: 4px 4px;
+  background-position: center center;
+  border-left: solid 1px gray;
+  border-right: solid 1px gray;
 }
