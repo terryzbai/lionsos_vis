@@ -46,6 +46,7 @@
   background-color: rgb(166, 163, 163);
   margin-bottom: 10px;
   position: relative;
+  overflow: hidden;
 }
 
 .mem-bar .allocated-mr {

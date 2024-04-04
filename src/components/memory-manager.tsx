@@ -25,11 +25,11 @@ interface FreeMRStatus {
   visibility : "visible" | "hidden"
 }
 
-export default function MemoryManager() {
-  const [ MRs, setMRs] = useState<Array<MemoryRegion>>([
-    {name: 'test1', phys_addr: 0, size: 100, page_size: 1, page_count: null},
-    {name: 'test2', phys_addr: 200, size: 150, page_size: 1, page_count: null}
-  ])
+export default function MemoryManager({MRs, setMRs}) {
+  // const [ MRs, setMRs] = useState<Array<MemoryRegion>>([
+  //   {name: 'test1', phys_addr: 0, size: 100, page_size: 1, page_count: null},
+  //   {name: 'test2', phys_addr: 200, size: 150, page_size: 1, page_count: null}
+  // ])
   const [ freeMRStatus, setFreeMRStatus ] = useState<FreeMRStatus>({
     phys_addr: 0,
     size: 0,

@@ -27,6 +27,7 @@ import { addNodeIntoList, openNodeEditor, getSDFContent, getPDList, deleteNode }
 import { Modal } from 'antd'
 import { channelLabelConfig, getValidEndID } from '../utils/helper'
 import { SDFContent } from '../utils/translator'
+import { MemoryRegion } from '../utils/element'
 import MemoryManager from '../components/memory-manager'
 
 /*
@@ -49,6 +50,10 @@ export const DiagramEditor = () => {
   const pdList = useAppSelector(getPDList)
   const [ nodeEditorOpen, setNodeEditorOpen ] = useState(false)
   const [ currentNodeID, setCurrentNodeID ] = useState('')
+  const [ MRs, setMRs] = useState<Array<MemoryRegion>>([
+    {name: 'test1', phys_addr: 0, size: 100, page_size: 1, page_count: null},
+    {name: 'test2', phys_addr: 200, size: 150, page_size: 1, page_count: null}
+  ])
 
   const graph_config = {
     background: {
@@ -386,7 +391,7 @@ export const DiagramEditor = () => {
 
   return (
     <div>
-      <MemoryManager />
+      <MemoryManager MRs={MRs} setMRs={setMRs} />
       <Toolbar className="toolbar" >
         <ToolbarGroup>
           <Item name="zoomIn" tooltip="Zoom In (Cmd +)" icon={<ZoomInOutlined />} />
