@@ -14,9 +14,7 @@ export default function AttrsForm({ node_id, setNodeEditorOpen, getNodeData, upd
     })
 
     updateNodeData(node_id, {
-      attrs: new_data,
-      mappings: ['test1', 'test2'],
-      irqs: ['test5'],
+      attrs: new_data
     })
 
     setNodeEditorOpen(false)

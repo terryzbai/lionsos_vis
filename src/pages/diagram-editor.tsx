@@ -147,7 +147,7 @@ export const DiagramEditor = () => {
 
     if (node) {
       node.data = new_data
-      node.setAttrs({ label: { text: new_data.attrs.name } })
+      node.setAttrs({ label: { text: node.data.attrs.name } })
       console.log(node)
     } else {
       console.log("Invalid node_id")

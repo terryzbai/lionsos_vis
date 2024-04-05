@@ -40,7 +40,6 @@ export interface VirtualMachine {
 }
 
 export interface SysMap {
-	key: string
 	mr: string
 	vaddr: number
 	perms: string

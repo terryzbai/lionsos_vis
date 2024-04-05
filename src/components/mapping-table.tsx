@@ -1,29 +1,20 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import type { GetRef } from 'antd'
-import { Typography, Checkbox, TableProps, Form, Input, InputNumber, Table, Radio } from 'antd'
+import { Typography, Checkbox, TableProps, Form, Input, InputNumber, Table, Button } from 'antd'
 import { SysMap } from '../utils/element'
 
-const originData: SysMap[] = []
-for (let i = 0; i < 10; i++) {
-  originData.push({
-    key: i.toString(),
-    mr: `Edward ${i}`,
-    vaddr: 32,
-    perms: `rw`,
-    cached: true,
-    setvar_vaddr: `var0`
-  })
+interface SysMapItem extends SysMap {
+  key: string
 }
 
-interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
-  editing: boolean
-  dataIndex: string
-  title: any
-  inputType: 'number' | 'text' | 'boolean'
-  record: SysMap
-  index: number
-  children: React.ReactNode
-}
+// interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
+//   editing: boolean
+//   dataIndex: string
+//   title: any
+//   inputType: 'number' | 'text' | 'boolean'
+//   record: SysMapItem
+//   index: number
+//   children: React.ReactNode
+// }
 
 const EditableCell = ({
   editing,
@@ -68,14 +59,13 @@ const EditableCell = ({
   )
 }
 
-export default function MappingTable() {
+export default function MappingTable({ node_id, getNodeData, updateNodeData }) {
   const [form] = Form.useForm()
-  const [data, setData] = useState(originData)
   const [editingKey, setEditingKey] = useState('')
+  const [data, setData] = useState<SysMapItem[]>([])
+  const isEditing = (record: SysMapItem) => record.key === editingKey
 
-  const isEditing = (record: SysMap) => record.key === editingKey
-
-  const edit = (record: Partial<SysMap> & { key: React.Key }) => {
+  const edit = (record: Partial<SysMapItem> & { key: React.Key }) => {
     form.setFieldsValue({ name: '', age: '', address: '', ...record });
     setEditingKey(record.key)
   }
@@ -84,12 +74,22 @@ export default function MappingTable() {
     setEditingKey('')
   }
 
+  const syncNodeData = () => {
+    const newData = data.map(mapping => {
+      const { key, ...rest } = mapping
+      return rest
+    })
+    console.log("push data:", newData)
+    updateNodeData(node_id, {
+      mappings: newData
+    })
+  }
+
   const save = async (key: React.Key) => {
     try {
-      const row = (await form.validateFields()) as SysMap
+      const row = (await form.validateFields()) as SysMapItem
 
       const newData = [...data]
-      console.log(newData)
       const index = newData.findIndex((item) => key === item.key)
       if (index > -1) {
         const item = newData[index]
@@ -104,9 +104,27 @@ export default function MappingTable() {
         setData(newData)
         setEditingKey('')
       }
+
+      syncNodeData()
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo)
     }
+  }
+
+  const handleAdd = () => {
+    console.log(data)
+    const newData: SysMapItem = {
+      key: data ? data.length.toString() : '0',
+      mr: `Default`,
+      vaddr: 0,
+      perms: 'rw',
+      cached: false,
+      setvar_vaddr: `Default`
+    }
+
+    console.log("add a row")
+    setData([...data, newData])
+    syncNodeData()
   }
 
   const columns = [
@@ -144,14 +162,14 @@ export default function MappingTable() {
       width: '5%',
       editable: true,
       dataType: 'boolean',
-      render: (_: any, record: SysMap) => {
+      render: (_: any, record: SysMapItem) => {
         return <Checkbox defaultChecked={record.cached} disabled={true} />
       }
     },
     {
       title: 'operation',
       dataIndex: 'operation',
-      render: (_: any, record: SysMap) => {
+      render: (_: any, record: SysMapItem) => {
         const editable = isEditing(record);
         return editable ? (
           <span>
@@ -177,7 +195,7 @@ export default function MappingTable() {
     }
     return {
       ...col,
-      onCell: (record: SysMap) => ({
+      onCell: (record: SysMapItem) => ({
         record,
         inputType: col.dataType,
         dataIndex: col.dataIndex,
@@ -187,22 +205,39 @@ export default function MappingTable() {
     }
   })
 
+  useEffect(() => {
+    const originData: SysMapItem[] = getNodeData(node_id).mappings?.map((mapping, index) => {
+      return {...mapping, key: index.toString()}
+    })
+    setData(originData)
+  }, [node_id])
+
+  useEffect(() => {
+    console.log("Data updated!")
+    syncNodeData()
+  }, [data])
+
   return (
-    <Form form={form} component={false}>
-      <Table
-        components={{
-          body: {
-            cell: EditableCell,
-          },
-        }}
-        bordered
-        dataSource={data}
-        columns={mergedColumns}
-        rowClassName="editable-row"
-        pagination={{
-          onChange: cancel,
-        }}
-      />
-    </Form>
+    <div>
+      <Button onClick={handleAdd} type="primary" style={{ marginBottom: 16 }}>
+        Add a mapping
+      </Button>
+      <Form form={form} component={false}>
+        <Table
+          components={{
+            body: {
+              cell: EditableCell,
+            },
+          }}
+          bordered
+          dataSource={data}
+          columns={mergedColumns}
+          rowClassName="editable-row"
+          pagination={{
+            onChange: cancel,
+          }}
+        />
+      </Form>
+    </div>
   )
 }
