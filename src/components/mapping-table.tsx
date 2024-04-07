@@ -93,10 +93,6 @@ export default function MappingTable({ node_id, getNodeData, updateNodeData }) {
     setEditingKey(record.key)
   }
 
-  // const deleteMapping = (record: Partial<SysMapItem> & { key: React.Key }) => {
-  //   form.setFieldsValue({ ...record });
-  // }
-
   const deleteMapping = (key: React.Key) => {
     const newData = data.filter((item) => item.key !== key)
     setData(newData)

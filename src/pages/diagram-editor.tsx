@@ -25,7 +25,7 @@ import {
 import { useAppSelector, useAppDispatch } from '../app/hooks'
 import { addNodeIntoList, openNodeEditor, getSDFContent, getPDList, deleteNode } from '../features/configSlice'
 import { Modal } from 'antd'
-import { channelLabelConfig, getValidEndID } from '../utils/helper'
+import { channelLabelConfig, getValidEndID, randColor } from '../utils/helper'
 import { SDFContent } from '../utils/translator'
 import { MemoryRegion } from '../utils/element'
 import MemoryManager from '../components/memory-manager'
@@ -47,7 +47,6 @@ export const DiagramEditor = () => {
   const [ globalGraph, setGlobalGraph ] = useState<Graph>(null)
   const [ ctrlPressed, setCtrlPressed ] = useState(false)
   const [ SDFEditorOpen, setSDFEditorOpen ] = useState(false)
-  // const SDFContent = useAppSelector(getSDFContent)
   const pdList = useAppSelector(getPDList)
   const [ nodeEditorOpen, setNodeEditorOpen ] = useState(false)
   const [ currentNodeID, setCurrentNodeID ] = useState('')
@@ -117,6 +116,8 @@ export const DiagramEditor = () => {
       
       console.log(group)
       addNode({id: group.id, shape: node_name})
+
+      group.data.color = randColor()
       return group
     },
   }
@@ -146,13 +147,16 @@ export const DiagramEditor = () => {
     const node = globalGraph?.getNodes().find(node => node.id === node_id)
 
     if (node) {
+      // Update data
       node.data = new_data
+      // Update the label displayed on the corresponding node
       node.setAttrs({ label: { text: node.data.attrs.name } })
+      // Update colours of memory regions
+
       console.log(node)
     } else {
       console.log("Invalid node_id")
     }
-
   }
 
   useEffect(() => {

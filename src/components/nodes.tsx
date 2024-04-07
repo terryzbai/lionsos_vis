@@ -89,6 +89,7 @@ const custom_group = {
     height: 120,
     data: {
       type: 'PD',
+      color: '#FFFFFF',
       parent: true,
       attrs: {
         name: 'Untitled PD',
@@ -126,6 +127,7 @@ const custom_group = {
     height: 60,
     data: {
       type: 'VM',
+      color: '#FFFFFF',
       parent: false,
       attrs: {
         name: 'Untitled VM',
