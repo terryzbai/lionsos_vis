@@ -16,77 +16,82 @@ interface SysMapItem extends SysMap {
 //   children: React.ReactNode
 // }
 
-const EditableCell = ({
-  editing,
-  dataIndex,
-  title,
-  inputType,
-  record,
-  index,
-  children,
-  ...restProps
-}) => {
-  const perm_options = ['r', 'w', 'x']
-
-  const mr_options = [
-    {
-      value: 'jack',
-      label: 'Jack',
-    },
-    {
-      value: 'lucy',
-      label: 'Lucy',
-    },
-    {
-      value: 'tom',
-      label: 'Tom',
-    },
-  ]
-  const filterOption = (input: string, option?: { label: string; value: string }) =>
-  (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
 
 
-  const inputNodes = {
-    'number': <InputNumber />,
-    'select': <Select
-    showSearch
-    placeholder="Select a person"
-    optionFilterProp="children"
-    filterOption={filterOption}
-    options={mr_options} />,
-    'boolean': <Checkbox />,
-    'multichoice': <Checkbox.Group options={perm_options}/>
-  }
-  const inputNode = inputNodes[inputType]
-
-  return (
-    <td {...restProps}>
-      {editing ? (
-        <Form.Item
-          name={dataIndex}
-          style={{ margin: 0 }}
-          rules={[
-            {
-              required: true,
-              message: `Please Input ${title}!`,
-            },
-          ]}
-          valuePropName={inputType === 'boolean' ? 'checked' : 'value'}
-        >
-          {inputNode}
-        </Form.Item>
-      ) : (
-        children
-      )}
-    </td>
-  )
-}
-
-export default function MappingTable({ node_id, getNodeData, updateNodeData }) {
+export default function MappingTable({ node_id, getNodeData, updateNodeData, MRs }) {
   const [form] = Form.useForm()
   const [editingKey, setEditingKey] = useState('')
   const [data, setData] = useState<SysMapItem[]>([])
   const isEditing = (record: SysMapItem) => record.key === editingKey
+
+  const EditableCell = ({
+    editing,
+    dataIndex,
+    title,
+    inputType,
+    record,
+    index,
+    children,
+    ...restProps
+  }) => {
+    const perm_options = ['r', 'w', 'x']
+  
+    // const mr_options = [
+    //   {
+    //     value: 'jack',
+    //     label: 'Jack',
+    //   },
+    //   {
+    //     value: 'lucy',
+    //     label: 'Lucy',
+    //   },
+    //   {
+    //     value: 'tom',
+    //     label: 'Tom',
+    //   },
+    // ]
+    const mr_options = MRs.map(MR => {
+      return { value: MR.name, label: MR.name }
+    })
+    const filterOption = (input: string, option?: { label: string; value: string }) =>
+    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+  
+  
+    const inputNodes = {
+      'number': <InputNumber />,
+      'select': <Select
+        showSearch
+        placeholder="Select a person"
+        optionFilterProp="children"
+        filterOption={filterOption}
+        options={mr_options} />,
+      'boolean': <Checkbox />,
+      'multichoice': <Checkbox.Group options={perm_options}/>
+    }
+    const inputNode = inputNodes[inputType]
+  
+    return (
+      <td {...restProps}>
+        {editing ? (
+          <Form.Item
+            name={dataIndex}
+            style={{ margin: 0 }}
+            rules={[
+              {
+                required: true,
+                message: `Please Input ${title}!`,
+              },
+            ]}
+            valuePropName={inputType === 'boolean' ? 'checked' : 'value'}
+          >
+            {inputNode}
+          </Form.Item>
+        ) : (
+          children
+        )}
+      </td>
+    )
+  }
 
   const edit = (record: Partial<SysMapItem> & { key: React.Key }) => {
     form.setFieldsValue({ ...record });

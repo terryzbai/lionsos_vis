@@ -6,6 +6,7 @@ export interface MemoryRegion {
 	phys_addr: number
 	page_size?: number
 	page_count?: number
+	nodes: string[]
 }
 
 export interface ProtectionDomain {

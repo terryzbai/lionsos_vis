@@ -51,8 +51,8 @@ export const DiagramEditor = () => {
   const [ nodeEditorOpen, setNodeEditorOpen ] = useState(false)
   const [ currentNodeID, setCurrentNodeID ] = useState('')
   const [ MRs, setMRs] = useState<Array<MemoryRegion>>([
-    {name: 'test1', phys_addr: 0, size: 100, page_size: 1, page_count: null},
-    {name: 'test2', phys_addr: 200, size: 150, page_size: 1, page_count: null}
+    {name: 'test1', phys_addr: 0, size: 100, page_size: 1, page_count: null, nodes: []},
+    {name: 'test2', phys_addr: 200, size: 150, page_size: 1, page_count: null, nodes: []}
   ])
 
   const graph_config = {
@@ -142,6 +142,24 @@ export const DiagramEditor = () => {
     return node?.data
   }
 
+  const updateMappings = () => {
+    const nodes = globalGraph.getNodes()
+    const newMRs = MRs.map((MR) => {
+      const new_mappings = nodes.map((node) => {
+        const node_mappings = node.data.mappings.map(mapping => mapping.mr)
+        console.log(MR.name, node_mappings, node_mappings.includes(MR.name))
+        if (node_mappings.includes(MR.name)) {
+          console.log('node id', node.id)
+          return node.id
+        }
+        return ''
+      }).filter(node_id => node_id !== '')
+
+      return { ...MR, nodes: new_mappings }
+    })
+    setMRs(newMRs)
+  }
+
   const updateNodeData = (node_id : string, new_data : any) => {
     console.log('updateNodeData', node_id, ':', new_data)
     const node = globalGraph?.getNodes().find(node => node.id === node_id)
@@ -152,7 +170,7 @@ export const DiagramEditor = () => {
       // Update the label displayed on the corresponding node
       node.setAttrs({ label: { text: node.data.attrs.name } })
       // Update colours of memory regions
-
+      updateMappings()  
       console.log(node)
     } else {
       console.log("Invalid node_id")
@@ -425,7 +443,14 @@ export const DiagramEditor = () => {
         <div className="app-content" ref={refGraphContainer}>
         </div>
       </div>
-      <NodeEditor node_id={currentNodeID} nodeEditorOpen={nodeEditorOpen} setNodeEditorOpen={setNodeEditorOpen} getNodeData={getNodeData} updateNodeData={updateNodeData}/>
+      <NodeEditor
+        node_id={currentNodeID}
+        nodeEditorOpen={nodeEditorOpen}
+        setNodeEditorOpen={setNodeEditorOpen}
+        getNodeData={getNodeData}
+        updateNodeData={updateNodeData}
+        MRs={MRs}
+        />
       <Modal
         title="Modal 1000px width"
         centered

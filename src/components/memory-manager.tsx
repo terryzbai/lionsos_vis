@@ -247,11 +247,12 @@ export default function MemoryManager({MRs, setMRs}) {
         title="Edit memory region"
         centered
         open={editorOpen}
+        forceRender
         onOk={(e) => {e.stopPropagation();setEditorOpen(false);editMR()}}
         onCancel={(e) => {e.stopPropagation();setEditorOpen(false)}}
       >
         <Form
-          name="basic"
+          name="mr-manager"
           form={ form }
           wrapperCol={{ span: 16 }}
           style={{ maxWidth: 600 }}

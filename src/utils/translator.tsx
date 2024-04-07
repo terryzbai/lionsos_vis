@@ -50,7 +50,6 @@ const getComponentXML = (cell : any, cells : any) => {
 }
 
 export const SDFContent = (cells : any ) => {
-  console.log(cells)
 
   if (cells == null) {
     return ''

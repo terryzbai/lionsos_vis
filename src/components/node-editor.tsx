@@ -4,7 +4,7 @@ import { InputNumber, Form, Input, Button } from 'antd'
 import MappingTable from './mapping-table'
 import AttrsForm from './attrs-form'
 
-export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen, getNodeData, updateNodeData }) {
+export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen, getNodeData, updateNodeData, MRs }) {
   const [ width, setWidth ] = useState(350)
   const data = getNodeData(node_id)
 
@@ -35,7 +35,7 @@ export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen,
           {
             key: '2',
             label: 'Mappings',
-            children: <MappingTable node_id={node_id} getNodeData={getNodeData} updateNodeData={updateNodeData} />,
+            children: <MappingTable node_id={node_id} getNodeData={getNodeData} updateNodeData={updateNodeData} MRs={MRs} />,
           },
           {
             key: '3',
