@@ -29,7 +29,6 @@ import { channelLabelConfig, getValidEndID, randColor } from '../utils/helper'
 import { SDFContent } from '../utils/translator'
 import { MemoryRegion } from '../utils/element'
 import MemoryManager from '../components/memory-manager'
-import MappingEditor from '../components/mapping-table'
 
 /*
 TODO:
@@ -391,8 +390,6 @@ export const DiagramEditor = () => {
         target_node: targetNode ? targetNode.id : null,
         target_end_id: targetNode ? getValidEndID(graph.getEdges(), targetNode.id) : 'null',
       }
-
-      console.log(edge)
     })
 
   }, [])

@@ -39,7 +39,7 @@ export const channelLabelConfig = (source_end_id : string, target_end_id : strin
         },
       },
       position: {
-        distance: 40,
+        distance: 20,
         args: {
           keepGradient: true,
           ensureLegibility: true,
@@ -79,7 +79,7 @@ export const channelLabelConfig = (source_end_id : string, target_end_id : strin
         },
       },
       position: {
-        distance: -40,
+        distance: -20,
         args: {
           keepGradient: true,
           ensureLegibility: true,

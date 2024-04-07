@@ -51,7 +51,6 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
   }
 
   const selectMR = (e, i : number) => {
-    console.log("?????")
     removeSelection()
     dragStatus.indexOfMR = i
     setIndexOfMR(i)
@@ -216,7 +215,7 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
   const backgroundColor = (MR) => {
     if (MR.nodes.length === 0) return ''
     if (MR.nodes.length === 1) {
-      return getNodeData(MR.nodes[0]).color
+      return getNodeData(MR.nodes[0])?.color
     }
     return '#FFFFFF'
   }

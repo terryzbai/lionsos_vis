@@ -1,8 +1,17 @@
+import { SysMap } from "./element"
 
 const insertIndents = (content : string) => {
-
   const ret =  "    " + content.split("\n").join("\n    ")
   return ret
+}
+
+const getMappingXML = (mappings : SysMap[]) => {
+  // <map mr="gic_vcpu" vaddr="0x8010000" perms="rw" cached="false" />
+  // console.log(mappings)
+  const mapping_content = mappings.map((mapping) => {
+    return `<map mr="${mapping.mr}" vaddr="${mapping.vaddr}" perms="${mapping.perms}" cached="${mapping.cached}" />`
+  })
+  return mapping_content.join("\n")
 }
 
 const getVMXML = (cell : any, cells : any) => {
@@ -12,7 +21,7 @@ const getVMXML = (cell : any, cells : any) => {
   attrs += node_attrs.priority ? ` priority="${node_attrs.priority}"` : ''
   attrs += node_attrs.budget ? ` budget="${node_attrs.budget}"` : ''
 
-  const mappings = "    /* mappings */"
+  const mappings = insertIndents(getMappingXML(cell.data.mappings))
   return `<virtual_machine${attrs}>\n${mappings}\n</virtual_machine>`
 }
 
@@ -33,8 +42,8 @@ const getPDXML = (cell : any, cells : any) => {
     return insertIndents(getComponentXML(child_cell, cells))
   }).join("\n\n") : ""
 
-  const mappings = "    /* mappings */"
-  return `<protection_domain${attrs}>\n${prog_img}\n${pd_children}\n${mappings}\n</protection_domain>`
+  const mappings = insertIndents(getMappingXML(cell.data.mappings))
+  return `<protection_domain${attrs}>\n${prog_img}\n${pd_children}\n\n${mappings}\n</protection_domain>`
 }
 
 const getComponentXML = (cell : any, cells : any) => {
