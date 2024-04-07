@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { Popover, Modal, Form, Input, InputNumber } from 'antd'
 import '../App.css'
-import { randColor } from '../utils/helper'
 
 interface MemoryRegion {
   name : string

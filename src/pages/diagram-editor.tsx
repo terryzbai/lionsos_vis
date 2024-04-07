@@ -29,6 +29,8 @@ import { channelLabelConfig, getValidEndID, randColor } from '../utils/helper'
 import { SDFContent } from '../utils/translator'
 import { MemoryRegion } from '../utils/element'
 import MemoryManager from '../components/memory-manager'
+import ChannelEditor from '../components/channel-editor'
+
 
 /*
 TODO:
@@ -48,6 +50,8 @@ export const DiagramEditor = () => {
   const [ SDFEditorOpen, setSDFEditorOpen ] = useState(false)
   const pdList = useAppSelector(getPDList)
   const [ nodeEditorOpen, setNodeEditorOpen ] = useState(false)
+  const [ channelEditorOpen, setChannelEditorOpen ] = useState(false)
+  const [ currentEdgeID, setCurrentEdgeID ] = useState('')
   const [ currentNodeID, setCurrentNodeID ] = useState('')
   const [ MRs, setMRs] = useState<Array<MemoryRegion>>([
     {name: 'test1', phys_addr: 0, size: 100, page_size: 1, page_count: null, nodes: []},
@@ -125,20 +129,12 @@ export const DiagramEditor = () => {
   const dispatch = useAppDispatch()
   const addNode = (node_info : { id: string, shape: string}) => {
     dispatch(addNodeIntoList(node_info))
-    console.log(pds)
   }
 
   const editSDF = () => {
     setSDFEditorOpen(true)
 
     
-  }
-
-  const getNodeData = (node_id : string) => {
-
-    const node = globalGraph?.getNodes().find(node => node.id === node_id)
-
-    return node?.data
   }
 
   const updateMappings = () => {
@@ -157,6 +153,11 @@ export const DiagramEditor = () => {
     setMRs(newMRs)
   }
 
+  const getNodeData = (node_id : string) => {
+    const node = globalGraph?.getNodes().find(node => node.id === node_id)
+    return node?.data
+  }
+
   const updateNodeData = (node_id : string, new_data : any) => {
     const node = globalGraph?.getNodes().find(node => node.id === node_id)
 
@@ -166,9 +167,33 @@ export const DiagramEditor = () => {
       // Update the label displayed on the corresponding node
       node.setAttrs({ label: { text: node.data.attrs.name } })
       // Update data and colour of memory regions
-      updateMappings()  
+      updateMappings()
     } else {
       console.log("Invalid node_id")
+    }
+  }
+
+  const getEdgeData = (edge_id : string) => {
+    const edge = globalGraph?.getEdges().find(edge => edge.id === edge_id)
+    return edge?.data
+  }
+
+  const updateEdgeData = (edge_id : string, new_data : any) => {
+    const edge = globalGraph?.getEdges().find(edge => edge.id === edge_id)
+    if (edge) {
+      // edge.data = {...new_data, type: 'channel'}
+      // edge.data = {
+      //   source_node: edge.data.source_node,
+      //   source_end_id: new_data.source_end_id,
+      //   target_node: edge.data.target_node,
+      //   target_end_id: new_data.target_end_id,
+      //   type: "channel"
+      // }
+      edge.data.source_end_id = new_data.source_end_id
+      edge.data.target_end_id = new_data.target_end_id
+      console.log(edge, new_data)
+    } else {
+      console.log("Invalid edge_id")
     }
   }
 
@@ -383,13 +408,20 @@ export const DiagramEditor = () => {
       }
       edge.attr('line/targetMarker', { tagName: 'circle', r: 2 })
       edge.attr('line/sourceMarker', { tagName: 'circle', r: 2 })
+      const new_source_end_id = sourceNode ? ((edge.data && edge.data.source_end_id !== 'null') ? edge.data?.source_end_id : getValidEndID(graph.getEdges(), sourceNode.id)) : 'null'
+      const new_target_end_id = targetNode ? ((edge.data && edge.data.target_end_id !== 'null') ? edge.data?.target_end_id : getValidEndID(graph.getEdges(), targetNode.id)) : 'null'
       edge.data = {
         type: 'channel',
         source_node: sourceNode ? sourceNode.id : null,
-        source_end_id: sourceNode ? getValidEndID(graph.getEdges(), sourceNode.id) : 'null',
+        source_end_id: new_source_end_id,
         target_node: targetNode ? targetNode.id : null,
-        target_end_id: targetNode ? getValidEndID(graph.getEdges(), targetNode.id) : 'null',
+        target_end_id: new_target_end_id,
       }
+    })
+
+    graph.on('edge:dblclick', ({ edge }) => {
+      setCurrentEdgeID(edge.id)
+      setChannelEditorOpen(true)
     })
 
   }, [])
@@ -444,6 +476,13 @@ export const DiagramEditor = () => {
         updateNodeData={updateNodeData}
         MRs={MRs}
         />
+      <ChannelEditor
+        channelEditorOpen={channelEditorOpen}
+        setChannelEditorOpen={setChannelEditorOpen}
+        edge_id={currentEdgeID}
+        getEdgeData={getEdgeData}
+        updateEdgeData={updateEdgeData}
+        getNodeData={getNodeData} />
       <Modal
         title="Modal 1000px width"
         centered
