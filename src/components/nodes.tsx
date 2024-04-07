@@ -123,8 +123,8 @@ const custom_group = {
   'VM': {
     ...commonAttrs,
     shape: 'rect',
-    width: 80,
-    height: 60,
+    width: 120,
+    height: 40,
     data: {
       type: 'VM',
       color: '#FFFFFF',
@@ -143,7 +143,7 @@ const custom_group = {
     attrs: {
       label: {
         text: 'Untitled VM',
-        fontSize: 18,
+        fontSize: 12,
         fill: "#000000",
       },
       text: {

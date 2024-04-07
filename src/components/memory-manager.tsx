@@ -107,7 +107,7 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
   }
   
   const createMR = () => {
-    setMRs([...MRs, {name: 'Untitled', phys_addr: freeMRStatus.phys_addr, size: freeMRStatus.size, page_size: 1, page_count: null}])
+    setMRs([...MRs, {name: 'Untitled', phys_addr: freeMRStatus.phys_addr, size: freeMRStatus.size, page_size: 1, page_count: null, nodes: []}])
     console.log("create MR", MRs)
     hideAvailableMR()
   }
