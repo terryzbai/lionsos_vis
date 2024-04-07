@@ -42,8 +42,8 @@ const getPDXML = (cell : any, cells : any) => {
     return insertIndents(getComponentXML(child_cell, cells))
   }).join("\n\n") : ""
 
-  const mappings = insertIndents(getMappingXML(cell.data.mappings))
-  return `<protection_domain${attrs}>\n${prog_img}\n${pd_children}\n\n${mappings}\n</protection_domain>`
+  const mappings = "\n\n" + insertIndents(getMappingXML(cell.data.mappings))
+  return `<protection_domain${attrs}>\n${prog_img}\n${pd_children}${mappings}\n</protection_domain>`
 }
 
 const getComponentXML = (cell : any, cells : any) => {
@@ -58,6 +58,14 @@ const getComponentXML = (cell : any, cells : any) => {
   return ""
 }
 
+const getChannelXML = (cell : any, cells : any) => {
+  const cell_data = cell.data
+  const node_a = cells.find(cell => cell.id === cell_data?.source_node)
+  const node_b = cells.find(child => child.id === cell_data?.target_node)
+
+  return `<channel>\n    <end pd="${node_a?.data.attrs.name}" id="${cell_data.source_end_id}" />\n    <end pd="${node_b?.data.attrs.name}" id="${cell_data.target_end_id}" />\n</channel>`
+}
+
 export const SDFContent = (cells : any ) => {
 
   if (cells == null) {
@@ -67,13 +75,13 @@ export const SDFContent = (cells : any ) => {
   const pds_content = cells.map(cell => {
     const cell_data = cell.data
     if (cell.shape === 'edge') {
-      console.log(`Channel:${cell_data?.source_node}-${cell.data?.source_end_id} <--> ${cell_data?.target_node}-${cell_data?.target_end_id}`)
+      // console.log(`Channel:${cell_data?.source_node}-${cell.data?.source_end_id} <--> ${cell_data?.target_node}-${cell_data?.target_end_id}`)
+      return insertIndents(getChannelXML(cell, cells))
     } else if (cell.parent == '' || cell.parent == null){
-      const content = getComponentXML(cell, cells)
-      return insertIndents(content)
+      return insertIndents(getComponentXML(cell, cells))
     }
   })
 
-  const content = '<?xml version="1.0" encoding="UTF-8"?>\n<system>\n' + pds_content.join('\n') + "\n</system>"
+  const content = '<?xml version="1.0" encoding="UTF-8"?>\n<system>\n' + pds_content.join('\n\n') + "\n</system>"
   return content
 }
