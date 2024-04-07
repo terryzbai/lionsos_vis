@@ -53,6 +53,8 @@
   height: 100%;
   background-color: greenyellow;
   position: absolute;
+  border-left: solid 1px gray;
+  border-right: solid 1px gray;
 }
 
 .mem-bar .free-mr {

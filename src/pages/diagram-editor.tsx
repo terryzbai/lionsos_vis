@@ -414,7 +414,7 @@ export const DiagramEditor = () => {
 
   return (
     <div>
-      <MemoryManager MRs={MRs} setMRs={setMRs} />
+      <MemoryManager MRs={MRs} setMRs={setMRs} getNodeData={getNodeData} />
       <Toolbar className="toolbar" >
         <ToolbarGroup>
           <Item name="zoomIn" tooltip="Zoom In (Cmd +)" icon={<ZoomInOutlined />} />

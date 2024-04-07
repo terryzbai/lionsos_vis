@@ -26,7 +26,7 @@ interface FreeMRStatus {
   visibility : "visible" | "hidden"
 }
 
-export default function MemoryManager({MRs, setMRs}) {
+export default function MemoryManager({MRs, setMRs, getNodeData }) {
   const [ freeMRStatus, setFreeMRStatus ] = useState<FreeMRStatus>({
     phys_addr: 0,
     size: 0,
@@ -212,6 +212,14 @@ export default function MemoryManager({MRs, setMRs}) {
     document.documentElement.style.cursor = 'auto'
   }
 
+  const backgroundColor = (MR) => {
+    if (MR.nodes.length === 0) return ''
+    if (MR.nodes.length === 1) {
+      return getNodeData(MR.nodes[0]).color
+    }
+    return '#FFFFFF'
+  }
+
   useEffect(() => {
     document.addEventListener('mousedown', removeSelection)
   }, [])
@@ -226,8 +234,8 @@ export default function MemoryManager({MRs, setMRs}) {
         return (
           <Popover placement="bottom" title={MR.name} content={'Addr:' + MR.phys_addr + '-' + (MR.phys_addr + MR.size)} key={i}>
             <div 
-              className={'unallocated-mr' + (i === indexOfMR ? ' selected-mr' : '')}
-              style={ {width: MR.size + 'px', left: MR.phys_addr} } 
+              className={MR.nodes.length ? 'allocated-mr' : 'unallocated-mr' + (i === indexOfMR ? ' selected-mr' : '')}
+              style={ {width: MR.size + 'px', left: MR.phys_addr, backgroundColor: backgroundColor(MR) } } 
               onMouseEnter={hideAvailableMR}
               onMouseDown={(e) => {e.stopPropagation();startDrag(e, i)}}
               onClick={(e) => {selectMR(e, i)}}
