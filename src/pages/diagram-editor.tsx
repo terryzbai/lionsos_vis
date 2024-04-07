@@ -147,9 +147,7 @@ export const DiagramEditor = () => {
     const newMRs = MRs.map((MR) => {
       const new_mappings = nodes.map((node) => {
         const node_mappings = node.data.mappings.map(mapping => mapping.mr)
-        console.log(MR.name, node_mappings, node_mappings.includes(MR.name))
         if (node_mappings.includes(MR.name)) {
-          console.log('node id', node.id)
           return node.id
         }
         return ''
@@ -161,7 +159,6 @@ export const DiagramEditor = () => {
   }
 
   const updateNodeData = (node_id : string, new_data : any) => {
-    console.log('updateNodeData', node_id, ':', new_data)
     const node = globalGraph?.getNodes().find(node => node.id === node_id)
 
     if (node) {
@@ -169,9 +166,8 @@ export const DiagramEditor = () => {
       node.data = new_data
       // Update the label displayed on the corresponding node
       node.setAttrs({ label: { text: node.data.attrs.name } })
-      // Update colours of memory regions
+      // Update data and colour of memory regions
       updateMappings()  
-      console.log(node)
     } else {
       console.log("Invalid node_id")
     }

@@ -113,7 +113,6 @@ export default function MappingTable({ node_id, getNodeData, updateNodeData, MRs
       const { key, ...rest } = mapping
       return rest
     })
-    console.log("push data:", newData)
     updateNodeData(node_id, {
       mappings: newData
     })
@@ -146,7 +145,6 @@ export default function MappingTable({ node_id, getNodeData, updateNodeData, MRs
   }
 
   const handleAdd = () => {
-    console.log(data)
     const newData: SysMapItem = {
       key: data ? data.length.toString() : '0',
       mr: `Default`,
@@ -156,7 +154,6 @@ export default function MappingTable({ node_id, getNodeData, updateNodeData, MRs
       setvar_vaddr: `Default`
     }
 
-    console.log("add a row")
     setData([...data, newData])
     syncNodeData()
   }
@@ -216,7 +213,7 @@ export default function MappingTable({ node_id, getNodeData, updateNodeData, MRs
           </span>
         ) : (
           <span>
-          <Typography.Link disabled={editingKey !== ''} onClick={() => edit(record)}>
+          <Typography.Link disabled={editingKey !== ''} onClick={() => edit(record)} style={{ marginRight: 8 }}>
             Edit
           </Typography.Link>
           <Typography.Link disabled={editingKey !== ''} onClick={() => deleteMapping(record.key)}>
@@ -252,7 +249,6 @@ export default function MappingTable({ node_id, getNodeData, updateNodeData, MRs
   }, [node_id])
 
   useEffect(() => {
-    console.log("Data updated!")
     syncNodeData()
   }, [data])
 

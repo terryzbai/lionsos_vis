@@ -51,6 +51,7 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
   }
 
   const selectMR = (e, i : number) => {
+    console.log("?????")
     removeSelection()
     dragStatus.indexOfMR = i
     setIndexOfMR(i)
@@ -228,7 +229,7 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
         const node_data = getNodeData(node_id)
         return (
           <div key={node_id}>
-            <br/>{node_data.attrs.name}
+            <br/>{node_data?.attrs.name}
           </div>
         )
       })}
@@ -250,7 +251,7 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
         return (
           <Popover placement="bottom" title={MR.name} content={popoverContent(MR)} key={i}>
             <div 
-              className={MR.nodes.length ? 'allocated-mr' : 'unallocated-mr' + (i === indexOfMR ? ' selected-mr' : '')}
+              className={(MR.nodes.length ? 'allocated-mr' : 'unallocated-mr') + (i === indexOfMR ? ' selected-mr' : '')}
               style={ {width: MR.size + 'px', left: MR.phys_addr, backgroundColor: backgroundColor(MR) } } 
               onMouseEnter={hideAvailableMR}
               onMouseDown={(e) => {e.stopPropagation();startDrag(e, i)}}

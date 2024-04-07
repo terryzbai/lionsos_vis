@@ -71,7 +71,6 @@ export const configSlice = createSlice({
         ...init_node_data[action.payload.shape]
       }
       state.pds.push(new_pd)
-      console.log("Add a", action.payload.shape, action.payload.id)
     },
     openNodeEditor: (state, action: PayloadAction<string>) => {
       state.nodeEditor.visible = true
@@ -153,7 +152,6 @@ export const getCurrentPD = (state: RootState) => {
 }
 
 export const getSDFContent = (state: RootState) => {
-  // console.log("Get current pds: ", state.config.pds)
   const pds_content = state.config.pds.map((pd) => {
     if (pd.parent === "") {
       let attrs = ''
