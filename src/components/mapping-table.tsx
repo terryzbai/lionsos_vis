@@ -89,9 +89,19 @@ export default function MappingTable({ node_id, getNodeData, updateNodeData }) {
   const isEditing = (record: SysMapItem) => record.key === editingKey
 
   const edit = (record: Partial<SysMapItem> & { key: React.Key }) => {
-    form.setFieldsValue({ name: '', age: '', address: '', ...record });
+    form.setFieldsValue({ ...record });
     setEditingKey(record.key)
   }
+
+  // const deleteMapping = (record: Partial<SysMapItem> & { key: React.Key }) => {
+  //   form.setFieldsValue({ ...record });
+  // }
+
+  const deleteMapping = (key: React.Key) => {
+    const newData = data.filter((item) => item.key !== key)
+    setData(newData)
+    syncNodeData()
+  };
 
   const cancel = () => {
     setEditingKey('')
@@ -204,9 +214,14 @@ export default function MappingTable({ node_id, getNodeData, updateNodeData }) {
             </Typography.Link>
           </span>
         ) : (
+          <span>
           <Typography.Link disabled={editingKey !== ''} onClick={() => edit(record)}>
             Edit
           </Typography.Link>
+          <Typography.Link disabled={editingKey !== ''} onClick={() => deleteMapping(record.key)}>
+            Delete
+          </Typography.Link>
+          </span>
         )
       },
     },
