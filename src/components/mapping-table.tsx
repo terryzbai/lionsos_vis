@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import { Typography, Checkbox, TableProps, Form, Input, InputNumber, Table, Button } from 'antd'
+import { Typography, Checkbox, TableProps, Form, Select, InputNumber, Table, Button } from 'antd'
 import { SysMap } from '../utils/element'
 
 interface SysMapItem extends SysMap {
@@ -28,9 +28,32 @@ const EditableCell = ({
 }) => {
   const perm_options = ['r', 'w', 'x']
 
+  const mr_options = [
+    {
+      value: 'jack',
+      label: 'Jack',
+    },
+    {
+      value: 'lucy',
+      label: 'Lucy',
+    },
+    {
+      value: 'tom',
+      label: 'Tom',
+    },
+  ]
+  const filterOption = (input: string, option?: { label: string; value: string }) =>
+  (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+
+
   const inputNodes = {
     'number': <InputNumber />,
-    'string': <Input />,
+    'select': <Select
+    showSearch
+    placeholder="Select a person"
+    optionFilterProp="children"
+    filterOption={filterOption}
+    options={mr_options} />,
     'boolean': <Checkbox />,
     'multichoice': <Checkbox.Group options={perm_options}/>
   }
@@ -133,7 +156,7 @@ export default function MappingTable({ node_id, getNodeData, updateNodeData }) {
       dataIndex: 'mr',
       width: '25%',
       editable: true,
-      dataType: 'string',
+      dataType: 'select',
     },
     {
       title: 'perms',
