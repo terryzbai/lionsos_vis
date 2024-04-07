@@ -220,6 +220,22 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
     return '#FFFFFF'
   }
 
+  const popoverContent = (MR) => {
+    return (
+      <>
+      Addr: {MR.phys_addr} - {MR.phys_addr + MR.size}
+      {MR.nodes.map(node_id => {
+        const node_data = getNodeData(node_id)
+        return (
+          <div key={node_id}>
+            <br/>{node_data.attrs.name}
+          </div>
+        )
+      })}
+      </>
+    )
+  }
+
   useEffect(() => {
     document.addEventListener('mousedown', removeSelection)
   }, [])
@@ -232,7 +248,7 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
     <div className='mem-bar' onMouseMove={(e) => displayAvailableMR(e, dragStatus.indexOfMR)} onMouseLeave={hideAvailableMR}>
       {MRs.map((MR, i) => {
         return (
-          <Popover placement="bottom" title={MR.name} content={'Addr:' + MR.phys_addr + '-' + (MR.phys_addr + MR.size)} key={i}>
+          <Popover placement="bottom" title={MR.name} content={popoverContent(MR)} key={i}>
             <div 
               className={MR.nodes.length ? 'allocated-mr' : 'unallocated-mr' + (i === indexOfMR ? ' selected-mr' : '')}
               style={ {width: MR.size + 'px', left: MR.phys_addr, backgroundColor: backgroundColor(MR) } } 
