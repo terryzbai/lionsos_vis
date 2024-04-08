@@ -1,4 +1,4 @@
-import { SysMap } from "./element"
+import { SysMap, MemoryRegion } from "./element"
 
 const insertIndents = (content : string) => {
   const ret =  "    " + content.split("\n").join("\n    ")
@@ -66,7 +66,15 @@ const getChannelXML = (cell : any, cells : any) => {
   return `<channel>\n    <end pd="${node_a?.data.attrs.name}" id="${cell_data.source_end_id}" />\n    <end pd="${node_b?.data.attrs.name}" id="${cell_data.target_end_id}" />\n</channel>`
 }
 
-export const SDFContent = (cells : any ) => {
+const getMRsXML = (MRs : MemoryRegion[]) => {
+  const xml_array = MRs.map(MR => {
+    return `<memory_region name="${MR.name}" size="${MR.size}" phys_addr="${MR.phys_addr}" />`
+  })
+
+  return xml_array.join('\n')
+}
+
+export const SDFContent = (cells : any, MRs : MemoryRegion[] ) => {
 
   if (cells == null) {
     return ''
@@ -82,6 +90,8 @@ export const SDFContent = (cells : any ) => {
     }
   })
 
-  const content = '<?xml version="1.0" encoding="UTF-8"?>\n<system>\n' + pds_content.join('\n\n') + "\n</system>"
+  const mrs_xml = insertIndents(getMRsXML(MRs))
+
+  const content = '<?xml version="1.0" encoding="UTF-8"?>\n<system>\n' + mrs_xml + '\n' + pds_content.join('\n\n') + "\n</system>"
   return content
 }

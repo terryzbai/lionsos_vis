@@ -491,7 +491,7 @@ export const DiagramEditor = () => {
         onCancel={() => setSDFEditorOpen(false)}
         width={1000}
       >
-        <textarea value={SDFContent(globalGraph?.toJSON().cells)} readOnly style={ {width: '100%', height: '500px'} }></textarea>
+        <textarea value={SDFContent(globalGraph?.toJSON().cells, MRs)} readOnly style={ {width: '100%', height: '500px'} }></textarea>
       </Modal>
     </div>
   )
