@@ -42,7 +42,7 @@ const getPDXML = (cell : any, cells : any) => {
     return insertIndents(getComponentXML(child_cell, cells))
   }).join("\n\n") : ""
 
-  const mappings = "\n\n" + insertIndents(getMappingXML(cell.data.mappings))
+  const mappings = cell.data.mappings.length ? "\n\n" + insertIndents(getMappingXML(cell.data.mappings)) : ""
   return `<protection_domain${attrs}>\n${prog_img}\n${pd_children}${mappings}\n</protection_domain>`
 }
 
@@ -92,6 +92,6 @@ export const SDFContent = (cells : any, MRs : MemoryRegion[] ) => {
 
   const mrs_xml = insertIndents(getMRsXML(MRs))
 
-  const content = '<?xml version="1.0" encoding="UTF-8"?>\n<system>\n' + mrs_xml + '\n' + pds_content.join('\n\n') + "\n</system>"
+  const content = '<?xml version="1.0" encoding="UTF-8"?>\n<system>\n' + mrs_xml + '\n\n' + pds_content.join('\n\n') + "\n</system>"
   return content
 }
