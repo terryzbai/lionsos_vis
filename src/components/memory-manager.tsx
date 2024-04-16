@@ -212,8 +212,8 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
   }
 
   const backgroundColor = (MR) => {
-    if (MR.nodes.length === 0) return ''
-    if (MR.nodes.length === 1) {
+    if (MR.nodes?.length === 0) return ''
+    if (MR.nodes?.length === 1) {
       return getNodeData(MR.nodes[0])?.color
     }
     return '#FFFFFF'
@@ -223,16 +223,24 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
     return (
       <>
       Addr: {MR.phys_addr} - {MR.phys_addr + MR.size}
-      {MR.nodes.map(node_id => {
+      {MR.nodes?.map(node_id => {
         const node_data = getNodeData(node_id)
         return (
           <div key={node_id}>
-            <br/>{node_data?.attrs.name}
+            {node_data?.attrs.name}
           </div>
         )
       })}
       </>
     )
+  }
+
+  const getMRClassNames = (num_mappings) => {
+    console.log(num_mappings, num_mappings == null)
+    if (num_mappings == null) return 'unallocated-mr'
+    if (num_mappings === 1) return 'allocated-mr'
+    if (num_mappings === 0) return 'unallocated-mr'
+    if (num_mappings > 1) return 'shared-mr'
   }
 
   useEffect(() => {
@@ -249,7 +257,7 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
         return (
           <Popover placement="bottom" title={MR.name} content={popoverContent(MR)} key={i}>
             <div 
-              className={(MR.nodes.length ? 'allocated-mr' : 'unallocated-mr') + (i === indexOfMR ? ' selected-mr' : '')}
+              className={getMRClassNames(MR.nodes?.length) + (i === indexOfMR ? ' selected-mr' : '')}
               style={ {width: MR.size + 'px', left: MR.phys_addr, backgroundColor: backgroundColor(MR) } } 
               onMouseEnter={hideAvailableMR}
               onMouseDown={(e) => {e.stopPropagation();startDrag(e, i)}}

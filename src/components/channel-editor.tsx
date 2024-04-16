@@ -16,7 +16,7 @@ export default function ChannelEditor({ channelEditorOpen, setChannelEditorOpen,
 
   return (
     <Modal
-      title="Edit memory region"
+      title="Edit communication channel"
       centered
       open={channelEditorOpen}
       forceRender
