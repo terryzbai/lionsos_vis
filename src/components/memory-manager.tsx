@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { Popover, Modal, Form, Input, InputNumber } from 'antd'
+import { Popover, Modal, Form, Input, InputNumber, Button } from 'antd'
 import '../App.css'
 
 interface MemoryRegion {
@@ -243,6 +243,11 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
     if (num_mappings > 1) return 'shared-mr'
   }
 
+  const deleteMR = () => {
+    MRs.splice(indexOfMR, 1)
+    setEditorOpen(false)
+  }
+
   useEffect(() => {
     document.addEventListener('mousedown', removeSelection)
   }, [])
@@ -328,6 +333,9 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
           >
             <InputNumber min={1} max={256} />
           </Form.Item>
+          <Button htmlType="button" type='primary' danger onClick={deleteMR}>
+            Delete
+          </Button>
         </Form>
       </Modal>
     </div>
