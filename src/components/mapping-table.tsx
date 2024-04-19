@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import { Typography, Checkbox, TableProps, Form, Select, InputNumber, Table, Button } from 'antd'
+import { Typography, Checkbox, TableProps, Form, Select, InputNumber, Table, Button, Input } from 'antd'
 import { SysMap } from '../utils/element'
 
 interface SysMapItem extends SysMap {
@@ -35,21 +35,7 @@ export default function MappingTable({ node_id, getNodeData, updateNodeData, MRs
     ...restProps
   }) => {
     const perm_options = ['r', 'w', 'x']
-  
-    // const mr_options = [
-    //   {
-    //     value: 'jack',
-    //     label: 'Jack',
-    //   },
-    //   {
-    //     value: 'lucy',
-    //     label: 'Lucy',
-    //   },
-    //   {
-    //     value: 'tom',
-    //     label: 'Tom',
-    //   },
-    // ]
+ 
     const mr_options = MRs.map(MR => {
       return { value: MR.name, label: MR.name }
     })
@@ -66,7 +52,8 @@ export default function MappingTable({ node_id, getNodeData, updateNodeData, MRs
         filterOption={filterOption}
         options={mr_options} />,
       'boolean': <Checkbox />,
-      'multichoice': <Checkbox.Group options={perm_options}/>
+      'multichoice': <Checkbox.Group options={perm_options}/>,
+      'string': <Input />
     }
     const inputNode = inputNodes[inputType]
   
@@ -162,23 +149,23 @@ export default function MappingTable({ node_id, getNodeData, updateNodeData, MRs
     {
       title: 'mr',
       dataIndex: 'mr',
-      width: '25%',
+      width: '20%',
       editable: true,
       dataType: 'select',
     },
     {
       title: 'perms',
       dataIndex: 'perms',
-      width: '15%',
+      width: '5%',
       editable: true,
       dataType: 'multichoice',
     },
     {
       title: 'vaddr',
       dataIndex: 'vaddr',
-      width: '10%',
+      width: '20%',
       editable: true,
-      dataType: 'number',
+      dataType: 'string',
     },
     {
       title: 'setvar_vaddr',
