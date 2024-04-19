@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { InputNumber, Form, Input, Button } from 'antd'
+import { InputNumber, Form, Input, Button, Checkbox } from 'antd'
 
 export default function AttrsForm({ node_id, setNodeEditorOpen, getNodeData, updateNodeData }) {
   const node_data = getNodeData(node_id)
@@ -16,6 +16,8 @@ export default function AttrsForm({ node_id, setNodeEditorOpen, getNodeData, upd
     updateNodeData(node_id, {
       attrs: new_data
     })
+
+    console.log(new_data)
 
     setNodeEditorOpen(false)
   }
@@ -80,10 +82,11 @@ export default function AttrsForm({ node_id, setNodeEditorOpen, getNodeData, upd
         <Form.Item
           label="pp"
           name="pp"
+          valuePropName="checked"
           hidden={ node_attrs && !('pp' in node_attrs) }
           rules={[{ required: false }]}
         >
-          <InputNumber min={1} max={256} />
+          <Checkbox />
         </Form.Item>
         <Form.Item
           label="Program Image"

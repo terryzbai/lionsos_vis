@@ -20,6 +20,7 @@ const getVMXML = (cell : any, cells : any) => {
   attrs += node_attrs ? ` name="${node_attrs.name}"` : ''
   attrs += node_attrs.priority ? ` priority="${node_attrs.priority}"` : ''
   attrs += node_attrs.budget ? ` budget="${node_attrs.budget}"` : ''
+  attrs += node_attrs.pp ? ` pp="${node_attrs.pp}"` : ''
 
   const mappings = insertIndents(getMappingXML(cell.data.mappings))
   return `<virtual_machine${attrs}>\n${mappings}\n</virtual_machine>`
@@ -34,6 +35,7 @@ const getPDXML = (cell : any, cells : any) => {
   attrs += node_attrs ? ` name="${node_attrs.name}"` : ''
   attrs += node_attrs.priority ? ` priority="${node_attrs.priority}"` : ''
   attrs += node_attrs.budget ? ` budget="${node_attrs.budget}"` : ''
+  attrs += node_attrs.pp ? ` pp="${node_attrs.pp}"` : ''
 
   const prog_img = `    <program_image path="${node_attrs.prog_img}" />`
 

@@ -236,7 +236,6 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
   }
 
   const getMRClassNames = (num_mappings) => {
-    console.log(num_mappings, num_mappings == null)
     if (num_mappings == null) return 'unallocated-mr'
     if (num_mappings === 1) return 'allocated-mr'
     if (num_mappings === 0) return 'unallocated-mr'
