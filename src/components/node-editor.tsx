@@ -9,7 +9,6 @@ export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen,
   const data = getNodeData(node_id)
 
   const onchange = (key : any) => {
-    console.log(key)
     switch (key) {
       case '1': 
         setWidth(350)

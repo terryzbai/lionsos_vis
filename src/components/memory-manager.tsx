@@ -1,14 +1,6 @@
-import { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Popover, Modal, Form, Input, InputNumber, Button } from 'antd'
 import '../App.css'
-
-interface MemoryRegion {
-  name : string
-  size: number
-  phys_addr : number
-  page_size : number | null
-  page_count : number | null
-}
 
 interface DragStatus {
   op : null | "left" | "middle" | "right"
@@ -31,10 +23,13 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
     size: 0,
     visibility: "hidden"
   })
+  const refMRContainer = React.createRef<HTMLDivElement>()
   const [ indexOfMR, setIndexOfMR ] = useState<number | null>(null)
   const [ form ] = Form.useForm(null)
   const [ editorOpen, _setEditorOpen ] = useState<boolean>(false)
+  const [ widthOfMRBar, setWidthOfMRBar ] = useState<number>(0)
   const myStateRef = useRef(editorOpen)
+  const maxPhyAddr = 4294967296
   const setEditorOpen = data => {
     myStateRef.current = data
     _setEditorOpen(data)
@@ -247,22 +242,33 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
     setEditorOpen(false)
   }
 
+  const getWidth = (paddr : number) => {
+    // console.log(paddr, widthOfMRBar, 4096 / maxPhyAddr)
+    return paddr
+  }
+
+  const resizeWindow = () => {
+    setWidthOfMRBar(refMRContainer.current?.clientWidth)
+  }
+
   useEffect(() => {
     document.addEventListener('mousedown', removeSelection)
+    window.addEventListener('resize', resizeWindow)
+    resizeWindow()
   }, [])
-
+  
   useEffect(() => {
     form.setFieldsValue(MRs[indexOfMR])
   })
 
   return (
-    <div className='mem-bar' onMouseMove={(e) => displayAvailableMR(e, dragStatus.indexOfMR)} onMouseLeave={hideAvailableMR}>
+    <div className='mem-bar' onMouseMove={(e) => displayAvailableMR(e, dragStatus.indexOfMR)} onMouseLeave={hideAvailableMR} ref={refMRContainer}>
       {MRs.map((MR, i) => {
         return (
           <Popover placement="bottom" title={MR.name} content={popoverContent(MR)} key={i}>
             <div 
               className={getMRClassNames(MR.nodes?.length) + (i === indexOfMR ? ' selected-mr' : '')}
-              style={ {width: MR.size + 'px', left: MR.phys_addr, backgroundColor: backgroundColor(MR) } } 
+              style={ {width: getWidth(MR.size) + 'px', left: MR.phys_addr, backgroundColor: backgroundColor(MR) } } 
               onMouseEnter={hideAvailableMR}
               onMouseDown={(e) => {e.stopPropagation();startDrag(e, i)}}
               onClick={(e) => {selectMR(e, i)}}

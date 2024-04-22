@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react'
+import { Modal } from 'antd'
 import { Graph } from '@antv/x6'
 import { Stencil } from '@antv/x6-plugin-stencil'
 import { Snapline } from '@antv/x6-plugin-snapline'
-import { Group } from '../components/group'
 import { Toolbar } from '@antv/x6-react-components'
+import { Group } from '../components/group'
 import NodeEditor from '../components/node-editor'
 import { stencil_group, custom_nodes, custom_group } from '../components/nodes'
+import MemoryManager from '../components/memory-manager'
+import ChannelEditor from '../components/channel-editor'
+import { SDFContent } from '../utils/translator'
+import { MemoryRegion } from '../utils/element'
+import { channelLabelConfig, getValidEndID, randColor } from '../utils/helper'
 import '@antv/x6-react-components/es/menu/style/index.css'
 import '@antv/x6-react-components/es/toolbar/style/index.css'
 import '../App.css'
@@ -22,21 +28,11 @@ import {
   DownloadOutlined,
   UploadOutlined,
 } from '@ant-design/icons'
-import { useAppSelector, useAppDispatch } from '../app/hooks'
-import { addNodeIntoList, openNodeEditor, getSDFContent, getPDList, deleteNode } from '../features/configSlice'
-import { Modal } from 'antd'
-import { channelLabelConfig, getValidEndID, randColor } from '../utils/helper'
-import { SDFContent } from '../utils/translator'
-import { MemoryRegion } from '../utils/element'
-import MemoryManager from '../components/memory-manager'
-import ChannelEditor from '../components/channel-editor'
-
 
 /*
 TODO:
 [ ] Set highest zIndex for the node being dragged
 [ ] Update states for embedded/detached nodes 
-[ ] Display endpoints when mouse is over the edge
 */
 
 const Item = Toolbar.Item // eslint-disable-line
@@ -48,7 +44,6 @@ export const DiagramEditor = () => {
   const [ globalGraph, setGlobalGraph ] = useState<Graph>(null)
   const [ ctrlPressed, setCtrlPressed ] = useState(false)
   const [ SDFEditorOpen, setSDFEditorOpen ] = useState(false)
-  const pdList = useAppSelector(getPDList)
   const [ nodeEditorOpen, setNodeEditorOpen ] = useState(false)
   const [ channelEditorOpen, setChannelEditorOpen ] = useState(false)
   const [ currentEdgeID, setCurrentEdgeID ] = useState('')
@@ -116,19 +111,10 @@ export const DiagramEditor = () => {
         id: 'port_1',
         group: 'bottom',
       })
-      
-      console.log(group)
-      addNode({id: group.id, shape: node_name})
 
       group.data.color = randColor()
       return group
     },
-  }
-
-  const pds = useAppSelector(state => state.config.pds)
-  const dispatch = useAppDispatch()
-  const addNode = (node_info : { id: string, shape: string}) => {
-    dispatch(addNodeIntoList(node_info))
   }
 
   const editSDF = () => {
@@ -181,14 +167,6 @@ export const DiagramEditor = () => {
   const updateEdgeData = (edge_id : string, new_data : any) => {
     const edge = globalGraph?.getEdges().find(edge => edge.id === edge_id)
     if (edge) {
-      // edge.data = {...new_data, type: 'channel'}
-      // edge.data = {
-      //   source_node: edge.data.source_node,
-      //   source_end_id: new_data.source_end_id,
-      //   target_node: edge.data.target_node,
-      //   target_end_id: new_data.target_end_id,
-      //   type: "channel"
-      // }
       edge.data.source_end_id = new_data.source_end_id
       edge.data.target_end_id = new_data.target_end_id
       console.log(edge, new_data)
@@ -244,9 +222,6 @@ export const DiagramEditor = () => {
           y: 0,
           offset: { x: -10, y: 10 },
           onClick(t) {
-            // TODO: remove node from global states
-            dispatch(deleteNode(t.cell.id))
-
             // source code of built-in button-remove
             var e=t.view, n=t.btn
             n.parent.remove()
@@ -425,17 +400,6 @@ export const DiagramEditor = () => {
     })
 
   }, [])
-
-  // useEffect(() => {
-  //   if (globalGraph != null) {
-  //     const nodes = globalGraph.getNodes()
-  //     pdList.map((pd) => {
-  //       // Update group name
-  //       nodes.find(node => node.id === pd.id)?.setAttrs({ label: { text: pd.name } })
-  //     })
-  //   }
-  // }, [pdList])
-
 
   return (
     <div>

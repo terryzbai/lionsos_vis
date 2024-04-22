@@ -17,8 +17,6 @@ export default function AttrsForm({ node_id, setNodeEditorOpen, getNodeData, upd
       attrs: new_data
     })
 
-    console.log(new_data)
-
     setNodeEditorOpen(false)
   }
 
