@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Popover, Modal, Form, Input, InputNumber, Button } from 'antd'
+import { MemoryRegion } from '../utils/element'
 import '../App.css'
 
 interface DragStatus {
@@ -17,6 +18,8 @@ interface FreeMRStatus {
   visibility : "visible" | "hidden"
 }
 
+const maxPhyAddr = 0xffffffff
+
 export default function MemoryManager({MRs, setMRs, getNodeData }) {
   const [ freeMRStatus, setFreeMRStatus ] = useState<FreeMRStatus>({
     phys_addr: 0,
@@ -27,9 +30,16 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
   const [ indexOfMR, setIndexOfMR ] = useState<number | null>(null)
   const [ form ] = Form.useForm(null)
   const [ editorOpen, _setEditorOpen ] = useState<boolean>(false)
-  const [ widthOfMRBar, setWidthOfMRBar ] = useState<number>(0)
+  const [ widthOfMRBar, setWidthOfMRBar ] = useState<number>(window.innerWidth - 20)
   const myStateRef = useRef(editorOpen)
-  const maxPhyAddr = 4294967296
+  const [ barConfig, setBarConfig ] = useState({
+    min_phyaddr: 0,
+    max_phyaddr: 0xffffffff,
+    min_mr_width: 20,         // pixels
+    max_free_width: 20,       // pixels
+  })
+  const [ MRWithAttrs, setMRWithAttrs ] = useState<Array<MemoryRegion & {width: number, left: number}>>([])
+
   const setEditorOpen = data => {
     myStateRef.current = data
     _setEditorOpen(data)
@@ -217,7 +227,7 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
   const popoverContent = (MR) => {
     return (
       <>
-      Addr: {MR.phys_addr} - {MR.phys_addr + MR.size}
+      Addr: {'0x' + MR.phys_addr.toString(16)} - {'0x' + (MR.phys_addr + MR.size).toString(16)}
       {MR.nodes?.map(node_id => {
         const node_data = getNodeData(node_id)
         return (
@@ -242,9 +252,48 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
     setEditorOpen(false)
   }
 
-  const getWidth = (paddr : number) => {
-    // console.log(paddr, widthOfMRBar, 4096 / maxPhyAddr)
-    return paddr
+  const updateBarRange = () => {
+    let min_phyaddr = maxPhyAddr
+    let max_phyaddr = 0
+    MRs.map(mr => {
+      min_phyaddr = Math.min(min_phyaddr, mr.phys_addr)
+      max_phyaddr = Math.max(max_phyaddr, mr.phys_addr + mr.size)
+    })
+
+    const diff = max_phyaddr - min_phyaddr
+
+    setBarConfig({...barConfig, min_phyaddr: min_phyaddr - (diff * 0.2), max_phyaddr: max_phyaddr + (diff * 0.2) })
+  }
+
+  const getWidth = (size : number) => {
+    const width = Math.max(size / (barConfig.max_phyaddr - barConfig.min_phyaddr) * widthOfMRBar, barConfig.min_mr_width)
+    return width
+  }
+
+  const updateAttrValues = () => {
+    let min_phyaddr = maxPhyAddr
+    let max_phyaddr = 0
+    MRs.map(mr => {
+      min_phyaddr = Math.min(min_phyaddr, mr.phys_addr)
+      max_phyaddr = Math.max(max_phyaddr, mr.phys_addr + mr.size)
+    })
+    const diff = max_phyaddr - min_phyaddr
+    min_phyaddr = min_phyaddr - (diff * 0.2)
+    max_phyaddr = max_phyaddr + (diff * 0.2)
+
+    let tempAttrValues: Array<MemoryRegion & { width: number, left: number}> = []
+    for (let mr of MRs) {
+      const width_i = getWidth(mr.size)
+      let left_i = (mr.phys_addr - min_phyaddr) / (max_phyaddr - min_phyaddr) * widthOfMRBar
+
+      for (let tempVal of tempAttrValues) {
+        if (tempVal.left < left_i && tempVal.left + tempVal.width > left_i) {
+          left_i = tempVal.left + tempVal.width
+        }
+      } 
+      tempAttrValues.push({...mr, width: width_i, left: left_i})
+    }
+    return tempAttrValues
   }
 
   const resizeWindow = () => {
@@ -255,20 +304,28 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
     document.addEventListener('mousedown', removeSelection)
     window.addEventListener('resize', resizeWindow)
     resizeWindow()
+
+    updateBarRange()
+    setMRWithAttrs(updateAttrValues())
   }, [])
   
   useEffect(() => {
     form.setFieldsValue(MRs[indexOfMR])
   })
 
+  useEffect(() => {
+    updateBarRange()
+    setMRWithAttrs(updateAttrValues())
+  }, [MRs])
+
   return (
     <div className='mem-bar' onMouseMove={(e) => displayAvailableMR(e, dragStatus.indexOfMR)} onMouseLeave={hideAvailableMR} ref={refMRContainer}>
-      {MRs.map((MR, i) => {
+      {MRWithAttrs.map((MR, i) => {
         return (
           <Popover placement="bottom" title={MR.name} content={popoverContent(MR)} key={i}>
             <div 
-              className={getMRClassNames(MR.nodes?.length) + (i === indexOfMR ? ' selected-mr' : '')}
-              style={ {width: getWidth(MR.size) + 'px', left: MR.phys_addr, backgroundColor: backgroundColor(MR) } } 
+              className={'memory-region ' + getMRClassNames(MR.nodes?.length) + (i === indexOfMR ? ' selected-mr' : '')}
+              style={ {width: getWidth(MR.size) + 'px', left: MR.left, backgroundColor: backgroundColor(MR) } } 
               onMouseEnter={hideAvailableMR}
               onMouseDown={(e) => {e.stopPropagation();startDrag(e, i)}}
               onClick={(e) => {selectMR(e, i)}}
@@ -300,7 +357,6 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
           initialValues={ MRs[indexOfMR] }
           layout="vertical"
           onFinish={editMR}
-          // onFinishFailed={onFinishFailed}
           autoComplete="off"
         >
           <Form.Item
@@ -315,7 +371,7 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
             name="size"
             rules={[{ required: true }]}
           >
-            <InputNumber min={1} max={256} />
+            <InputNumber min={1} />
           </Form.Item>
           <Form.Item
             label="phys_addr"

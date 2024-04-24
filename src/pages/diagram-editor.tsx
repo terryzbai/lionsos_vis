@@ -50,8 +50,11 @@ export const DiagramEditor = () => {
   const [ currentEdgeID, setCurrentEdgeID ] = useState('')
   const [ currentNodeID, setCurrentNodeID ] = useState('')
   const [ MRs, setMRs] = useState<Array<MemoryRegion>>([
-    {name: 'test1', phys_addr: 0, size: 100, page_size: 1, page_count: null, nodes: []},
-    {name: 'test2', phys_addr: 200, size: 150, page_size: 1, page_count: null, nodes: []}
+    {name: 'uart', phys_addr: 0x9000000, size: 0x1000, page_size: 1, page_count: null, nodes: []},
+    {name: 'shared_buffer', phys_addr: 0x9001000, size: 0x1000, page_size: 1, page_count: null, nodes: []},
+    {name: 'guest_ram', phys_addr: 0x10000000, size: 0x200000, page_size: 1, page_count: null, nodes: []},
+    {name: 'ethernet', phys_addr: 0xa003000, size: 0x1000, page_size: 1, page_count: null, nodes: []},
+    {name: 'gic_vcpu', phys_addr: 0x8040000, size: 0x1000, page_size: 1, page_count: null, nodes: []}
   ])
 
   const graph_config = {
