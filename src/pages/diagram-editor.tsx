@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Modal } from 'antd'
-import { Graph } from '@antv/x6'
+import { Graph, Cell } from '@antv/x6'
+import { ERLayout } from '@antv/layout'
 import { Stencil } from '@antv/x6-plugin-stencil'
 import { Snapline } from '@antv/x6-plugin-snapline'
 import { Toolbar } from '@antv/x6-react-components'
@@ -119,8 +120,6 @@ export const DiagramEditor = () => {
 
   const editSDF = () => {
     setSDFEditorOpen(true)
-
-    
   }
 
   const updateMappings = () => {
@@ -175,6 +174,43 @@ export const DiagramEditor = () => {
     }
   }
 
+  const test_add_groups = () => {
+    const cells: Cell[] = []
+    const nodes = []
+    const edges = []
+    nodes.push({...custom_group['PD'], id: `11111`})
+    nodes.push({...custom_group['PD'], id: `22222`})
+    nodes.push({...custom_group['PD'], id: `33333`})
+    nodes.push({...custom_group['PD'], id: `44444`})
+
+    const ERLayoutInstance = new ERLayout({
+      nodes,
+      edges,
+      nodeMinGap: 240
+    })
+
+    ERLayoutInstance.execute().then((res) => {
+      console.log(nodes, edges)
+      nodes.forEach((item) => {
+        const new_group = new Group(item)
+        new_group.addPort({
+          id: 'port_1',
+          group: 'bottom',
+        })
+  
+        new_group.data.color = randColor()
+        cells.push(new_group)
+      })
+      edges.forEach((item) => {
+        cells.push(globalGraph.createEdge(item))
+      })
+      globalGraph.resetCells(cells)
+      globalGraph.zoomToFit({ padding: 20, maxScale: 1 })
+
+      console.log(globalGraph.toJSON())
+    })
+  }
+
   useEffect(() => {
     const graph = new Graph({
       ...graph_config,
@@ -188,7 +224,6 @@ export const DiagramEditor = () => {
         sharp: true,
       }),
     )
-    graph.centerContent()
 
     const stencil = new Stencil({
       ...stencil_config,

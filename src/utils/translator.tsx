@@ -50,7 +50,7 @@ const getPDXML = (cell : any, cells : any) => {
 
 const getComponentXML = (cell : any, cells : any) => {
 
-  switch (cell.data.type) {
+  switch (cell.data?.type) {
     case "PD":
       return getPDXML(cell, cells)
     case "VM":

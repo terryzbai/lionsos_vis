@@ -1,6 +1,5 @@
 import { Drawer, Tabs } from 'antd'
-import { useEffect, useState } from 'react'
-import { InputNumber, Form, Input, Button } from 'antd'
+import { useState } from 'react'
 import MappingTable from './mapping-table'
 import AttrsForm from './attrs-form'
 
