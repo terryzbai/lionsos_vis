@@ -115,6 +115,13 @@ export const DiagramEditor = () => {
       group.addPort({
         id: 'port_1',
         group: 'bottom',
+        attrs: {
+          circle: {
+            magnet: true,
+            stroke: '#8f8f8f',
+            r: 5,
+          },
+        },
       })
 
       group.data.color = randColor()
@@ -178,9 +185,41 @@ export const DiagramEditor = () => {
     }
   }
 
+  const updateIRQPosition = (node_id : string, graph : Graph) => {
+    graph.getEdges().map(edge => {
+      if (edge.data.type !== 'irq') return
+
+      if (edge.getSourceNode()?.id === node_id) {
+        const sourceNode = edge.getSourceNode()
+        const edge_type = edge.data.type
+  
+        if (edge_type === 'irq') {
+          const port = sourceNode.getPorts().find(port => port.id === edge.id)
+          const portPosition = edge.getSourcePoint()
+          if (port.group === 'right') {
+            edge.prop('target', { x: portPosition.x + 80, y: portPosition.y })
+          }
+        }
+      } else if (edge.getTargetNode()?.id === node_id) {
+        const sourceNode = edge.getTargetNode()
+        const edge_type = edge.data.type
+  
+        if (edge_type === 'irq') {
+          const port = sourceNode.getPorts().find(port => port.id === edge.id)
+          const portPosition = edge.getTargetPoint()
+          if (port.group === 'right') {
+            edge.prop('target', { x: portPosition.x + 80, y: portPosition.y })
+          }
+        }
+      }
+
+    })
+  }
+
   const reassignEdgesForComponent = (node_id : string, graph : Graph) => {
     const edges = graph.getEdges()
     edges.map(edge => {
+      const edge_type = edge.data.type
       const sourceNode = edge.getSourceNode()
       if (sourceNode) {
         const targetPoint = edge.getTargetPoint()
@@ -188,18 +227,16 @@ export const DiagramEditor = () => {
           { x: sourceNode.position().x, y: sourceNode.position().y, width: sourceNode.size().width, height: sourceNode.size().height},
           { x: targetPoint.x, y: targetPoint.y }
         )
-        console.log("border:", border)
-        console.log(edge, edge.getSourcePortId())
         const portId = edge.getSourcePortId()
-        sourceNode.portProp(portId!, 'group', border)
         if (portId === 'port_1') {
-          const ret = sourceNode.addPort({
+          // TODO: use a better id for port
+          sourceNode.addPort({
             id: edge.id,
             group: 'right',
           })
           edge.setSource({ cell: sourceNode, port: edge.id })
-          console.log(ret)
         }
+        sourceNode.portProp(portId!, 'group', border)
       }
     })
   }
@@ -321,6 +358,8 @@ export const DiagramEditor = () => {
       if (children && children.length) {
         node.prop('originSize', node.getSize())
       }
+
+      updateIRQPosition(node.id, graph)
     })
 
     graph.on('node:collapse', ({ node }: { node: Group }) => {
@@ -350,6 +389,8 @@ export const DiagramEditor = () => {
 
     const embedPadding = 40
     graph.on('node:change:position', ({ node, options }) => {
+      updateIRQPosition(node.id, graph)
+
       if (options.skipParentHandler || ctrlPressed) {
         return
       }
@@ -436,6 +477,14 @@ export const DiagramEditor = () => {
       edge.removeTools()
       edge.setLabels({})
     })
+    
+    graph.on('edge:mouseup', ({ edge }) => {
+      edge.removeTools()
+      edge.setLabels({})
+      
+      if (edge.getSourceNode()) updateIRQPosition(edge.getSourceNode().id, graph)
+      if (edge.getTargetNode()) updateIRQPosition(edge.getTargetNode().id, graph)
+    })
 
     graph.on('edge:changed', ({ edge }) => {
       const sourceNode = edge.getSourceNode()
@@ -454,7 +503,7 @@ export const DiagramEditor = () => {
           target_end_id: null,
         }
       } else if (sourceNode && targetNode) { // CC
-        edge.setSource(sourceNode)
+        // edge.setSource(sourceNode)
         edge.setTarget(targetNode)
 
         edge.attr('line/targetMarker', { tagName: 'circle', r: 2 })

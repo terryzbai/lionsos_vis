@@ -157,7 +157,7 @@ const custom_group = {
             circle: {
               magnet: true,
               stroke: '#8f8f8f',
-              r: 5,
+              r: 0,
             },
           },
         },
