@@ -120,8 +120,6 @@ export const closestBorder = (box : {x : number, y : number, width: number, heig
   const minVerticalDistance = Math.min(distanceToTop, distanceToBottom)
 
   // Find the closest border
-  console.log(minHorizontalDistance, minVerticalDistance)
-  console.log(distanceToTop, distanceToBottom, distanceToLeft, distanceToRight)
   if (minHorizontalDistance < minVerticalDistance) {
     return (distanceToLeft < distanceToRight) ? 'left' : 'right'
   } else {

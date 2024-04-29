@@ -182,14 +182,25 @@ export const DiagramEditor = () => {
     const edges = graph.getEdges()
     edges.map(edge => {
       const sourceNode = edge.getSourceNode()
-      const border = closestBorder(
-        { x: sourceNode.position().x, y: sourceNode.position().y, width: sourceNode.size().width, height: sourceNode.size().height},
-        { x: edge.getTargetPoint().x, y: edge.getTargetPoint().y }
-      )
-      console.log(sourceNode.position())
-      console.log(sourceNode.size())
-      console.log(edge.getTargetPoint())
-      console.log("border:", border)
+      if (sourceNode) {
+        const targetPoint = edge.getTargetPoint()
+        const border = closestBorder(
+          { x: sourceNode.position().x, y: sourceNode.position().y, width: sourceNode.size().width, height: sourceNode.size().height},
+          { x: targetPoint.x, y: targetPoint.y }
+        )
+        console.log("border:", border)
+        console.log(edge, edge.getSourcePortId())
+        const portId = edge.getSourcePortId()
+        sourceNode.portProp(portId!, 'group', border)
+        if (portId === 'port_1') {
+          const ret = sourceNode.addPort({
+            id: edge.id,
+            group: 'right',
+          })
+          edge.setSource({ cell: sourceNode, port: edge.id })
+          console.log(ret)
+        }
+      }
     })
   }
 
@@ -459,7 +470,7 @@ export const DiagramEditor = () => {
         }
       } else { // IRQ
         if (sourceNode) {
-          edge.setSource(sourceNode)
+          // edge.setSource({ cell: sourceNode, port: 'test1'})
           edge.attr('line/sourceMarker', 'async')
           edge.attr('line/targetMarker', { tagName: 'circle', r: 2 })
         }
