@@ -93,3 +93,38 @@ export const randColor = () => {
   const color = "#" + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0').toUpperCase()
   return color
 }
+
+export const closestBorder = (box : {x : number, y : number, width: number, height: number }, point : { x: number, y: number }) => {
+  // box is an object with x, y, width, and height properties
+  // point is an object with x and y properties
+  const boxLeft = box.x
+  const boxRight = box.x + box.width
+  const boxTop = box.y
+  const boxBottom = box.y + box.height
+
+  // Calculate distances to each side
+  const distanceToLeft = Math.abs(point.x - boxLeft)
+  const distanceToRight = Math.abs(point.x - boxRight)
+  const distanceToTop = Math.abs(point.y - boxTop)
+  const distanceToBottom = Math.abs(point.y - boxBottom)
+
+  if (Math.abs(distanceToLeft - distanceToRight) != box.width) {
+    return (distanceToTop < distanceToBottom) ? 'top' : 'bottom'
+  }
+  if (Math.abs(distanceToTop - distanceToBottom) != box.width) {
+    return (distanceToLeft < distanceToRight) ? 'left' : 'right'
+  }
+  
+  // Determine the minimum distance
+  const minHorizontalDistance = Math.min(distanceToLeft, distanceToRight)
+  const minVerticalDistance = Math.min(distanceToTop, distanceToBottom)
+
+  // Find the closest border
+  console.log(minHorizontalDistance, minVerticalDistance)
+  console.log(distanceToTop, distanceToBottom, distanceToLeft, distanceToRight)
+  if (minHorizontalDistance < minVerticalDistance) {
+    return (distanceToLeft < distanceToRight) ? 'left' : 'right'
+  } else {
+    return (distanceToTop < distanceToBottom) ? 'top' : 'bottom'
+  }
+}

@@ -12,7 +12,7 @@ import MemoryManager from '../components/memory-manager'
 import ChannelEditor from '../components/channel-editor'
 import { SDFContent } from '../utils/translator'
 import { MemoryRegion } from '../utils/element'
-import { channelLabelConfig, getValidEndID, randColor } from '../utils/helper'
+import { channelLabelConfig, getValidEndID, randColor, closestBorder } from '../utils/helper'
 import '@antv/x6-react-components/es/menu/style/index.css'
 import '@antv/x6-react-components/es/toolbar/style/index.css'
 import '../App.css'
@@ -29,6 +29,7 @@ import {
   DownloadOutlined,
   UploadOutlined,
 } from '@ant-design/icons'
+import { readdirSync } from 'fs'
 
 /*
 TODO:
@@ -175,6 +176,21 @@ export const DiagramEditor = () => {
     } else {
       console.log("Invalid edge_id")
     }
+  }
+
+  const reassignEdgesForComponent = (node_id : string, graph : Graph) => {
+    const edges = graph.getEdges()
+    edges.map(edge => {
+      const sourceNode = edge.getSourceNode()
+      const border = closestBorder(
+        { x: sourceNode.position().x, y: sourceNode.position().y, width: sourceNode.size().width, height: sourceNode.size().height},
+        { x: edge.getTargetPoint().x, y: edge.getTargetPoint().y }
+      )
+      console.log(sourceNode.position())
+      console.log(sourceNode.size())
+      console.log(edge.getTargetPoint())
+      console.log("border:", border)
+    })
   }
 
   const test_add_groups = () => {
@@ -413,23 +429,62 @@ export const DiagramEditor = () => {
     graph.on('edge:changed', ({ edge }) => {
       const sourceNode = edge.getSourceNode()
       const targetNode = edge.getTargetNode()
-      if (sourceNode) {
+
+      // Neither IRQ nor CC
+      if (!sourceNode && !targetNode) {
+        edge.attr('line/targetMarker', 'block')
+        edge.attr('line/sourceMarker', 'block')
+
+        edge.data = { 
+          type: 'null',
+          source_node: null,
+          source_end_id: null,
+          target_node: null,
+          target_end_id: null,
+        }
+      } else if (sourceNode && targetNode) { // CC
         edge.setSource(sourceNode)
+        edge.setTarget(targetNode)
+
+        edge.attr('line/targetMarker', { tagName: 'circle', r: 2 })
+        edge.attr('line/sourceMarker', { tagName: 'circle', r: 2 })
+        const new_source_end_id = sourceNode ? ((edge.data && edge.data.source_end_id !== 'null') ? edge.data?.source_end_id : getValidEndID(graph.getEdges(), sourceNode.id)) : 'null'
+        const new_target_end_id = targetNode ? ((edge.data && edge.data.target_end_id !== 'null') ? edge.data?.target_end_id : getValidEndID(graph.getEdges(), targetNode.id)) : 'null'
+        edge.data = { 
+          type: 'channel',
+          source_node: sourceNode ? sourceNode.id : null,
+          source_end_id: new_source_end_id,
+          target_node: targetNode ? targetNode.id : null,
+          target_end_id: new_target_end_id,
+        }
+      } else { // IRQ
+        if (sourceNode) {
+          edge.setSource(sourceNode)
+          edge.attr('line/sourceMarker', 'async')
+          edge.attr('line/targetMarker', { tagName: 'circle', r: 2 })
+        }
+        if (targetNode) {
+          edge.setTarget(targetNode)
+          edge.attr('line/sourceMarker', { tagName: 'circle', r: 2 })
+          edge.attr('line/targetMarker', 'async')
+        }
+        const new_target_end_id = targetNode ? ((edge.data && edge.data.target_end_id !== 'null') ? edge.data?.target_end_id : getValidEndID(graph.getEdges(), targetNode.id)) : 'null'
+        edge.data = {
+          type: 'irq',
+          source_node: sourceNode ? sourceNode.id : null,
+          source_end_id: sourceNode ? '1' : 'int',
+          target_node: targetNode ? targetNode.id : null,
+          target_end_id: targetNode ? '1' : 'int',
+        }
+      }
+
+      if (sourceNode) {
+        reassignEdgesForComponent(sourceNode.id, graph)
       }
       if (targetNode) {
-        edge.setTarget(targetNode)
+        reassignEdgesForComponent(targetNode.id, graph)
       }
-      edge.attr('line/targetMarker', { tagName: 'circle', r: 2 })
-      edge.attr('line/sourceMarker', { tagName: 'circle', r: 2 })
-      const new_source_end_id = sourceNode ? ((edge.data && edge.data.source_end_id !== 'null') ? edge.data?.source_end_id : getValidEndID(graph.getEdges(), sourceNode.id)) : 'null'
-      const new_target_end_id = targetNode ? ((edge.data && edge.data.target_end_id !== 'null') ? edge.data?.target_end_id : getValidEndID(graph.getEdges(), targetNode.id)) : 'null'
-      edge.data = {
-        type: 'channel',
-        source_node: sourceNode ? sourceNode.id : null,
-        source_end_id: new_source_end_id,
-        target_node: targetNode ? targetNode.id : null,
-        target_end_id: new_target_end_id,
-      }
+
     })
 
     graph.on('edge:dblclick', ({ edge }) => {
