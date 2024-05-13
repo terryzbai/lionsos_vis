@@ -81,6 +81,53 @@ const custom_nodes = {
   }]
 };
 
+const common_ports ={
+  ports: {
+    groups: {
+      top: {
+        position: 'top',
+        attrs: {
+          circle: {
+            magnet: true,
+            stroke: '#8f8f8f',
+            r: 0,
+          },
+        },
+      },
+      left: {
+        position: 'left',
+        attrs: {
+          circle: {
+            magnet: true,
+            stroke: '#8f8f8f',
+            r: 0,
+          },
+        },
+      },
+      right: {
+        position: 'right',
+        attrs: {
+          circle: {
+            magnet: true,
+            stroke: '#8f8f8f',
+            r: 0,
+          },
+        },
+      },
+      bottom: {
+        position: 'bottom',
+        attrs: {
+          circle: {
+            magnet: true,
+            stroke: '#8f8f8f',
+            r: 0,
+          },
+        },
+      },
+    },
+  }
+} 
+
 const custom_group = {
   'PD': {
     ...commonAttrs,
@@ -119,50 +166,7 @@ const custom_group = {
         strokeWidth: 1,
       },
     },
-    ports: {
-      groups: {
-        top: {
-          position: 'top',
-          attrs: {
-            circle: {
-              magnet: true,
-              stroke: '#8f8f8f',
-              r: 0,
-            },
-          },
-        },
-        left: {
-          position: 'left',
-          attrs: {
-            circle: {
-              magnet: true,
-              stroke: '#8f8f8f',
-              r: 0,
-            },
-          },
-        },
-        right: {
-          position: 'right',
-          attrs: {
-            circle: {
-              magnet: true,
-              stroke: '#8f8f8f',
-              r: 0,
-            },
-          },
-        },
-        bottom: {
-          position: 'bottom',
-          attrs: {
-            circle: {
-              magnet: true,
-              stroke: '#8f8f8f',
-              r: 0,
-            },
-          },
-        },
-      },
-    },
+    ...common_ports
   },
   'VM': {
     ...commonAttrs,
@@ -201,6 +205,7 @@ const custom_group = {
         strokeWidth: 1,
       },
     },
+    ...common_ports
   },
 }
 

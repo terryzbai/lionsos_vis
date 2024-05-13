@@ -77,7 +77,6 @@ const getMRsXML = (MRs : MemoryRegion[]) => {
 }
 
 export const SDFContent = (cells : any, MRs : MemoryRegion[] ) => {
-
   if (cells == null) {
     return ''
   }
