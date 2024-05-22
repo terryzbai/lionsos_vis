@@ -4,18 +4,10 @@ const TestPage = () => {
   const [tlFunction, setTlFunction] = useState(null)
   const [concatWithHelloWorld, setConcatWithHelloWorld] = useState(null)
   const [instance, setInstance] = useState(null)
-
-
-  const test_json = {
-    maps: " | Hello WASM",
-    pds: [
-      { name: 'PD1', priority: 1 },
-      { name: 'PD2', priority: 2 }
-    ]
-  }
+  const [dtb, setDtb] = useState(null)
   
   useEffect(() => {
-    fetch('api.wasm').then(response =>
+    fetch('gui_sdfgen.wasm').then(response =>
       response.arrayBuffer()
     ).then(bytes => {
       const typedArray = new Uint8Array(bytes)
@@ -26,13 +18,37 @@ const TestPage = () => {
       }).then(result => {
         setInstance(result.instance)
         console.log(result.instance)
-        setConcatWithHelloWorld(() => result.instance.exports.concatWithHelloWorld)
+        setConcatWithHelloWorld(() => result.instance.exports.jsonToXml)
       })
     })
   }, []);
 
+  const readDtb = () => {
+    fetch('qemu_arm_virt.dtb').then(response =>
+      response.arrayBuffer()
+    ).then(bytes => {
+      const typedArray = new Uint8Array(bytes)
+      console.log(bytes)
+      setDtb(typedArray)
+    })
+  }
+
   const handleFunc = () => {
     if (instance) {
+      const blob_bytes = new TextDecoder("utf-8").decode(dtb)
+      console.log(blob_bytes.length)
+
+      const test_json = {
+        board: "qemu_arm_virt",
+        dtb: dtb,
+        maps: " | Hello WASM",
+        pds: [
+          { name: 'PD1', priority: 1 },
+          { name: 'PD2', priority: 2 }
+        ]
+      }
+      // console.log(dtb)
+
       // const inputString = "Input string"
       const inputString = JSON.stringify(test_json)
       const inputBuffer = new TextEncoder().encode(inputString)
@@ -52,7 +68,7 @@ const TestPage = () => {
       console.log("u8arr length: " + memory.length);
 
       const resultString = new TextDecoder().decode(memory.subarray(resultPtr, resultPtr + ret_len))
-      console.log("Concatenated String:", resultString)
+      console.log("Result:\n", resultString)
     }
   }
 
@@ -60,6 +76,7 @@ const TestPage = () => {
     <>
     Hello
     <br />
+    <button onClick={readDtb}>read dtb</button>
     <button onClick={handleFunc}>click here</button>
     </>
   )
