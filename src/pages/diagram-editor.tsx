@@ -420,7 +420,7 @@ export const DiagramEditor = () => {
 
     const embedPadding = 40
     graph.on('node:change:position', ({ node, options }) => {
-      updateIRQsPosition(node.id, graph)
+      reassignEdgesForComponent(graph)
 
       if (options.skipParentHandler || ctrlPressed) {
         return
@@ -508,68 +508,104 @@ export const DiagramEditor = () => {
       edge.removeTools()
       edge.setLabels({})
     })
-    
+
     graph.on('edge:mouseup', ({ edge }) => {
-      edge.removeTools()
-      edge.setLabels({})
-
-      reassignEdgesForComponent(graph)
-
-      if (edge.getSourceNode()) updateIRQsPosition(edge.getSourceNode().id, graph)
-      if (edge.getTargetNode()) updateIRQsPosition(edge.getTargetNode().id, graph)
-    })
-
-    graph.on('edge:changed', ({ edge }) => {
       const sourceNode = edge.getSourceNode()
       const targetNode = edge.getTargetNode()
 
-      // Neither IRQ nor CC
-      if (!sourceNode && !targetNode) {
-        edge.attr('line/targetMarker', 'block')
-        edge.attr('line/sourceMarker', 'block')
+      // TODO: replace all '1' with getFreeEndID()
 
-        edge.data = { 
-          type: 'null',
-          source_node: null,
-          source_end_id: null,
-          target_node: null,
-          target_end_id: null,
-        }
-      } else if (sourceNode && targetNode) { // CC
-        // edge.setSource(sourceNode)
-        // edge.setTarget(targetNode)
-
-        edge.attr('line/targetMarker', { tagName: 'circle', r: 2 })
-        edge.attr('line/sourceMarker', { tagName: 'circle', r: 2 })
-        const new_source_end_id = ((edge.data && edge.data.source_end_id !== 'int') ? edge.data?.source_end_id : getValidEndID(graph.getEdges(), sourceNode.id))
-        const new_target_end_id = ((edge.data && edge.data.target_end_id !== 'int') ? edge.data?.target_end_id : getValidEndID(graph.getEdges(), targetNode.id))
+      edge.attr('line/targetMarker', { tagName: 'circle', r: 2 })
+      edge.attr('line/sourceMarker', { tagName: 'circle', r: 2 })
+      if (sourceNode && targetNode) {
         edge.data = { 
           type: 'channel',
-          source_node: sourceNode ? sourceNode.id : null,
-          source_end_id: new_source_end_id,
-          target_node: targetNode ? targetNode.id : null,
-          target_end_id: new_target_end_id,
+          source_node: sourceNode,
+          source_end_id: '1',
+          target_node: targetNode,
+          target_end_id: '1',
         }
-      } else { // IRQ
-        if (sourceNode) {
-          edge.attr('line/sourceMarker', 'async')
-          edge.attr('line/targetMarker', { tagName: 'circle', r: 2 })
+      } else if (!sourceNode && targetNode && edge.data?.source_node) {
+        // Reset source
+        edge.setSource(edge.data?.source_node)
+        
+        edge.data = { 
+          type: 'channel',
+          source_node: edge.data.source_node,
+          source_end_id: edge.data.source_end_id,
+          target_node: targetNode,
+          target_end_id: '1',
         }
-        if (targetNode) {
-          edge.attr('line/sourceMarker', { tagName: 'circle', r: 2 })
-          edge.attr('line/targetMarker', 'async')
+      } else if (sourceNode && !targetNode && edge.data?.target_node) {
+        // Reset target
+        edge.setTarget({ cell: edge.data?.target_node })
+
+        edge.data = { 
+          type: 'channel',
+          source_node: sourceNode,
+          source_end_id: '1',
+          target_node: edge.data.target_node,
+          target_end_id: edge.data.target_end_id,
         }
-        edge.data = {
-          type: 'irq',
-          source_node: sourceNode ? sourceNode.id : null,
-          source_end_id: sourceNode ? '1' : 'int',
-          target_node: targetNode ? targetNode.id : null,
-          target_end_id: targetNode ? '1' : 'int',
-        }
+      } else {
+        // remove edge
+        graph.removeEdge(edge.id)
       }
 
       reassignEdgesForComponent(graph)
     })
+
+    // graph.on('edge:changed', ({ edge }) => {
+    //   const sourceNode = edge.getSourceNode()
+    //   const targetNode = edge.getTargetNode()
+
+    //   // Neither IRQ nor CC
+    //   if (!sourceNode && !targetNode) {
+    //     edge.attr('line/targetMarker', 'block')
+    //     edge.attr('line/sourceMarker', 'block')
+
+    //     edge.data = { 
+    //       type: 'null',
+    //       source_node: null,
+    //       source_end_id: null,
+    //       target_node: null,
+    //       target_end_id: null,
+    //     }
+    //   } else if (sourceNode && targetNode) { // CC
+    //     // edge.setSource(sourceNode)
+    //     // edge.setTarget(targetNode)
+
+    //     edge.attr('line/targetMarker', { tagName: 'circle', r: 2 })
+    //     edge.attr('line/sourceMarker', { tagName: 'circle', r: 2 })
+    //     const new_source_end_id = ((edge.data && edge.data.source_end_id !== 'int') ? edge.data?.source_end_id : getValidEndID(graph.getEdges(), sourceNode.id))
+    //     const new_target_end_id = ((edge.data && edge.data.target_end_id !== 'int') ? edge.data?.target_end_id : getValidEndID(graph.getEdges(), targetNode.id))
+    //     edge.data = { 
+    //       type: 'channel',
+    //       source_node: sourceNode ? sourceNode.id : null,
+    //       source_end_id: new_source_end_id,
+    //       target_node: targetNode ? targetNode.id : null,
+    //       target_end_id: new_target_end_id,
+    //     }
+    //   } else { // IRQ
+    //     if (sourceNode) {
+    //       edge.attr('line/sourceMarker', 'async')
+    //       edge.attr('line/targetMarker', { tagName: 'circle', r: 2 })
+    //     }
+    //     if (targetNode) {
+    //       edge.attr('line/sourceMarker', { tagName: 'circle', r: 2 })
+    //       edge.attr('line/targetMarker', 'async')
+    //     }
+    //     edge.data = {
+    //       type: 'irq',
+    //       source_node: sourceNode ? sourceNode.id : null,
+    //       source_end_id: sourceNode ? '1' : 'int',
+    //       target_node: targetNode ? targetNode.id : null,
+    //       target_end_id: targetNode ? '1' : 'int',
+    //     }
+    //   }
+
+    //   // reassignEdgesForComponent(graph)
+    // })
 
     graph.on('edge:dblclick', ({ edge }) => {
       setCurrentEdgeID(edge.id)
