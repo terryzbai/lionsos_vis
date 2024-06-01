@@ -152,7 +152,7 @@ const custom_group = {
     attrs: {
       label: {
         text: 'Untitled PD',
-        fontSize: 18,
+        fontSize: 16,
         fill: "#000000",
       },
       text: {
