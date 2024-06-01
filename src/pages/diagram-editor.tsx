@@ -396,6 +396,7 @@ export const DiagramEditor = () => {
     })
 
     graph.on('node:collapse', ({ node }: { node: Group }) => {
+      console.log('collapse')
       node.toggleCollapse()
       const collapsed = node.isCollapsed()
       const collapse = (parent: Group) => {
@@ -433,12 +434,13 @@ export const DiagramEditor = () => {
         node.prop('originPosition', node.getPosition())
       }
     
-      const parent = node.getParent()
+      const parent : Group = node.getParent()
       if (parent && parent.isNode()) {
         let originSize = parent.prop('originSize')
         if (originSize == null) {
           originSize = parent.getSize()
           parent.prop('originSize', originSize)
+          console.log('get original size')
         }
     
         let originPosition = parent.prop('originPosition')
@@ -481,7 +483,7 @@ export const DiagramEditor = () => {
           })
         }
     
-        if (hasChange) {
+        if (hasChange && parent.isCollapsed() == false) {
           parent.prop(
             {
               position: { x, y },
