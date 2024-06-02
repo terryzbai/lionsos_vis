@@ -44,7 +44,7 @@ export const DiagramEditor = () => {
   const refGraphContainer = React.createRef<HTMLDivElement>()
   const refStencilContainer = React.createRef<HTMLDivElement>()
   const [ globalGraph, setGlobalGraph ] = useState<Graph>(null)
-  const [ ctrlPressed, setCtrlPressed ] = useState(false)
+  // const [ ctrlPressed, setCtrlPressed ] = useState(false)
   const [ SDFEditorOpen, setSDFEditorOpen ] = useState(false)
   const [ nodeEditorOpen, setNodeEditorOpen ] = useState(false)
   const [ channelEditorOpen, setChannelEditorOpen ] = useState(false)
@@ -57,6 +57,8 @@ export const DiagramEditor = () => {
     {name: 'ethernet', phys_addr: 0xa003000, size: 0x1000, page_size: 1, page_count: null, nodes: []},
     {name: 'gic_vcpu', phys_addr: 0x8040000, size: 0x1000, page_size: 1, page_count: null, nodes: []}
   ])
+
+  var ctrlPressed = false
 
   const graph_config = {
     background: {
@@ -372,32 +374,29 @@ export const DiagramEditor = () => {
     })
 
     graph.on('node:mousedown', ({ node }) => {
-      node.data.originZIndex = node.getZIndex()
-      // node.setZIndex(9999)
       node.toFront({ deep: true })
     })
 
     graph.on('node:mouseup', ({ node }) => {
-      console.log(node)
       if (node.parent == null) {
-        // node.setZIndex(node.data.originZIndex)
         node.toBack({ deep: true })
       } else {
-        node.setZIndex(node.parent.getZIndex() + 1)
+        node.parent.toBack({ deep: true })
       }
-
-      console.log(graph.getCells())
     })
 
-    // setCtrlPressed(false)
     graph.on('node:embedding', ({ e }: { e }) => {
-      setCtrlPressed(e.metaKey || e.ctrlKey)
+      ctrlPressed = e.metaKey || e.ctrlKey
     })
     
     graph.on('node:embedded', ({ node, currentParent }) => {
-      setCtrlPressed(false)
-      const parent_zIndex = currentParent.getZIndex()
-      node.setZIndex(parent_zIndex + 1)
+      ctrlPressed = false
+      currentParent.toBack({ deep: true })
+      var topParent : Cell = currentParent
+      while (topParent.parent) {
+        topParent = topParent.parent
+      }
+      topParent.toBack({ deep: true })
     })
 
     graph.on('node:change:size', ({ node, options }) => {
