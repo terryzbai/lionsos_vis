@@ -371,6 +371,24 @@ export const DiagramEditor = () => {
       node.removeTools()
     })
 
+    graph.on('node:mousedown', ({ node }) => {
+      node.data.originZIndex = node.getZIndex()
+      // node.setZIndex(9999)
+      node.toFront({ deep: true })
+    })
+
+    graph.on('node:mouseup', ({ node }) => {
+      console.log(node)
+      if (node.parent == null) {
+        // node.setZIndex(node.data.originZIndex)
+        node.toBack({ deep: true })
+      } else {
+        node.setZIndex(node.parent.getZIndex() + 1)
+      }
+
+      console.log(graph.getCells())
+    })
+
     // setCtrlPressed(false)
     graph.on('node:embedding', ({ e }: { e }) => {
       setCtrlPressed(e.metaKey || e.ctrlKey)
@@ -396,7 +414,6 @@ export const DiagramEditor = () => {
     })
 
     graph.on('node:collapse', ({ node }: { node: Group }) => {
-      console.log('collapse')
       node.toggleCollapse()
       const collapsed = node.isCollapsed()
       const collapse = (parent: Group) => {
@@ -440,7 +457,6 @@ export const DiagramEditor = () => {
         if (originSize == null) {
           originSize = parent.getSize()
           parent.prop('originSize', originSize)
-          console.log('get original size')
         }
     
         let originPosition = parent.prop('originPosition')
