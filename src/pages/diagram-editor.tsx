@@ -43,6 +43,7 @@ const ToolbarGroup = Toolbar.Group // eslint-disable-line
 export const DiagramEditor = () => {
   const refGraphContainer = React.createRef<HTMLDivElement>()
   const refStencilContainer = React.createRef<HTMLDivElement>()
+  const refTextarea = React.useRef<HTMLTextAreaElement>()
   const [ globalGraph, setGlobalGraph ] = useState<Graph>(null)
   // const [ ctrlPressed, setCtrlPressed ] = useState(false)
   const [ SDFEditorOpen, setSDFEditorOpen ] = useState(false)
@@ -131,10 +132,14 @@ export const DiagramEditor = () => {
     },
   }
 
-  const editSDF = () => {
+  const openSDFEditor = () => {
     setSDFEditorOpen(true)
 
     console.log(globalGraph.toJSON())
+  }
+
+  const focusChange = () => {
+    console.log(refTextarea.current.selectionStart)
   }
 
   const updateMappings = () => {
@@ -654,7 +659,7 @@ export const DiagramEditor = () => {
           <Item name="downloadDiagram" icon={<SaveOutlined />} tooltip="Save Diagram"></Item>
         </ToolbarGroup>
         <ToolbarGroup>
-          <Item name="editSDF" icon={<EditOutlined />} tooltip="Edit SDF" onClick={editSDF}></Item>
+          <Item name="editSDF" icon={<EditOutlined />} tooltip="Edit SDF" onClick={openSDFEditor}></Item>
           <Item name="uploadeSDF" icon={<UploadOutlined />} tooltip="Upload SDF"></Item>
           <Item name="downloadSDF" icon={<DownloadOutlined />} tooltip="Download SDF"></Item>
         </ToolbarGroup>
@@ -682,12 +687,19 @@ export const DiagramEditor = () => {
       <Modal
         title="Modal 1000px width"
         centered
+        forceRender
         open={SDFEditorOpen}
         onOk={() => setSDFEditorOpen(false)}
         onCancel={() => setSDFEditorOpen(false)}
         width={1000}
       >
-        <textarea value={SDFContent(globalGraph?.toJSON().cells, MRs)} style={ {width: '100%', height: '500px'} }></textarea>
+        <textarea
+          ref={refTextarea}
+          value={SDFContent(globalGraph?.toJSON().cells, MRs)}
+          onChange={() => console.log('111')}
+          onClick={focusChange}
+          style={ {width: '100%', height: '500px'} }>
+        </textarea>
       </Modal>
     </div>
   )
