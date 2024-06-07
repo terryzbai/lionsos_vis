@@ -350,6 +350,7 @@ export const DiagramEditor = () => {
     })
 
     graph.on('node:dblclick', (ev) => {
+      console.log("dblclick")
       setCurrentNodeID(ev.node.id)
       setNodeEditorOpen(true)
       // dispatch(openNodeEditor(ev.node.id))
@@ -378,11 +379,11 @@ export const DiagramEditor = () => {
       node.removeTools()
     })
 
-    graph.on('node:mousedown', ({ node }) => {
+    graph.on('node:mouseenter', ({ node }) => {
       node.toFront({ deep: true })
     })
 
-    graph.on('node:mouseup', ({ node }) => {
+    graph.on('node:mouseleave', ({ node }) => {
       if (node.parent == null) {
         node.toBack({ deep: true })
       } else {
