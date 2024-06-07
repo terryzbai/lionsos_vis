@@ -10,6 +10,7 @@ import NodeEditor from '../components/node-editor'
 import { stencil_group, custom_nodes, custom_group } from '../components/nodes'
 import MemoryManager from '../components/memory-manager'
 import ChannelEditor from '../components/channel-editor'
+import TemplateList from '../components/template-list'
 import { SDFContent } from '../utils/translator'
 import { MemoryRegion } from '../utils/element'
 import { channelLabelConfig, getValidEndID, randColor, closestBorder } from '../utils/helper'
@@ -47,6 +48,7 @@ export const DiagramEditor = () => {
   const [ globalGraph, setGlobalGraph ] = useState<Graph>(null)
   // const [ ctrlPressed, setCtrlPressed ] = useState(false)
   const [ SDFEditorOpen, setSDFEditorOpen ] = useState(false)
+  const [ templateListOpen, setTemplateListOpen ] = useState(false)
   const [ nodeEditorOpen, setNodeEditorOpen ] = useState(false)
   const [ channelEditorOpen, setChannelEditorOpen ] = useState(false)
   const [ currentEdgeID, setCurrentEdgeID ] = useState('')
@@ -134,8 +136,11 @@ export const DiagramEditor = () => {
 
   const openSDFEditor = () => {
     setSDFEditorOpen(true)
-
     console.log(globalGraph.toJSON())
+  }
+
+  const openTemplateList = () => {
+    setTemplateListOpen(true)
   }
 
   const focusChange = () => {
@@ -350,7 +355,6 @@ export const DiagramEditor = () => {
     })
 
     graph.on('node:dblclick', (ev) => {
-      console.log("dblclick")
       setCurrentNodeID(ev.node.id)
       setNodeEditorOpen(true)
       // dispatch(openNodeEditor(ev.node.id))
@@ -662,7 +666,7 @@ export const DiagramEditor = () => {
         <ToolbarGroup>
           <Item name="editSDF" icon={<EditOutlined />} tooltip="Edit SDF" onClick={openSDFEditor}></Item>
           <Item name="uploadeSDF" icon={<UploadOutlined />} tooltip="Upload SDF"></Item>
-          <Item name="downloadSDF" icon={<DownloadOutlined />} tooltip="Download SDF"></Item>
+          <Item name="downloadTemplates" icon={<DownloadOutlined />} tooltip="Download Templates" onClick={openTemplateList}></Item>
         </ToolbarGroup>
       </Toolbar>
       <div className="stencil-app">
@@ -702,6 +706,7 @@ export const DiagramEditor = () => {
           style={ {width: '100%', height: '500px'} }>
         </textarea>
       </Modal>
+      <TemplateList templateListOpen={templateListOpen} setTemplateListOpen={setTemplateListOpen}></TemplateList>
     </div>
   )
 }
