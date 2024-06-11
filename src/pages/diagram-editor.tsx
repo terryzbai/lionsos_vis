@@ -30,13 +30,6 @@ import {
   DownloadOutlined,
   UploadOutlined,
 } from '@ant-design/icons'
-import { readdirSync } from 'fs'
-
-/*
-TODO:
-[ ] Set highest zIndex for the node being dragged
-[ ] Update states for embedded/detached nodes 
-*/
 
 const Item = Toolbar.Item // eslint-disable-line
 const ToolbarGroup = Toolbar.Group // eslint-disable-line
@@ -46,7 +39,6 @@ export const DiagramEditor = () => {
   const refStencilContainer = React.createRef<HTMLDivElement>()
   const refTextarea = React.useRef<HTMLTextAreaElement>()
   const [ globalGraph, setGlobalGraph ] = useState<Graph>(null)
-  // const [ ctrlPressed, setCtrlPressed ] = useState(false)
   const [ SDFEditorOpen, setSDFEditorOpen ] = useState(false)
   const [ templateListOpen, setTemplateListOpen ] = useState(false)
   const [ nodeEditorOpen, setNodeEditorOpen ] = useState(false)
@@ -140,6 +132,8 @@ export const DiagramEditor = () => {
   }
 
   const openTemplateList = () => {
+    const PDs = globalGraph.getCells().filter(cell => cell.data.type === 'PD')
+    const PDNodes = PDs?.map(PD => {return {"name": PD.data.attrs.name, "node_id": PD.id}})
     setTemplateListOpen(true)
   }
 
@@ -671,8 +665,7 @@ export const DiagramEditor = () => {
       </Toolbar>
       <div className="stencil-app">
         <div className="app-stencil" ref={refStencilContainer} />
-        <div className="app-content" ref={refGraphContainer}>
-        </div>
+        <div className="app-content" ref={refGraphContainer} />
       </div>
       <NodeEditor
         node_id={currentNodeID}
@@ -706,7 +699,7 @@ export const DiagramEditor = () => {
           style={ {width: '100%', height: '500px'} }>
         </textarea>
       </Modal>
-      <TemplateList templateListOpen={templateListOpen} setTemplateListOpen={setTemplateListOpen}></TemplateList>
+      <TemplateList templateListOpen={templateListOpen} setTemplateListOpen={setTemplateListOpen} graph={globalGraph}></TemplateList>
     </div>
   )
 }

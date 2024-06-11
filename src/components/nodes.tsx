@@ -139,7 +139,7 @@ const custom_group = {
       color: '#FFFFFF',
       parent: true,
       attrs: {
-        name: 'Untitled PD',
+        name: 'UntitledPD',
         priority: 0,
         budget: 0,
         period: 0,
@@ -151,7 +151,7 @@ const custom_group = {
     },
     attrs: {
       label: {
-        text: 'Untitled PD',
+        text: 'UntitledPD',
         fontSize: 16,
         fill: "#000000",
       },
@@ -178,7 +178,7 @@ const custom_group = {
       color: '#FFFFFF',
       parent: false,
       attrs: {
-        name: 'Untitled VM',
+        name: 'UntitledVM',
         id: 0,
         priority: 0,
         budget: 0,
@@ -190,7 +190,7 @@ const custom_group = {
     },
     attrs: {
       label: {
-        text: 'Untitled VM',
+        text: 'UntitledVM',
         fontSize: 12,
         fill: "#000000",
       },
@@ -211,7 +211,7 @@ const custom_group = {
 
 export const init_node_data = {
   'PD': {
-    name: 'Untitled PD',
+    name: 'UntitledPD',
     priority: 0,
     budget: 0,
     period: 0,
@@ -223,7 +223,7 @@ export const init_node_data = {
     parent: '',
   },
   'VM': {
-    name: 'Untitled VM',
+    name: 'UntitledVM',
     priority: 0,
     budget: 0,
     period: 0,

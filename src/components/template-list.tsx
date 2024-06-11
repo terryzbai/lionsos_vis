@@ -8,9 +8,36 @@ interface DataType {
   content: string;
 }
 
-export default function TemplateList({ templateListOpen, setTemplateListOpen }) {
-  const fileContent = "Hello World"
-  // const blob = new Blob([fileContent], { type: 'text/plain' });
+export default function TemplateList({ templateListOpen, setTemplateListOpen, graph }) {
+
+  const toTemplateList = () => {
+
+    const PDs = graph?.getCells().filter(cell => cell.data.type === 'PD')
+    return PDs?.map(PD => {
+      const edges = graph.getEdges()
+      const channels = edges?.map(edge => {
+        if (edge.getSourceNode().id == PD.id) {
+          const targetName = edge.getTargetNode()?.data.attrs.name
+          return {"name": targetName, "end_id": edge.data.source_end_id}
+        } else if (edge.getTargetNode().id == PD.id) {
+          const sourceName = edge.getSourceNode()?.data.attrs.name
+          return {"name": sourceName, "end_id": edge.data.target_end_id}
+        }
+        return
+      })?.filter(entry => entry != null)
+
+      console.log(PD.data.attrs.name, channels)
+      const channels_definition = channels.map(channel => "#define " + channel.name + " " + channel.end_id)
+      const content = "#pragma once\n\n" + channels_definition?.join("\n")
+
+      return {
+        key: PD.id + 'cheaderfile',
+        name: PD.data.attrs.name + '.h',
+        type: 'C Header File',
+        content: content,
+      }
+    })
+  }
 
   const columns : TableColumnsType<DataType> = [
     {
@@ -77,7 +104,7 @@ export default function TemplateList({ templateListOpen, setTemplateListOpen }) 
       <div>
       <Table
         columns={columns}
-        dataSource={data}
+        dataSource={toTemplateList()}
       />
       </div>
     </Modal>
