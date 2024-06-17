@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import init, {greet} from "validator-wasm"
 
 const TestPage = () => {
   const [tlFunction, setTlFunction] = useState(null)
@@ -7,6 +8,7 @@ const TestPage = () => {
   const [dtb, setDtb] = useState(null)
   const [drivers, setDrivers] = useState(null)
   const [deviceClass, setDeviceClass] = useState(null)
+  const [SDF, setSDF] = useState("")
 
   const sDDFURL = `https://raw.githubusercontent.com/au-ts/sddf/862feed2485d5a6f5f31f80664dd6ad5374b757c/`
   const driver_paths = [
@@ -114,7 +116,15 @@ const TestPage = () => {
 
       const resultString = new TextDecoder().decode(memory.subarray(resultPtr, resultPtr + ret_len))
       console.log("Result:\n", resultString)
+      setSDF(resultString)
     }
+  }
+
+  const handleValidation = () => {
+    init().then((_exports) => {
+      alert(greet(SDF))
+    });
+    // wasm.greet()
   }
 
   return (
@@ -123,6 +133,9 @@ const TestPage = () => {
     <br />
     <button onClick={readDtb}>read dtb</button>
     <button onClick={handleFunc}>click here</button>
+    <br />
+    <br />
+    <button onClick={handleValidation}>Validate</button>
     </>
   )
 }
