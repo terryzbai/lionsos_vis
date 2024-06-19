@@ -14,6 +14,7 @@ import TemplateList from '../components/template-list'
 import { SDFContent } from '../utils/translator'
 import { MemoryRegion } from '../utils/element'
 import { channelLabelConfig, getValidEndID, randColor, closestBorder } from '../utils/helper'
+import SDFGenerator from '../components/sdf-generator'
 import '@antv/x6-react-components/es/menu/style/index.css'
 import '@antv/x6-react-components/es/toolbar/style/index.css'
 import '../App.css'
@@ -45,6 +46,8 @@ export const DiagramEditor = () => {
   const [ channelEditorOpen, setChannelEditorOpen ] = useState(false)
   const [ currentEdgeID, setCurrentEdgeID ] = useState('')
   const [ currentNodeID, setCurrentNodeID ] = useState('')
+  const [ toGenerateSDF, setToGenerateSDF ] = useState<boolean>(false)
+  const [ SDFText, setSDFText ] = useState('')
   const [ MRs, setMRs] = useState<Array<MemoryRegion>>([
     {name: 'uart', phys_addr: 0x9000000, size: 0x1000, page_size: 1, page_count: null, nodes: []},
     {name: 'shared_buffer', phys_addr: 0x9001000, size: 0x1000, page_size: 1, page_count: null, nodes: []},
@@ -128,7 +131,7 @@ export const DiagramEditor = () => {
 
   const openSDFEditor = () => {
     setSDFEditorOpen(true)
-    console.log(globalGraph.toJSON())
+    setToGenerateSDF(true)
   }
 
   const openTemplateList = () => {
@@ -578,58 +581,6 @@ export const DiagramEditor = () => {
       reassignEdgesForComponent(graph)
     })
 
-    // graph.on('edge:changed', ({ edge }) => {
-    //   const sourceNode = edge.getSourceNode()
-    //   const targetNode = edge.getTargetNode()
-
-    //   // Neither IRQ nor CC
-    //   if (!sourceNode && !targetNode) {
-    //     edge.attr('line/targetMarker', 'block')
-    //     edge.attr('line/sourceMarker', 'block')
-
-    //     edge.data = { 
-    //       type: 'null',
-    //       source_node: null,
-    //       source_end_id: null,
-    //       target_node: null,
-    //       target_end_id: null,
-    //     }
-    //   } else if (sourceNode && targetNode) { // CC
-    //     // edge.setSource(sourceNode)
-    //     // edge.setTarget(targetNode)
-
-    //     edge.attr('line/targetMarker', { tagName: 'circle', r: 2 })
-    //     edge.attr('line/sourceMarker', { tagName: 'circle', r: 2 })
-    //     const new_source_end_id = ((edge.data && edge.data.source_end_id !== 'int') ? edge.data?.source_end_id : getValidEndID(graph.getEdges(), sourceNode.id))
-    //     const new_target_end_id = ((edge.data && edge.data.target_end_id !== 'int') ? edge.data?.target_end_id : getValidEndID(graph.getEdges(), targetNode.id))
-    //     edge.data = { 
-    //       type: 'channel',
-    //       source_node: sourceNode ? sourceNode.id : null,
-    //       source_end_id: new_source_end_id,
-    //       target_node: targetNode ? targetNode.id : null,
-    //       target_end_id: new_target_end_id,
-    //     }
-    //   } else { // IRQ
-    //     if (sourceNode) {
-    //       edge.attr('line/sourceMarker', 'async')
-    //       edge.attr('line/targetMarker', { tagName: 'circle', r: 2 })
-    //     }
-    //     if (targetNode) {
-    //       edge.attr('line/sourceMarker', { tagName: 'circle', r: 2 })
-    //       edge.attr('line/targetMarker', 'async')
-    //     }
-    //     edge.data = {
-    //       type: 'irq',
-    //       source_node: sourceNode ? sourceNode.id : null,
-    //       source_end_id: sourceNode ? '1' : 'int',
-    //       target_node: targetNode ? targetNode.id : null,
-    //       target_end_id: targetNode ? '1' : 'int',
-    //     }
-    //   }
-
-    //   // reassignEdgesForComponent(graph)
-    // })
-
     graph.on('edge:dblclick', ({ edge }) => {
       setCurrentEdgeID(edge.id)
       setChannelEditorOpen(true)
@@ -693,13 +644,15 @@ export const DiagramEditor = () => {
       >
         <textarea
           ref={refTextarea}
-          value={SDFContent(globalGraph?.toJSON().cells, MRs)}
+          // value={SDFContent(globalGraph?.toJSON().cells, MRs)}
+          value={SDFText}
           onChange={() => console.log('111')}
           onClick={focusChange}
           style={ {width: '100%', height: '500px'} }>
         </textarea>
       </Modal>
       <TemplateList templateListOpen={templateListOpen} setTemplateListOpen={setTemplateListOpen} graph={globalGraph}></TemplateList>
+      <SDFGenerator globalGraph={globalGraph} toGenerateSDF={toGenerateSDF} setToGenerateSDF={setToGenerateSDF} setSDFText={setSDFText} />
     </div>
   )
 }

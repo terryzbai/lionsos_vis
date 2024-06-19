@@ -26,7 +26,6 @@ export default function TemplateList({ templateListOpen, setTemplateListOpen, gr
         return
       })?.filter(entry => entry != null)
 
-      console.log(PD.data.attrs.name, channels)
       const channels_definition = channels.map(channel => "#define " + channel.name + " " + channel.end_id)
       const content = "#pragma once\n\n" + channels_definition?.join("\n")
 
