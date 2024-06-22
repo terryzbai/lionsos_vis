@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import init, {greet} from "validator-wasm"
 
-const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText }) => {
+const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText, MRs }) => {
   const [sdfGenWasm, setSdfGenWasm] = useState(null)
   const [instance, setInstance] = useState(null)
   const [dtb, setDtb] = useState(null)
@@ -24,21 +24,33 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
     {class: "network", path: "serial/config.json"},
   ]
 
+  const getMRJson = (MRs) => {
+    if (MRs == null) return []
+
+    const mrs = MRs.map(map => {
+      return {
+        name: map.name,
+        size: parseInt(map.size),
+        phys_addr: parseInt(map.phys_addr),
+        page_size: parseInt(map.page_size),
+      }
+    })
+
+    return mrs
+  }
+
   const getPDJson = (PDs) => {
     if (PDs == null) return []
 
-    const pds = []
-    PDs.map(PD => {
+    const pds = PDs.map(PD => {
       const children = getPDJson(PD.children)
-      const attrs = {
+      return {
         ...PD.data.attrs,
         children: children,
         type: PD.data.type,
         maps: PD.data.mappings,
         irqs: PD.data.irqs
       }
-      console.log(attrs)
-      pds.push(attrs)
     })
     return pds
   }
@@ -46,21 +58,18 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
   const getChannelJson = (edges) => {
     if (edges == null) return []
 
-    const channels = []
-    edges.map(edge => {
-      const attrs = {
+    const channels = edges.map(edge => {
+      return {
         pd1: edge.data.source_node?.data.attrs.name,
         pd2: edge.data.target_node?.data.attrs.name,
         pd1_end_id: parseInt(edge.data.source_end_id),
         pd2_end_id: parseInt(edge.data.target_end_id),
       }
-      console.log(attrs)
-      channels.push(attrs)
     })
     return channels
   }
 
-  const sdf_generate = () => {
+  const generateSDF = () => {
     const attrJson = {
       board: "qemu_arm_virt",
       dtb: Array.from(dtb),
@@ -73,10 +82,10 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
 
     const PDs = globalGraph?.getNodes().filter(node => node.data.type == "PD").filter(node => node.parent == null)
     const channels = globalGraph?.getEdges().filter(edge => edge.data.type == "channel")
-    console.log(channels)
     
     attrJson.pds = getPDJson(PDs)
     attrJson.channels = getChannelJson(channels)
+    attrJson.mrs = getMRJson(MRs)
     console.log(attrJson)
     const inputString = JSON.stringify(attrJson)
     const inputBuffer = new TextEncoder().encode(inputString)
@@ -94,6 +103,7 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
     console.log("Result:\n", resultString)
 
     setSDFText(resultString)
+    setSDF(resultString)
     setToGenerateSDF(false)
   }
 
@@ -163,7 +173,7 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
 
   useEffect(() => {
     if (toGenerateSDF) {
-      sdf_generate()
+      generateSDF()
       setToGenerateSDF(false)
     }
   }, [toGenerateSDF])

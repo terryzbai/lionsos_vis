@@ -652,7 +652,7 @@ export const DiagramEditor = () => {
         </textarea>
       </Modal>
       <TemplateList templateListOpen={templateListOpen} setTemplateListOpen={setTemplateListOpen} graph={globalGraph}></TemplateList>
-      <SDFGenerator globalGraph={globalGraph} toGenerateSDF={toGenerateSDF} setToGenerateSDF={setToGenerateSDF} setSDFText={setSDFText} />
+      <SDFGenerator globalGraph={globalGraph} toGenerateSDF={toGenerateSDF} setToGenerateSDF={setToGenerateSDF} setSDFText={setSDFText} MRs={MRs} />
     </div>
   )
 }
