@@ -39,6 +39,18 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
     return mrs
   }
 
+  const getMapJson = (mappings) => {
+    return mappings.map(map => {
+      console.log(map)
+      return {
+        ...map,
+        perm_r: map.perms.includes('r'),
+        perm_w: map.perms.includes('w'),
+        perm_x: map.perms.includes('x'),
+      }
+    })
+  }
+
   const getPDJson = (PDs) => {
     if (PDs == null) return []
 
@@ -48,7 +60,7 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
         ...PD.data.attrs,
         children: children,
         type: PD.data.type,
-        maps: PD.data.mappings,
+        maps: getMapJson(PD.data.mappings),
         irqs: PD.data.irqs
       }
     })
