@@ -7,13 +7,12 @@ import { Snapline } from '@antv/x6-plugin-snapline'
 import { Toolbar } from '@antv/x6-react-components'
 import { Group } from '../components/group'
 import NodeEditor from '../components/node-editor'
-import { stencil_group, custom_nodes, custom_group } from '../components/nodes'
+import { stencilRender, stencil_group } from '../components/nodes'
 import MemoryManager from '../components/memory-manager'
 import ChannelEditor from '../components/channel-editor'
 import TemplateList from '../components/template-list'
-import { SDFContent } from '../utils/translator'
 import { MemoryRegion } from '../utils/element'
-import { channelLabelConfig, getValidEndID, randColor, closestBorder } from '../utils/helper'
+import { channelLabelConfig, getValidEndID, randColor, closestBorder, reassignEdgesForComponent } from '../utils/helper'
 import SDFGenerator from '../components/sdf-generator'
 import '@antv/x6-react-components/es/menu/style/index.css'
 import '@antv/x6-react-components/es/toolbar/style/index.css'
@@ -99,7 +98,6 @@ export const DiagramEditor = () => {
 
   const stencil_config = {
     title: 'Components',
-    // target: graph,
     search(cell, keyword) {
       return cell.shape.indexOf(keyword) !== -1
     },
@@ -109,23 +107,7 @@ export const DiagramEditor = () => {
     stencilGraphHeight: 0,
     groups: stencil_group,
     getDropNode(node) {
-      const node_name = node.data?.name
-
-      const group = new Group(custom_group[String(node_name)])
-      group.addPort({
-        id: 'port_1',
-        group: 'bottom',
-        attrs: {
-          circle: {
-            magnet: true,
-            stroke: '#8f8f8f',
-            r: 5,
-          },
-        },
-      })
-
-      group.data.color = randColor()
-      return group
+      return node.data?.newNode()
     },
   }
 
@@ -162,6 +144,10 @@ export const DiagramEditor = () => {
 
   const getNodeData = (node_id : string) => {
     const node = globalGraph?.getNodes().find(node => node.id === node_id)
+    if (node?.data.subsystem) {
+      const subsystem = globalGraph?.getNodes().find(node => node.id === node.data.subsystem)
+      return subsystem?.data
+    }
     return node?.data
   }
 
@@ -236,89 +222,42 @@ export const DiagramEditor = () => {
     })
   }
 
-  const reassignEdgesForComponent = (graph : Graph) => {
-    const edges = graph.getEdges()
-    edges.map(edge => {
-      const sourceNode = edge.getSourceNode()
-      const targetNode = edge.getTargetNode()
-      if (sourceNode) {
-        const targetPoint = edge.getTargetPoint()
-        const border = closestBorder(
-          { x: sourceNode.position().x, y: sourceNode.position().y, width: sourceNode.size().width, height: sourceNode.size().height},
-          { x: targetPoint.x, y: targetPoint.y }
-        )
-        const portId = edge.getSourcePortId()
-        const source_port = sourceNode.id + edge.id
-        if (portId === 'port_1' || portId === null) {
-          // TODO: use a better id for port
-          sourceNode.addPort({
-            id: source_port,
-            group: border,
-          })
-          edge.setSource({ cell: sourceNode, port: source_port })
-        } else {
-          sourceNode.portProp(source_port!, 'group', border)
-        }
-      }
-      if (targetNode) {
-        const sourcePoint = edge.getSourcePoint()
-        const border = closestBorder(
-          { x: targetNode.position().x, y: targetNode.position().y, width: targetNode.size().width, height: targetNode.size().height},
-          { x: sourcePoint.x, y: sourcePoint.y }
-        )
-        const portId = edge.getTargetPortId()
-        
-        const target_port = targetNode.id + edge.id
-        if (portId === 'port_1' || portId == null) {
-          // TODO: use a better id for port
-          targetNode.addPort({
-            id: target_port,
-            group: border,
-          })
-          edge.setTarget({ cell: targetNode, port: target_port })
-        } else {
-          targetNode.portProp(target_port!, 'group', border)
-        }
-      }
-    })
-  }
+  // const test_add_groups = () => {
+  //   const cells: Cell[] = []
+  //   const nodes = []
+  //   const edges = []
+  //   nodes.push({...custom_group['PD'], id: `11111`})
+  //   nodes.push({...custom_group['PD'], id: `22222`})
+  //   nodes.push({...custom_group['PD'], id: `33333`})
+  //   nodes.push({...custom_group['PD'], id: `44444`})
 
-  const test_add_groups = () => {
-    const cells: Cell[] = []
-    const nodes = []
-    const edges = []
-    nodes.push({...custom_group['PD'], id: `11111`})
-    nodes.push({...custom_group['PD'], id: `22222`})
-    nodes.push({...custom_group['PD'], id: `33333`})
-    nodes.push({...custom_group['PD'], id: `44444`})
+  //   const ERLayoutInstance = new ERLayout({
+  //     nodes,
+  //     edges,
+  //     nodeMinGap: 240
+  //   })
 
-    const ERLayoutInstance = new ERLayout({
-      nodes,
-      edges,
-      nodeMinGap: 240
-    })
-
-    ERLayoutInstance.execute().then((res) => {
-      console.log(nodes, edges)
-      nodes.forEach((item) => {
-        const new_group = new Group(item)
-        new_group.addPort({
-          id: 'port_1',
-          group: 'bottom',
-        })
+  //   ERLayoutInstance.execute().then((res) => {
+  //     console.log(nodes, edges)
+  //     nodes.forEach((item) => {
+  //       const new_group = new Group(item)
+  //       new_group.addPort({
+  //         id: 'port_1',
+  //         group: 'bottom',
+  //       })
   
-        new_group.data.color = randColor()
-        cells.push(new_group)
-      })
-      edges.forEach((item) => {
-        cells.push(globalGraph.createEdge(item))
-      })
-      globalGraph.resetCells(cells)
-      globalGraph.zoomToFit({ padding: 20, maxScale: 1 })
+  //       new_group.data.color = randColor()
+  //       cells.push(new_group)
+  //     })
+  //     edges.forEach((item) => {
+  //       cells.push(globalGraph.createEdge(item))
+  //     })
+  //     globalGraph.resetCells(cells)
+  //     globalGraph.zoomToFit({ padding: 20, maxScale: 1 })
 
-      console.log(globalGraph.toJSON())
-    })
-  }
+  //     console.log(globalGraph.toJSON())
+  //   })
+  // }
 
   useEffect(() => {
     const graph = new Graph({
@@ -341,18 +280,11 @@ export const DiagramEditor = () => {
 
     refStencilContainer.current.appendChild(stencil.container)
 
-    // Render components on tool bar
-    Object.keys(custom_nodes).forEach((group_name) => {
-      const nodes = custom_nodes[group_name as keyof typeof custom_nodes].map((config) => {
-        return graph.createNode(config)
-      })
-      
-      // stencil.load()
-      stencil.load(nodes, group_name)
-    })
+    stencilRender(graph, stencil)
 
-    graph.on('node:dblclick', (ev) => {
-      setCurrentNodeID(ev.node.id)
+    graph.on('node:dblclick', ({ node }) => {
+      // console.log(ev.node.)
+      setCurrentNodeID(node.id)
       setNodeEditorOpen(true)
       // dispatch(openNodeEditor(ev.node.id))
     })
@@ -442,6 +374,12 @@ export const DiagramEditor = () => {
       }
     
       collapse(node)
+    })
+
+    graph.on('node:added', ({ node }) => {
+      if (node.data.renderChildrenNodes) {
+        node.data.renderChildrenNodes(graph, node)
+      }
     })
 
     const embedPadding = 40

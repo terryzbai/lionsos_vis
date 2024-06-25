@@ -1,6 +1,30 @@
 import { useEffect } from 'react'
 import { InputNumber, Form, Input, Button, Checkbox } from 'antd'
 
+const getFormItem = (attr) => {
+  const inputType = attr?.type
+  const attrName = attr?.name
+
+  const inputNodes = {
+    'number': <InputNumber min={attr?.min} max={attr?.max} />,
+    'boolean': <Checkbox />,
+    'string': <Input />
+  }
+  const inputNode = inputNodes[inputType]
+
+  return (
+    <Form.Item
+      label={attrName}
+      name={attrName}
+      rules={[{ required: attr?.required }]}
+      valuePropName={inputType === 'boolean' ? 'checked' : 'value'}
+      key={attrName}
+    >
+      {inputNode}
+    </Form.Item>
+  )
+}
+
 export default function AttrsForm({ node_id, setNodeEditorOpen, getNodeData, updateNodeData }) {
   const node_data = getNodeData(node_id)
   const node_attrs = node_data?.attrs
@@ -38,7 +62,10 @@ export default function AttrsForm({ node_id, setNodeEditorOpen, getNodeData, upd
         // onFinishFailed={onFinishFailed}
         autoComplete="off"
       >
-        <Form.Item
+        {node_data?.editable_attrs.map(attr => {
+          return getFormItem(attr)
+        })}
+        {/* <Form.Item
           label="Name"
           name="name"
           rules={[{ required: true }]}
@@ -93,7 +120,7 @@ export default function AttrsForm({ node_id, setNodeEditorOpen, getNodeData, upd
           rules={[{ required: false }]}
         >
           <Input />
-        </Form.Item>
+        </Form.Item> */}
         <Button htmlType="submit" type="primary">
           Save
         </Button>

@@ -1,239 +1,29 @@
+import { pd_preview_attrs } from "./os-components/pd"
+import { vm_preview_attrs } from "./os-components/vm"
+import { serial_preview_attrs } from "./os-components/serial"
 
-const commonAttrs = {
-  ports: {
-    groups: {
-      bottom: {
-        position: 'bottom',
-        attrs: {
-          circle: {
-            magnet: true,
-            stroke: '#8f8f8f',
-            r: 5,
-          },
-        },
-      },
-    },
+const group_registration = {
+  'Basic': {
+    'PD': pd_preview_attrs,
+    'VM': vm_preview_attrs,
   },
-}
-
-const stencil_group = [
-  {
-    name: 'Basic',
-    title: 'Basic',
-  }, {
-    name: 'Advanced',
-    title: 'Advanced',
+  'Subsystem': {
+    'serial': serial_preview_attrs,
   }
-]
-
-const custom_nodes = {
-  'Basic': [{
-    ...commonAttrs,
-    shape: 'rect',
-    x: 40,
-    y: 40,
-    width: 80,
-    height: 40,
-    label: 'PD',
-    data: {
-      name: 'PD',
-      cellType: 'group',
-    },
-    attrs: {
-      body: {
-        fill: '#efdbff',
-        stroke: '#9254de',
-        strokeWidth: 1,
-      },
-    },
-  }, {
-    ...commonAttrs,
-    shape: 'rect',
-    x: 100,
-    y: 40,
-    width: 60,
-    height: 50,
-    label: 'VM',
-    data: {
-      name: 'VM',
-      cellType: 'group',
-    },
-    attrs: {
-      text: {
-        textAnchor: "middle",
-      },
-      body: {
-        fill: '#ffd591',
-        stroke: '#ffa940',
-        strokeWidth: 1,
-      },
-    },
-  },
-  ],
-  'Advanced': [{
-    ...commonAttrs,
-    shape: 'rect',
-    x: 40,
-    y: 40,
-    width: 80,
-    height: 40,
-    label: 'sDDF',
-  }]
-};
-
-const common_ports ={
-  ports: {
-    groups: {
-      top: {
-        position: 'top',
-        attrs: {
-          circle: {
-            magnet: true,
-            stroke: '#8f8f8f',
-            r: 0,
-          },
-        },
-      },
-      left: {
-        position: 'left',
-        attrs: {
-          circle: {
-            magnet: true,
-            stroke: '#8f8f8f',
-            r: 0,
-          },
-        },
-      },
-      right: {
-        position: 'right',
-        attrs: {
-          circle: {
-            magnet: true,
-            stroke: '#8f8f8f',
-            r: 0,
-          },
-        },
-      },
-      bottom: {
-        position: 'bottom',
-        attrs: {
-          circle: {
-            magnet: true,
-            stroke: '#8f8f8f',
-            r: 0,
-          },
-        },
-      },
-    },
-  }
-} 
-
-const custom_group = {
-  'PD': {
-    ...commonAttrs,
-    shape: 'rect',
-    width: 200,
-    height: 120,
-    data: {
-      type: 'PD',
-      color: '#FFFFFF',
-      parent: true,
-      attrs: {
-        name: 'UntitledPD',
-        priority: 0,
-        budget: 0,
-        period: 0,
-        pp: 0,
-        prog_img: 'default.elf',
-      },
-      mappings: [],
-      irqs: [],
-    },
-    attrs: {
-      label: {
-        text: 'UntitledPD',
-        fontSize: 16,
-        fill: "#000000",
-      },
-      text: {
-        textAnchor: "left",
-        x: 0,
-        y: 12,
-      },
-      body: {
-        fill: '#efdbff',
-        stroke: '#9254de',
-        strokeWidth: 1,
-      },
-    },
-    ...common_ports
-  },
-  'VM': {
-    ...commonAttrs,
-    shape: 'rect',
-    width: 120,
-    height: 40,
-    data: {
-      type: 'VM',
-      color: '#FFFFFF',
-      parent: false,
-      attrs: {
-        name: 'UntitledVM',
-        id: 0,
-        priority: 0,
-        budget: 0,
-        period: 0,
-        pp: 0,
-      },
-      mappings: [],
-      irqs: [],
-    },
-    attrs: {
-      label: {
-        text: 'UntitledVM',
-        fontSize: 12,
-        fill: "#000000",
-      },
-      text: {
-        textAnchor: "left",
-        x: 0,
-        y: 12,
-      },
-      body: {
-        fill: '#ffd591',
-        stroke: '#ffa940',
-        strokeWidth: 1,
-      },
-    },
-    ...common_ports
-  },
 }
 
-export const init_node_data = {
-  'PD': {
-    name: 'UntitledPD',
-    priority: 0,
-    budget: 0,
-    period: 0,
-    pp: 0,
-    prog_img: 'default.elf',
-    mappings: [],
-    pds: [],
-    vms: [],
-    parent: '',
-  },
-  'VM': {
-    name: 'UntitledVM',
-    priority: 0,
-    budget: 0,
-    period: 0,
-    pp: 0,
-    prog_img: 'default.elf',
-    mappings: [],
-    pds: [],
-    vms: [],
-    parent: '',
-  },
+const stencilRender = (graph, stencil) => {
+  Object.entries(group_registration).map(group => {
+    const [group_name, group_items] = group
+    const node_list = Object.values(group_items).map(node_attrs => {
+      return graph.createNode(node_attrs)
+    })
+    stencil.load(node_list, group_name)
+  })
 }
 
-export { stencil_group, custom_nodes, custom_group }
+const stencil_group = Object.keys(group_registration).map(key => {
+  return {name: key, title: key}
+})
+
+export { stencilRender, stencil_group }

@@ -1,3 +1,4 @@
+import { Graph } from "@antv/x6"
 
 export const getValidEndID = (edges : Array<any>, node_id : string) => {
     return 1
@@ -125,4 +126,51 @@ export const closestBorder = (box : {x : number, y : number, width: number, heig
   } else {
     return (distanceToTop < distanceToBottom) ? 'top' : 'bottom'
   }
+}
+
+
+export const reassignEdgesForComponent = (graph : Graph) => {
+  const edges = graph.getEdges()
+  edges.map(edge => {
+    const sourceNode = edge.getSourceNode()
+    const targetNode = edge.getTargetNode()
+    if (sourceNode) {
+      const targetPoint = edge.getTargetPoint()
+      const border = closestBorder(
+        { x: sourceNode.position().x, y: sourceNode.position().y, width: sourceNode.size().width, height: sourceNode.size().height},
+        { x: targetPoint.x, y: targetPoint.y }
+      )
+      const portId = edge.getSourcePortId()
+      const source_port = sourceNode.id + edge.id
+      if (portId === 'port_1' || portId == null) {
+        sourceNode.addPort({
+          id: source_port,
+          group: border,
+        })
+        edge.setSource({ cell: sourceNode, port: source_port })
+      } else {
+        sourceNode.portProp(source_port!, 'group', border)
+      }
+    }
+    if (targetNode) {
+      const sourcePoint = edge.getSourcePoint()
+      const border = closestBorder(
+        { x: targetNode.position().x, y: targetNode.position().y, width: targetNode.size().width, height: targetNode.size().height},
+        { x: sourcePoint.x, y: sourcePoint.y }
+      )
+      const portId = edge.getTargetPortId()
+      
+      const target_port = targetNode.id + edge.id
+      if (portId === 'port_1' || portId == null) {
+        // TODO: use a better id for port
+        targetNode.addPort({
+          id: target_port,
+          group: border,
+        })
+        edge.setTarget({ cell: targetNode, port: target_port })
+      } else {
+        targetNode.portProp(target_port!, 'group', border)
+      }
+    }
+  })
 }
