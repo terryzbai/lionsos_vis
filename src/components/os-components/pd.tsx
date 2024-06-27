@@ -1,8 +1,9 @@
 import { common_attrs, common_ports } from "./common"
 import { Group } from '../group'
 import { randColor } from '../../utils/helper'
+import { EditableAttrs } from "./common"
 
-const pd_editable_attrs = [
+const pd_editable_attrs : Array<EditableAttrs> = [
   { name: 'name', type: 'string', required: true },
   { name: 'priority', type: 'number', min: 0, max: 255, required: true },
   { name: 'budget', type: 'number', min: 0, max: 1000, required: false },

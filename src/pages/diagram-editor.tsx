@@ -222,43 +222,6 @@ export const DiagramEditor = () => {
     })
   }
 
-  // const test_add_groups = () => {
-  //   const cells: Cell[] = []
-  //   const nodes = []
-  //   const edges = []
-  //   nodes.push({...custom_group['PD'], id: `11111`})
-  //   nodes.push({...custom_group['PD'], id: `22222`})
-  //   nodes.push({...custom_group['PD'], id: `33333`})
-  //   nodes.push({...custom_group['PD'], id: `44444`})
-
-  //   const ERLayoutInstance = new ERLayout({
-  //     nodes,
-  //     edges,
-  //     nodeMinGap: 240
-  //   })
-
-  //   ERLayoutInstance.execute().then((res) => {
-  //     console.log(nodes, edges)
-  //     nodes.forEach((item) => {
-  //       const new_group = new Group(item)
-  //       new_group.addPort({
-  //         id: 'port_1',
-  //         group: 'bottom',
-  //       })
-  
-  //       new_group.data.color = randColor()
-  //       cells.push(new_group)
-  //     })
-  //     edges.forEach((item) => {
-  //       cells.push(globalGraph.createEdge(item))
-  //     })
-  //     globalGraph.resetCells(cells)
-  //     globalGraph.zoomToFit({ padding: 20, maxScale: 1 })
-
-  //     console.log(globalGraph.toJSON())
-  //   })
-  // }
-
   useEffect(() => {
     const graph = new Graph({
       ...graph_config,
@@ -283,10 +246,9 @@ export const DiagramEditor = () => {
     stencilRender(graph, stencil)
 
     graph.on('node:dblclick', ({ node }) => {
-      // console.log(ev.node.)
+      console.log(node.id)
       setCurrentNodeID(node.id)
       setNodeEditorOpen(true)
-      // dispatch(openNodeEditor(ev.node.id))
     })
 
     graph.on('node:mouseenter', ({ node }) => {
@@ -582,7 +544,6 @@ export const DiagramEditor = () => {
       >
         <textarea
           ref={refTextarea}
-          // value={SDFContent(globalGraph?.toJSON().cells, MRs)}
           value={SDFText}
           onChange={() => console.log('111')}
           onClick={focusChange}

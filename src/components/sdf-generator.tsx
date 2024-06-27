@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import init, {greet} from "validator-wasm"
+import { getSerialJson } from "./os-components/serial"
 
 const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText, MRs }) => {
   const [sdfGenWasm, setSdfGenWasm] = useState(null)
@@ -89,15 +90,20 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
       deviceClasses: deviceClass,
       mrs: [],
       pds: [],
-      channels: []
+      channels: [],
+      sddf_subsystems: [],
     }
 
-    const PDs = globalGraph?.getNodes().filter(node => node.data.type == "PD").filter(node => node.parent == null)
+    const PDs = globalGraph?.getNodes().filter(node => node.data.type == "PD").filter(node => {
+      return node.parent == null || node.parent?.data.type == 'sddf_subsystem'
+    })
     const channels = globalGraph?.getEdges().filter(edge => edge.data.type == "channel")
+    const sddf_subsystems = globalGraph?.getNodes().filter(node => node.data.type == 'sddf_subsystem')
     
     attrJson.pds = getPDJson(PDs)
     attrJson.channels = getChannelJson(channels)
     attrJson.mrs = getMRJson(MRs)
+    attrJson.sddf_subsystems = getSerialJson(sddf_subsystems)
     console.log(attrJson)
     const inputString = JSON.stringify(attrJson)
     const inputBuffer = new TextEncoder().encode(inputString)

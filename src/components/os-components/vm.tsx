@@ -1,8 +1,9 @@
 import { common_attrs, common_ports } from "./common"
 import { Group } from '../group'
 import { randColor } from '../../utils/helper'
+import { EditableAttrs } from "./common"
 
-const vm_editable_attrs = [
+const vm_editable_attrs : Array<EditableAttrs> = [
   { name: 'name', type: 'string', required: true },
   { name: 'id', type: 'number', min: 0, max: 255, required: true },
   { name: 'priority', type: 'number', min: 0, max: 255, required: true },
@@ -16,7 +17,7 @@ const group_attrs = {
     ...common_attrs,
     shape: 'rect',
     width: 120,
-    height: 40,
+    height: 30,
     data: {
       type: 'VM',
       color: '#FFFFFF',
@@ -37,13 +38,13 @@ const group_attrs = {
     attrs: {
       label: {
         text: 'UntitledVM',
-        fontSize: 12,
+        fontSize: 14,
         fill: "#000000",
       },
       text: {
         textAnchor: "left",
         x: 0,
-        y: 12,
+        y: 10,
       },
       body: {
         fill: '#ffd591',

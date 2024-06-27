@@ -3,8 +3,31 @@ import { Group } from '../group'
 import { newPDNode } from "./pd"
 import { Graph } from "@antv/x6"
 import { reassignEdgesForComponent } from '../../utils/helper'
+import { EditableAttrs } from "./common"
 
-const serial_system_editable_attrs = [
+interface serial_system_json_format {
+  class: string,
+  client1: string,
+  client2: string,
+  device_node: string,
+  driver_name: string,
+  mux_tx_name: string,
+  mux_rx_name: string,
+  data_region_size: number,
+}
+
+const serial_default_json : serial_system_json_format = {
+  class: 'serial',
+  client1: '',
+  client2: '',
+  device_node: '',
+  driver_name: 'serial_driver',
+  mux_tx_name: 'serial_mux_tx',
+  mux_rx_name: 'serial_mux_rx',
+  data_region_size: 0x1000,
+}
+
+const serial_system_editable_attrs : Array<EditableAttrs> = [
   { name: 'name', type: 'string', required: true },
   { name: 'data_region_size', type: 'number', required: true }
 ]
@@ -28,26 +51,26 @@ const renderChildrenNodes = (graph : Graph, serial_system : Group) => {
   // Add serial driver
   const serial_driver = newPDNode()
   serial_driver.position(x + 280, y + 100)
-  serial_driver.data.attrs.name = 'serial_driver'
+  serial_driver.data.attrs.name = serial_default_json.driver_name
+  serial_driver.data.subsystem = serial_system
   serial_system.addChild(serial_driver)
   serial_system.data.driver = serial_driver.id
-  
+
   // Add mux_tx PD
   const mux_tx = newPDNode()
   mux_tx.position(x + 40, y + 40)
-  mux_tx.data.attrs.name = 'serial_mux_tx'
+  mux_tx.data.attrs.name = serial_default_json.mux_tx_name
+  mux_tx.data.subsystem = serial_system
   serial_system.addChild(mux_tx)
   serial_system.data.mux_tx = mux_tx.id
   
   // Add mux_rx PD
   const mux_rx = newPDNode()
   mux_rx.position(x + 40, y + 180)
-  mux_rx.data.attrs.name = 'serial_mux_tx'
+  mux_rx.data.attrs.name = serial_default_json.mux_rx_name
+  mux_rx.data.subsystem = serial_system
   serial_system.addChild(mux_rx)
   serial_system.data.mux_rx = mux_rx.id
-
-  addChannel(graph, serial_driver, mux_tx)
-  addChannel(graph, serial_driver, mux_rx)
 
   updateSubsystem(graph, serial_system)
 }
@@ -58,15 +81,9 @@ const group_attrs = {
   width: 500,
   height: 320,
   data: {
-    type: 'Subsystem',
+    type: 'sddf_subsystem',
     renderChildrenNodes: renderChildrenNodes,
-    attrs: {
-      name: 'serial_system',
-      data_region_size: 0x1000,
-    },
-    driver: '',
-    mux_tx: '',
-    mux_rx: '',
+    attrs: serial_default_json,
     editable_attrs: serial_system_editable_attrs
   },
   attrs: {
@@ -120,4 +137,9 @@ const serial_preview_attrs = {
   },
 }
 
-export { serial_preview_attrs }
+const getSerialJson = (serial_system : Group) => {
+  console.log(serial_system)
+  return []
+}
+
+export { serial_preview_attrs, getSerialJson }

@@ -1,5 +1,13 @@
 import { Graph } from "@antv/x6"
 
+export interface EditableAttrs {
+  name: string,
+  type: 'string' | 'number' | 'boolean',
+  required: boolean,
+  min?: number,
+  max?: number,
+}
+
 const common_attrs = {
   ports: {
     groups: {
