@@ -30,6 +30,7 @@ import {
   DownloadOutlined,
   UploadOutlined,
 } from '@ant-design/icons'
+import { SystemComponent } from '../components/os-components/SystemComponent'
 
 const Item = Toolbar.Item // eslint-disable-line
 const ToolbarGroup = Toolbar.Group // eslint-disable-line
@@ -45,6 +46,7 @@ export const DiagramEditor = () => {
   const [ channelEditorOpen, setChannelEditorOpen ] = useState(false)
   const [ currentEdgeID, setCurrentEdgeID ] = useState('')
   const [ currentNodeID, setCurrentNodeID ] = useState('')
+  const [ currentNode, setCurrentNode ] = useState<SystemComponent>(null)
   const [ toGenerateSDF, setToGenerateSDF ] = useState<boolean>(false)
   const [ SDFText, setSDFText ] = useState('')
   const [ MRs, setMRs] = useState<Array<MemoryRegion>>([
@@ -107,7 +109,7 @@ export const DiagramEditor = () => {
     stencilGraphHeight: 0,
     groups: stencil_group,
     getDropNode(node) {
-      return node.data?.newNode()
+      return node.data?.createNode()
     },
   }
 
@@ -120,10 +122,6 @@ export const DiagramEditor = () => {
     const PDs = globalGraph.getCells().filter(cell => cell.data.type === 'PD')
     const PDNodes = PDs?.map(PD => {return {"name": PD.data.attrs.name, "node_id": PD.id}})
     setTemplateListOpen(true)
-  }
-
-  const focusChange = () => {
-    console.log(refTextarea.current.selectionStart)
   }
 
   const updateMappings = () => {
@@ -245,10 +243,11 @@ export const DiagramEditor = () => {
 
     stencilRender(graph, stencil)
 
-    graph.on('node:dblclick', ({ node }) => {
-      console.log(node.id)
+    graph.on('node:dblclick', ({ node, e }) => {
+      setCurrentNode(node.data.component)
       setCurrentNodeID(node.id)
       setNodeEditorOpen(true)
+      e.stopPropagation()
     })
 
     graph.on('node:mouseenter', ({ node }) => {
@@ -524,6 +523,7 @@ export const DiagramEditor = () => {
         setNodeEditorOpen={setNodeEditorOpen}
         getNodeData={getNodeData}
         updateNodeData={updateNodeData}
+        component={currentNode}
         MRs={MRs}
         />
       <ChannelEditor
@@ -546,7 +546,6 @@ export const DiagramEditor = () => {
           ref={refTextarea}
           value={SDFText}
           onChange={() => console.log('111')}
-          onClick={focusChange}
           style={ {width: '100%', height: '500px'} }>
         </textarea>
       </Modal>

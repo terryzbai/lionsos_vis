@@ -4,6 +4,7 @@ import { newPDNode } from "./pd"
 import { Graph } from "@antv/x6"
 import { reassignEdgesForComponent } from '../../utils/helper'
 import { EditableAttrs } from "./common"
+import { SystemComponent } from "./SystemComponent"
 
 interface serial_system_json_format {
   class: string,
@@ -11,8 +12,8 @@ interface serial_system_json_format {
   client2: string,
   device_node: string,
   driver_name: string,
-  mux_tx_name: string,
-  mux_rx_name: string,
+  serial_mux_tx: string,
+  serial_mux_rx: string,
   data_region_size: number,
 }
 
@@ -22,13 +23,15 @@ const serial_default_json : serial_system_json_format = {
   client2: '',
   device_node: '',
   driver_name: 'serial_driver',
-  mux_tx_name: 'serial_mux_tx',
-  mux_rx_name: 'serial_mux_rx',
+  serial_mux_tx: 'serial_mux_tx',
+  serial_mux_rx: 'serial_mux_rx',
   data_region_size: 0x1000,
 }
 
 const serial_system_editable_attrs : Array<EditableAttrs> = [
-  { name: 'name', type: 'string', required: true },
+  { name: 'driver_name', type: 'string', required: true },
+  { name: 'serial_mux_tx', type: 'string', required: true },
+  { name: 'serial_mux_rx', type: 'string', required: true },
   { name: 'data_region_size', type: 'number', required: true }
 ]
 
@@ -59,7 +62,7 @@ const renderChildrenNodes = (graph : Graph, serial_system : Group) => {
   // Add mux_tx PD
   const mux_tx = newPDNode()
   mux_tx.position(x + 40, y + 40)
-  mux_tx.data.attrs.name = serial_default_json.mux_tx_name
+  mux_tx.data.attrs.name = serial_default_json.serial_mux_tx
   mux_tx.data.subsystem = serial_system
   serial_system.addChild(mux_tx)
   serial_system.data.mux_tx = mux_tx.id
@@ -67,7 +70,7 @@ const renderChildrenNodes = (graph : Graph, serial_system : Group) => {
   // Add mux_rx PD
   const mux_rx = newPDNode()
   mux_rx.position(x + 40, y + 180)
-  mux_rx.data.attrs.name = serial_default_json.mux_rx_name
+  mux_rx.data.attrs.name = serial_default_json.serial_mux_rx
   mux_rx.data.subsystem = serial_system
   serial_system.addChild(mux_rx)
   serial_system.data.mux_rx = mux_rx.id
@@ -139,6 +142,7 @@ const serial_preview_attrs = {
 
 const getSerialJson = (serial_system : Group) => {
   console.log(serial_system)
+
   return []
 }
 

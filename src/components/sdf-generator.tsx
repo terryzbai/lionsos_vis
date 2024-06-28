@@ -94,6 +94,12 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
       sddf_subsystems: [],
     }
 
+    const test_pds = globalGraph?.getNodes().filter(node =>  node.data.component.getType() == 'PD')
+    test_pds?.map(pd => {
+      pd.data.component.getJson()
+    })
+    console.log(test_pds)
+
     const PDs = globalGraph?.getNodes().filter(node => node.data.type == "PD").filter(node => {
       return node.parent == null || node.parent?.data.type == 'sddf_subsystem'
     })
