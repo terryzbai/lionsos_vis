@@ -1,15 +1,14 @@
-import { pd_preview_attrs } from "./os-components/pd"
-import { vm_preview_attrs } from "./os-components/vm"
-import { serial_preview_attrs } from "./os-components/serial"
-import { PDComponentInit } from "./os-components/pdx"
+import { PDComponentInit } from "./os-components/pd"
+import { VMComponentInit } from "./os-components/vm"
+import { SerialComponentInit } from "./os-components/serial"
 
 const group_registration = {
   'Basic': {
     'PD': PDComponentInit,
-    // 'VM': vm_preview_attrs,
+    'VM': VMComponentInit,
   },
   'Subsystem': {
-    // 'serial': serial_preview_attrs,
+    'serial': SerialComponentInit,
   }
 }
 

@@ -30,7 +30,7 @@ import {
   DownloadOutlined,
   UploadOutlined,
 } from '@ant-design/icons'
-import { SystemComponent } from '../components/os-components/SystemComponent'
+import { SystemComponent } from '../components/os-components/component-interface'
 
 const Item = Toolbar.Item // eslint-disable-line
 const ToolbarGroup = Toolbar.Group // eslint-disable-line
@@ -338,9 +338,7 @@ export const DiagramEditor = () => {
     })
 
     graph.on('node:added', ({ node }) => {
-      if (node.data.renderChildrenNodes) {
-        node.data.renderChildrenNodes(graph, node)
-      }
+      node.data.component.renderChildrenNodes(graph)
     })
 
     const embedPadding = 40

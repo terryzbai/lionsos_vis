@@ -1,6 +1,6 @@
 import { FunctionComponent, useEffect } from 'react'
 import { InputNumber, Form, Input, Button, Checkbox } from 'antd'
-import { SystemComponent } from './os-components/SystemComponent'
+import { SystemComponent } from './os-components/component-interface'
 
 export const getFormItem = (attr) => {
   const inputType = attr?.type

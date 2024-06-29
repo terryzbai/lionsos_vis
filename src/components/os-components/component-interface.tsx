@@ -6,8 +6,9 @@ export interface SystemComponentJsonFormat {}
 
 // Data model of this component
 export interface DataModel {
-    node_id : string;
-    attrs: object;
+  node_id : string;
+  attrs: object;
+  subsystem: Group | null;
 }
 
 export interface EditableAttrs {
@@ -85,7 +86,7 @@ export const common_ports = {
 
 export interface SystemComponentInit {
   preview_attrs: object,
-  createNode: (node_id: string) => Group
+  createNode: (subsystem: Group | null) => Group
 }
 
 export interface SystemComponent {
@@ -95,6 +96,7 @@ export interface SystemComponent {
   // Editable attributes, will be shown in Attributes Form
   editable_attrs : Array<EditableAttrs>;
 
+  renderChildrenNodes: (graph: Graph) => void
   renderUnchangableNodes: () => JSX.Element
 
   getType: () => string
