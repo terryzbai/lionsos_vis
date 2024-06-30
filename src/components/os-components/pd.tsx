@@ -9,6 +9,7 @@ import {
 import { Group } from '../group'
 import { Graph } from "@antv/x6";
 import { randColor } from '../../utils/helper'
+import { SysMapItem } from '../mapping-table'
 
 interface PDDataModel extends DataModel {
   type: 'PD',
@@ -19,8 +20,9 @@ interface PDDataModel extends DataModel {
     budget: number,
     period: number,
     pp: boolean,
-    prog_img: string
+    prog_img: string,
   },
+  mappings: SysMapItem[],
 }
 
 export const pd_preview_attrs = {
@@ -109,6 +111,7 @@ export class PDComponent implements SystemComponent {
       pp: false,
       prog_img: 'default.elf',
     },
+    mappings: [],
     subsystem: null,
   };
 
@@ -135,6 +138,10 @@ export class PDComponent implements SystemComponent {
     return this.data.type
   }
 
+  public getMappings = () => {
+    return this.data.mappings
+  }
+
   public getAttrValues = () => {
     return this.data.attrs
   }
@@ -151,27 +158,27 @@ export class PDComponent implements SystemComponent {
 
   // Update style if attributes are modified, e.g. PD names
   // Render children nodes if exist
-  public updateAttrs = (new_data : any) => {
+  public updateData = (new_data : any) => {
     if (this.node) {
-      this.data = {...this.data, attrs: new_data}
-      this.node.setAttrs({ label: { text: new_data.name } })
+      this.data = {...this.data, ...new_data}
+      this.node.setAttrs({ label: { text: this.data.attrs.name } })
     }
   }
 
   // Generate JSON for the component
   public getJson = () => {
-    // const children = this.getJson(PD.children)
     const children = this.node.children?.map(child => {
       return child.data.component.getJson()
     })
 
-    const json = {
+    console.log(this.data.mappings)
+
+    return {
       ...this.data.attrs,
       children: children ? children : [],
       type: this.data.type,
       maps: [],
       irqs: [],
     }
-    return json
   }
 }

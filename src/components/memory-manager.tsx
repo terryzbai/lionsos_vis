@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Popover, Modal, Form, Input, InputNumber, Button, Select } from 'antd'
 import { MemoryRegion } from '../utils/element'
+import { getComponentByID } from '../utils/helper'
 import '../App.css'
 
 const { Option } = Select
@@ -23,7 +24,7 @@ interface FreeMRStatus {
 
 const maxPhyAddr = 0xffffffff
 
-export default function MemoryManager({MRs, setMRs, getNodeData }) {
+export default function MemoryManager({MRs, setMRs, getNodeData, graph }) {
   const [ freeMRStatus, setFreeMRStatus ] = useState<FreeMRStatus>({
     phys_addr: 0,
     size: 0,
@@ -131,7 +132,6 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
   }
 
   const editMR = () => {
-    console.log("edit MR", form.getFieldsValue(), sizeUnit)
     setMRs(oldMRs => {
       const newMRs = oldMRs.map((MR, index) => {
         if (index === indexOfMR) {
@@ -235,7 +235,8 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
   const backgroundColor = (MR) => {
     if (MR.nodes?.length === 0) return ''
     if (MR.nodes?.length === 1) {
-      return getNodeData(MR.nodes[0])?.color
+      const component = getComponentByID(graph, MR.nodes[0])
+      return component.getData().color
     }
     return '#FFFFFF'
   }
@@ -245,10 +246,11 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
       <>
       Addr: {'0x' + MR.phys_addr.toString(16)} - {'0x' + (MR.phys_addr + MR.size).toString(16)}
       {MR.nodes?.map(node_id => {
-        const node_data = getNodeData(node_id)
+        const component = getComponentByID(graph, node_id)
+        const node_attrs = component.getAttrValues()
         return (
           <div key={node_id}>
-            {node_data?.attrs.name}
+            {node_attrs.name}
           </div>
         )
       })}

@@ -1,5 +1,6 @@
 import { Graph } from '@antv/x6'
-import { Group } from '../group';
+import { Group } from '../group'
+import { SysMapItem } from '../mapping-table'
 
 // Json format for passing configurations to WASM
 export interface SystemComponentJsonFormat {}
@@ -99,12 +100,12 @@ export interface SystemComponent {
 
   getType: () => string
   getData: () => DataModel
-
+  getMappings: () => SysMapItem[]
   getAttrValues: () => object
   
   // Update style if attributes are modified, e.g. PD names
   // Render children nodes if exist
-  updateAttrs: (new_data : any) => void
+  updateData: (new_data : object) => void
 
   // Generate JSON for the component
   getJson: () => object

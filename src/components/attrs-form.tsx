@@ -44,7 +44,7 @@ export const AttrsForm: FunctionComponent<AttrsFromPros> = ({ setNodeEditorOpen,
       new_data[key] = data[key]
     })
 
-    component.updateAttrs(new_data)
+    component.updateData({ attrs: new_data })
 
     setNodeEditorOpen(false)
   }

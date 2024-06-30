@@ -9,6 +9,7 @@ import {
 import { Group } from '../group'
 import { Graph } from "@antv/x6";
 import { randColor } from '../../utils/helper'
+import { SysMapItem } from '../mapping-table'
 
 interface VMDataModel extends DataModel {
   type: 'VM',
@@ -20,6 +21,7 @@ interface VMDataModel extends DataModel {
     period: number,
     pp: boolean,
   },
+  mappings: SysMapItem[],
 }
 
 const vm_preview_attrs = {
@@ -101,6 +103,7 @@ export class VMComponent implements SystemComponent {
       period: 0,
       pp: false,
     },
+    mappings: [],
     subsystem: null,
   };
 
@@ -126,6 +129,10 @@ export class VMComponent implements SystemComponent {
     return this.data.type
   }
 
+  public getMappings = () => {
+    return this.data.mappings
+  }
+
   public getAttrValues = () => {
     return this.data.attrs
   }
@@ -138,10 +145,10 @@ export class VMComponent implements SystemComponent {
 
   // Update style if attributes are modified, e.g. PD names
   // Render children nodes if exist
-  public updateAttrs = (new_data : any) => {
+  public updateData = (new_data : any) => {
     if (this.node) {
-      this.data = {...this.data, attrs: new_data}
-      this.node.setAttrs({ label: { text: new_data.name } })
+      this.data = {...this.data, ...new_data}
+      this.node.setAttrs({ label: { text: this.data.attrs.name } })
     }
   }
 

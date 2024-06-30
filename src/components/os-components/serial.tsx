@@ -150,22 +150,32 @@ export class SerialComponent implements SystemComponent {
     return this.data.type
   }
 
+  public getMappings = () => {
+    return []
+  }
+
   public getAttrValues = () => {
     return this.data.attrs
   }
 
   private syncChildrenData = () => {
     const driver_component = this.children.driver.data.component
-    driver_component.updateAttrs({...driver_component.getAttrValues(), name: this.data.attrs.driver_name})
-    //serial_driver.data.subsystem = serial_system
+    driver_component.updateData({
+      attrs: {...driver_component.getAttrValues(), name: this.data.attrs.driver_name},
+      subsystem: this,
+    })
 
     const mux_tx_component = this.children.mux_tx.data.component
-    mux_tx_component.updateAttrs({...mux_tx_component.getAttrValues(), name: this.data.attrs.serial_mux_tx})
-    //mux_tx.data.subsystem = serial_system
+    mux_tx_component.updateData({
+      attrs: {...mux_tx_component.getAttrValues(), name: this.data.attrs.serial_mux_tx},
+      subsystem: this,
+    })
 
     const mux_rx_component = this.children.mux_rx.data.component
-    mux_rx_component.updateAttrs({...mux_rx_component.getAttrValues(), name: this.data.attrs.serial_mux_rx})
-    //mux_rx.data.subsystem = serial_system
+    mux_rx_component.updateData({
+      attrs: {...mux_rx_component.getAttrValues(), name: this.data.attrs.serial_mux_rx},
+      subsystem: this,
+    })
   }
 
   public renderChildrenNodes = (graph: Graph) => {
@@ -201,10 +211,9 @@ export class SerialComponent implements SystemComponent {
 
   // Update style if attributes are modified, e.g. PD names
   // Render children nodes if exist
-  public updateAttrs = (new_data : any) => {
+  public updateData = (new_data : any) => {
     if (this.node) {
-      this.data = {...this.data, attrs: new_data}
-      // this.node.setAttrs({ label: { text: new_data.name } })
+      this.data = {...this.data, ...new_data}
       this.syncChildrenData()
     }
   }

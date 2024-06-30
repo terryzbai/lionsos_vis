@@ -128,7 +128,8 @@ export const DiagramEditor = () => {
     const nodes = globalGraph.getNodes()
     const newMRs = MRs.map((MR) => {
       const new_mappings = nodes.map((node) => {
-        const node_mappings = node.data.mappings.map(mapping => mapping.mr)
+        const component = node.data.component
+        const node_mappings = component?.getMappings().map(mapping => mapping.mr)
         if (node_mappings.includes(MR.name)) {
           return node.id
         }
@@ -487,7 +488,7 @@ export const DiagramEditor = () => {
 
   return (
     <div>
-      <MemoryManager MRs={MRs} setMRs={setMRs} getNodeData={getNodeData} />
+      <MemoryManager MRs={MRs} setMRs={setMRs} getNodeData={getNodeData} graph={globalGraph} />
       <Toolbar className="toolbar" >
         <ToolbarGroup>
           <Item name="zoomIn" tooltip="Zoom In (Cmd +)" icon={<ZoomInOutlined />} />
@@ -523,6 +524,7 @@ export const DiagramEditor = () => {
         updateNodeData={updateNodeData}
         component={currentNode}
         MRs={MRs}
+        updateMappings={updateMappings}
         />
       <ChannelEditor
         channelEditorOpen={channelEditorOpen}

@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Typography, Checkbox, TableProps, Form, Select, InputNumber, Table, Button, Input } from 'antd'
 import { SysMap } from '../utils/element'
 
-interface SysMapItem extends SysMap {
+export interface SysMapItem extends SysMap {
   key: string
 }
 
@@ -16,7 +16,7 @@ interface SysMapItem extends SysMap {
 //   children: React.ReactNode
 // }
 
-export default function MappingTable({ node_id, getNodeData, updateNodeData, MRs }) {
+export default function MappingTable({ getNodeData, updateNodeData, MRs, component, updateMappings }) {
   const [form] = Form.useForm()
   const [editingKey, setEditingKey] = useState('')
   const [data, setData] = useState<SysMapItem[]>([])
@@ -39,8 +39,7 @@ export default function MappingTable({ node_id, getNodeData, updateNodeData, MRs
     })
     const filterOption = (input: string, option?: { label: string; value: string }) =>
     (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-  
-  
+
     const inputNodes = {
       'number': <InputNumber />,
       'select': <Select
@@ -98,9 +97,11 @@ export default function MappingTable({ node_id, getNodeData, updateNodeData, MRs
       const { key, ...rest } = mapping
       return rest
     })
-    updateNodeData(node_id, {
-      mappings: newData
-    })
+    component?.updateData({mappings: newData})
+    updateMappings()
+    //    updateNodeData(node_id, {
+    //      mappings: newData
+    //    })
   }
 
   const save = async (key: React.Key) => {
@@ -227,11 +228,11 @@ export default function MappingTable({ node_id, getNodeData, updateNodeData, MRs
   })
 
   useEffect(() => {
-    const originData: SysMapItem[] = getNodeData(node_id).mappings?.map((mapping, index) => {
+    const originData = component.getData().mappings.map((mapping, index) => {
       return {...mapping, key: index.toString()}
     })
     setData(originData)
-  }, [node_id])
+  }, [component])
 
   useEffect(() => {
     syncNodeData()
