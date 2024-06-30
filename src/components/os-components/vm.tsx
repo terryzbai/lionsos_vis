@@ -94,7 +94,7 @@ export class VMComponent implements SystemComponent {
     node_id: '',
     type: 'VM',
     attrs: {
-      name: 'UntitledPD',
+      name: 'UntitledVM',
       id: 0,
       priority: 0,
       budget: 0,
@@ -155,7 +155,6 @@ export class VMComponent implements SystemComponent {
     console.log(children)
     const json = {
       ...this.data.attrs,
-      // children: children,
       type: this.data.type,
       // maps: getMapJson(PD.data.mappings),
       // irqs: PD.data.irqs

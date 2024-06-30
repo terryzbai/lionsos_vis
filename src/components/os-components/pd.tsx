@@ -95,8 +95,6 @@ export const PDComponentInit: SystemComponentInit = {
 }
 
 export class PDComponent implements SystemComponent {
-  component_json: any;
-  graph: Graph;
   node: Group;
 
   data: PDDataModel = {
@@ -141,6 +139,10 @@ export class PDComponent implements SystemComponent {
     return this.data.attrs
   }
 
+  public isPartOfSubsystem = () => {
+    return this.data.subsystem != null
+  }
+
   public renderChildrenNodes = (graph: Graph) => {}
 
   public renderUnchangableNodes = () => {
@@ -163,13 +165,12 @@ export class PDComponent implements SystemComponent {
       return child.data.component.getJson()
     })
 
-    console.log(children)
     const json = {
       ...this.data.attrs,
-      // children: children,
+      children: children ? children : [],
       type: this.data.type,
-      // maps: getMapJson(PD.data.mappings),
-      // irqs: PD.data.irqs
+      maps: [],
+      irqs: [],
     }
     return json
   }

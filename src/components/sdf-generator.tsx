@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import init, {greet} from "validator-wasm"
+import init, { greet } from "validator-wasm"
+import { PDComponent } from "./os-components/pd"
 
 const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText, MRs }) => {
   const [sdfGenWasm, setSdfGenWasm] = useState(null)
@@ -93,21 +94,23 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
       sddf_subsystems: [],
     }
 
-    const test_pds = globalGraph?.getNodes().filter(node =>  node.data.component.getType() == 'PD')
-    test_pds?.map(pd => {
-      pd.data.component.getJson()
+    const PDs = globalGraph?.getNodes().filter(node => {
+      return node.data.component.getType() == "PD"
+    }).filter(node => {
+      const component : PDComponent = node.data.component
+      return node.parent == null || component.isPartOfSubsystem()
     })
-    console.log(test_pds)
-
-    const PDs = globalGraph?.getNodes().filter(node => node.data.type == "PD").filter(node => {
-      return node.parent == null || node.parent?.data.type == 'sddf_subsystem'
-    })
-    const channels = globalGraph?.getEdges().filter(edge => edge.data.type == "channel")
-    const sddf_subsystems = globalGraph?.getNodes().filter(node => node.data.type == 'sddf_subsystem')
-    
-    attrJson.pds = getPDJson(PDs)
-    attrJson.channels = getChannelJson(channels)
-    attrJson.mrs = getMRJson(MRs)
+    if (PDs) {
+      attrJson.pds = PDs?.map(pd => pd.data.component.getJson())
+    }
+    //    const channels = globalGraph?.getEdges().filter(edge => edge.data.type == "channel")
+    const sddf_subsystems = globalGraph?.getNodes().filter(node => node.data.component.getType() == 'sddf_subsystem')
+    if (sddf_subsystems) {
+      attrJson.sddf_subsystems = sddf_subsystems?.map(subsystem => subsystem.data.component.getJson())
+    }
+    //
+    //    attrJson.channels = getChannelJson(channels)
+    //    attrJson.mrs = getMRJson(MRs)
     // attrJson.sddf_subsystems = getSerialJson(sddf_subsystems)
     console.log(attrJson)
     const inputString = JSON.stringify(attrJson)
@@ -203,7 +206,7 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
 
   return (
     <>
-    Hello
+
     <br />
     <button onClick={handleTest}>handle Test</button>
 

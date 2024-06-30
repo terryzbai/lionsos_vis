@@ -132,6 +132,7 @@ export class SerialComponent implements SystemComponent {
 
   editable_attrs: EditableAttrs[] = [
     { name: 'driver_name', type: 'string', required: true },
+    { name: 'driver_node', type: 'string', required: true },
     { name: 'serial_mux_tx', type: 'string', required: true },
     { name: 'serial_mux_rx', type: 'string', required: true },
     { name: 'data_region_size', type: 'number', required: true }
@@ -210,6 +211,6 @@ export class SerialComponent implements SystemComponent {
 
   // Generate JSON for the component
   public getJson = () => {
-    return {}
+    return this.data.attrs
   }
 }

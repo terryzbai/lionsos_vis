@@ -90,9 +90,7 @@ export interface SystemComponentInit {
 }
 
 export interface SystemComponent {
-  component_json : any;
-  data : DataModel;    
-  graph : Graph;
+  data : DataModel;
   // Editable attributes, will be shown in Attributes Form
   editable_attrs : Array<EditableAttrs>;
 
