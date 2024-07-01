@@ -35,7 +35,7 @@ import { SystemComponent } from '../components/os-components/component-interface
 const Item = Toolbar.Item // eslint-disable-line
 const ToolbarGroup = Toolbar.Group // eslint-disable-line
 
-export const DiagramEditor = () => {
+export const DiagramEditor = ({ board, dtb }) => {
   const refGraphContainer = React.createRef<HTMLDivElement>()
   const refStencilContainer = React.createRef<HTMLDivElement>()
   const refTextarea = React.useRef<HTMLTextAreaElement>()
@@ -550,7 +550,7 @@ export const DiagramEditor = () => {
         </textarea>
       </Modal>
       <TemplateList templateListOpen={templateListOpen} setTemplateListOpen={setTemplateListOpen} graph={globalGraph}></TemplateList>
-      <SDFGenerator globalGraph={globalGraph} toGenerateSDF={toGenerateSDF} setToGenerateSDF={setToGenerateSDF} setSDFText={setSDFText} MRs={MRs} />
+      <SDFGenerator globalGraph={globalGraph} toGenerateSDF={toGenerateSDF} setToGenerateSDF={setToGenerateSDF} setSDFText={setSDFText} MRs={MRs} board={board} dtb={dtb} />
     </div>
   )
 }

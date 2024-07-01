@@ -2,10 +2,9 @@ import { useState, useEffect } from 'react';
 import init, { greet } from "validator-wasm"
 import { PDComponent } from "./os-components/pd"
 
-const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText, MRs }) => {
+const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText, MRs, board, dtb }) => {
   const [sdfGenWasm, setSdfGenWasm] = useState(null)
   const [instance, setInstance] = useState(null)
-  const [dtb, setDtb] = useState(null)
   const [drivers, setDrivers] = useState(null)
   const [deviceClass, setDeviceClass] = useState(null)
   const [SDF, setSDF] = useState("")
@@ -96,7 +95,7 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
 
   const generateSDF = () => {
     const attrJson = {
-      board: "qemu_arm_virt",
+      board: board,
       dtb: Array.from(dtb),
       drivers: drivers,
       deviceClasses: deviceClass,
@@ -193,14 +192,6 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
         setInstance(result.instance)
         setSdfGenWasm(() => result.instance.exports.jsonToXml)
       })
-    })
-
-    fetch('qemu_arm_virt.dtb').then(response =>
-      response.arrayBuffer()
-    ).then(bytes => {
-      const typedArray = new Uint8Array(bytes)
-      setDtb(typedArray)
-      console.log("DTB has been loaded.")
     })
 
     readDeviceConfig(driver_paths, setDrivers)

@@ -1,8 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Popover, Modal, Form, Input, InputNumber, Button, Select } from 'antd'
-import { MemoryRegion } from '../utils/element'
 import { getComponentByID } from '../utils/helper'
 import '../App.css'
+
+export interface MemoryRegion {
+	name: string
+	size: number
+	phys_addr: number
+	page_size?: number
+	page_count?: number
+	nodes: string[]
+}
 
 const { Option } = Select
 
