@@ -14,8 +14,7 @@ interface SerialDataModel extends DataModel {
   type: 'sddf_subsystem',
   attrs: {
     class: string,
-    client1: string,
-    client2: string,
+    clients: string[],
     device_node: string,
     driver_name: string,
     serial_mux_tx: string,
@@ -119,8 +118,7 @@ export class SerialComponent implements SystemComponent {
     type: 'sddf_subsystem',
     attrs: {
       class: 'serial',
-      client1: '',
-      client2: '',
+      clients: [],
       device_node: '',
       driver_name: 'serial_driver',
       serial_mux_tx: 'serial_mux_tx',
@@ -156,6 +154,10 @@ export class SerialComponent implements SystemComponent {
 
   public getAttrValues = () => {
     return this.data.attrs
+  }
+
+  public addClient = (node_id: string) => {
+    this.data.attrs.clients.push(node_id)
   }
 
   private syncChildrenData = () => {

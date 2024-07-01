@@ -3,8 +3,9 @@ import {
   SystemComponent,
   DataModel,
   EditableAttrs,
+  parseMapJson,
   common_attrs,
-  common_ports
+  common_ports,
 } from "./component-interface";
 import { Group } from '../group'
 import { Graph } from "@antv/x6";
@@ -91,7 +92,7 @@ export const PDComponentInit: SystemComponentInit = {
       component: new_component,
       parent: true,
     }
-  
+
     return group
   }
 }
@@ -171,13 +172,13 @@ export class PDComponent implements SystemComponent {
       return child.data.component.getJson()
     })
 
-    console.log(this.data.mappings)
+    const mappings = parseMapJson(this.data.mappings)
 
     return {
       ...this.data.attrs,
       children: children ? children : [],
       type: this.data.type,
-      maps: [],
+      maps: mappings,
       irqs: [],
     }
   }

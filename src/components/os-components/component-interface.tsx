@@ -85,6 +85,17 @@ export const common_ports = {
   }
 }
 
+export const parseMapJson = (mappings: SysMapItem[]) => {
+    return mappings.map(map => {
+      return {
+        ...map,
+        perm_r: map.perms.includes('r'),
+        perm_w: map.perms.includes('w'),
+        perm_x: map.perms.includes('x'),
+      }
+    })
+}
+
 export interface SystemComponentInit {
   preview_attrs: object,
   createNode: (subsystem: Group | null) => Group
@@ -110,4 +121,3 @@ export interface SystemComponent {
   // Generate JSON for the component
   getJson: () => object
 }
-

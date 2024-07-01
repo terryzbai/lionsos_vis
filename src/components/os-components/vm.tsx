@@ -3,8 +3,9 @@ import {
   SystemComponent,
   DataModel,
   EditableAttrs,
+  parseMapJson,
   common_attrs,
-  common_ports
+  common_ports,
 } from "./component-interface";
 import { Group } from '../group'
 import { Graph } from "@antv/x6";
@@ -13,6 +14,7 @@ import { SysMapItem } from '../mapping-table'
 
 interface VMDataModel extends DataModel {
   type: 'VM',
+  color: string,
   attrs: {
     name: string,
     id: number,
@@ -95,6 +97,7 @@ export class VMComponent implements SystemComponent {
   data: VMDataModel = {
     node_id: '',
     type: 'VM',
+    color: '#FFFFFF',
     attrs: {
       name: 'UntitledVM',
       id: 0,
@@ -117,8 +120,9 @@ export class VMComponent implements SystemComponent {
   ]
 
   constructor(node: Group, subsystem: Group | null) {
-    this.node = node
+    this.data.color = randColor()
     this.data.subsystem = subsystem
+    this.node = node
   }
 
   public getData = () => {
@@ -154,16 +158,11 @@ export class VMComponent implements SystemComponent {
 
   // Generate JSON for the component
   public getJson = () => {
-    // const children = this.getJson(PD.children)
-    const children = this.node.children?.map(child => {
-      return child.data.component.getJson()
-    })
-
-    console.log(children)
+    const mappings = parseMapJson(this.data.mappings)
     const json = {
       ...this.data.attrs,
       type: this.data.type,
-      // maps: getMapJson(PD.data.mappings),
+      maps: mappings,
       // irqs: PD.data.irqs
     }
     return json

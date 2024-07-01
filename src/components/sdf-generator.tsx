@@ -72,13 +72,25 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
     if (edges == null) return []
 
     const channels = edges.map(edge => {
+      const pd1 = edge.data.source_node?.data.component
+      const pd2 = edge.data.target_node?.data.component
+
+      if (pd1.getType() == 'sddf_subsystem' && pd2.getType() == 'PD') {
+        pd1.addClient(pd2.getAttrValues().name)
+        return ''
+      }
+      if (pd2.getType() == 'sddf_subsystem' && pd1.getType() == 'PD') {
+        pd2.addClient(pd1.getAttrValues().name)
+        return ''
+      }
+
       return {
-        pd1: edge.data.source_node?.data.attrs.name,
-        pd2: edge.data.target_node?.data.attrs.name,
+        pd1: pd1.getAttrValues().name,
+        pd2: pd2.getAttrValues().name,
         pd1_end_id: parseInt(edge.data.source_end_id),
         pd2_end_id: parseInt(edge.data.target_end_id),
       }
-    })
+    }).filter(channel => channel != '')
     return channels
   }
 
@@ -100,19 +112,17 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
       const component : PDComponent = node.data.component
       return node.parent == null || component.isPartOfSubsystem()
     })
-    if (PDs) {
-      attrJson.pds = PDs?.map(pd => pd.data.component.getJson())
-    }
-    //    const channels = globalGraph?.getEdges().filter(edge => edge.data.type == "channel")
+    attrJson.pds = PDs?.map(pd => pd.data.component.getJson()) ?? []
+
     const sddf_subsystems = globalGraph?.getNodes().filter(node => node.data.component.getType() == 'sddf_subsystem')
-    if (sddf_subsystems) {
-      attrJson.sddf_subsystems = sddf_subsystems?.map(subsystem => subsystem.data.component.getJson())
-    }
-    //
-    //    attrJson.channels = getChannelJson(channels)
-    //    attrJson.mrs = getMRJson(MRs)
-    // attrJson.sddf_subsystems = getSerialJson(sddf_subsystems)
+    attrJson.sddf_subsystems = sddf_subsystems?.map(subsystem => subsystem.data.component.getJson()) ?? []
+
+    const channels = globalGraph?.getEdges().filter(edge => edge.data.type == "channel")
+    attrJson.channels = getChannelJson(channels)
+
+    attrJson.mrs = getMRJson(MRs)
     console.log(attrJson)
+
     const inputString = JSON.stringify(attrJson)
     const inputBuffer = new TextEncoder().encode(inputString)
     
