@@ -11,7 +11,7 @@ import { stencilRender, stencil_group } from '../components/nodes'
 import MemoryManager from '../components/memory-manager'
 import ChannelEditor from '../components/channel-editor'
 import TemplateList from '../components/template-list'
-import { MemoryRegion } from '../utils/element'
+import { MemoryRegion } from '../components/memory-manager'
 import { channelLabelConfig, getValidEndID, randColor, closestBorder, reassignEdgesForComponent } from '../utils/helper'
 import SDFGenerator from '../components/sdf-generator'
 import '@antv/x6-react-components/es/menu/style/index.css'
@@ -32,8 +32,8 @@ import {
 } from '@ant-design/icons'
 import { SystemComponent } from '../components/os-components/component-interface'
 
-const Item = Toolbar.Item // eslint-disable-line
-const ToolbarGroup = Toolbar.Group // eslint-disable-line
+const Item = Toolbar.Item             // eslint-disable-line
+const ToolbarGroup = Toolbar.Group    // eslint-disable-line
 
 export const DiagramEditor = ({ board, dtb }) => {
   const refGraphContainer = React.createRef<HTMLDivElement>()

@@ -41,13 +41,13 @@ export default function MemoryManager({MRs, setMRs, getNodeData, graph }) {
   const refMRContainer = React.createRef<HTMLDivElement>()
   const [ form ] = Form.useForm(null)
   const [ indexOfMR, setIndexOfMR ] = useState<number | null>(null)
-  const [ editorOpen, _setEditorOpen ] = useState<boolean>(false)
+  const [ editorOpen, setEditorOpen ] = useState<boolean>(false)
   const [ MRWithAttrs, setMRWithAttrs ] = useState<Array<MemoryRegion & {type: string, index: number}>>([])
   const [ MRWidth, setMRWidth ] = useState<number>(0)
-
+  const [ physAddr, setPhysAddr ] = useState<string>('')
   const [ sizeUnit, setSizeUnit ] = useState('1')
   const sizeUnits = (
-    <Select value={sizeUnit} onChange={setSizeUnit}>
+    <Select value={sizeUnit} onChange={setSizeUnit} style={{ width: 100 }}>
       <Option value="11073741824">GB</Option>
       <Option value="1048576">MB</Option>
       <Option value="1024">KB</Option>
@@ -57,6 +57,10 @@ export default function MemoryManager({MRs, setMRs, getNodeData, graph }) {
 
   const updateAttrValues = () => {
     if (MRs == null) return
+
+    console.log(MRs)
+    MRs.sort((a, b) => a.phys_addr - b.phys_addr);
+    console.log(MRs)
 
     var index = 0
     var last_phys_addr = 0
@@ -87,7 +91,6 @@ export default function MemoryManager({MRs, setMRs, getNodeData, graph }) {
     setMRWithAttrs(tempMRWithAttrs)
     const bar_width = refMRContainer.current?.clientWidth
     setMRWidth(bar_width / tempMRWithAttrs.length)
-    console.log(bar_width / tempMRWithAttrs.length)
   }
 
   const popoverContent = (MR) => {
@@ -106,16 +109,17 @@ export default function MemoryManager({MRs, setMRs, getNodeData, graph }) {
     )
   }
 
-  const selectMR = (e, i : number) => {
-    // removeSelection()
-    // dragStatus.indexOfMR = i
-    // setIndexOfMR(i)
+  const selectMR = (MR) => {
+    const i = MR.index
+    if (i < 0) {
+      setMRs([...MRs, {name: 'Untitled', phys_addr: MR.phys_addr, size: MR.size, page_size: MR.page_size, page_count: null, nodes: []}])
+    } else {
+      setIndexOfMR(i)
+      updatePhysAddr(MRs[i].phys_addr)
+    }
   }
 
   const createMR = () => {
-    setMRs([...MRs, {name: 'Untitled', phys_addr: freeMRStatus.phys_addr, size: freeMRStatus.size, page_size: 1, page_count: null, nodes: []}])
-    console.log("create MR", MRs)
-    // hideAvailableMR()
   }
 
   const getMRClassNames = (num_mappings) => {
@@ -123,6 +127,11 @@ export default function MemoryManager({MRs, setMRs, getNodeData, graph }) {
     if (num_mappings === 1) return 'allocated-mr'
     if (num_mappings === 0) return 'unallocated-mr'
     if (num_mappings > 1) return 'shared-mr'
+  }
+
+  const updatePhysAddr = (value) => {
+    const display_value = '0x' + (value).toString(16)
+    setPhysAddr(display_value)
   }
 
   useEffect(() => {
@@ -155,14 +164,70 @@ export default function MemoryManager({MRs, setMRs, getNodeData, graph }) {
             <div
               className={'memory-region ' + MR.type}
               style={ {width: MRWidth + 'px', left: i * MRWidth + 'px' } }
-              onClick={(e) => {selectMR(e, i)}}
-              onDoubleClick={() => {_setEditorOpen(true)}}
+              onClick={() => {selectMR(MR)}}
+              onDoubleClick={() => {setEditorOpen(true)}}
               key={i}
               >
             </div>
           </Popover>
         )
       })}
+      <Modal
+        title="Edit memory region"
+        centered
+        open={editorOpen}
+        forceRender
+        onOk={(e) => {e.stopPropagation();setEditorOpen(false)}}
+        onCancel={(e) => {e.stopPropagation();setEditorOpen(false)}}
+      >
+        <Form
+          name="mr-manager"
+          form={ form }
+          wrapperCol={{ span: 16 }}
+          style={{ maxWidth: 600 }}
+          initialValues={ MRs[indexOfMR] }
+          layout="vertical"
+          autoComplete="off"
+        >
+          <Form.Item
+            label="name"
+            name="name"
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="size"
+            name="size"
+            rules={[{ required: true }]}
+          >
+            <Input addonAfter={sizeUnits} />
+          </Form.Item>
+          <Form.Item
+            label="phys_addr"
+            rules={[{ required: true }]}
+          >
+            <Input onChange={e => {updatePhysAddr(e.target.value)}} value={physAddr}/>
+          </Form.Item>
+          <Form.Item
+            label="page_size"
+            name="page_size"
+            rules={[{ required: true }]}
+          >
+            <InputNumber min={1} />
+          </Form.Item>
+          <Form.Item
+            label="page_count"
+            name="page_count"
+            rules={[{ required: true }]}
+          >
+            <InputNumber min={1} max={256} />
+          </Form.Item>
+          <Button htmlType="button" type='primary' danger>
+            Delete
+          </Button>
+        </Form>
+      </Modal>
     </div>
   )
 }
