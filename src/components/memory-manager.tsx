@@ -58,9 +58,7 @@ export default function MemoryManager({MRs, setMRs, getNodeData, graph }) {
   const updateAttrValues = () => {
     if (MRs == null) return
 
-    console.log(MRs)
     MRs.sort((a, b) => a.phys_addr - b.phys_addr);
-    console.log(MRs)
 
     var index = 0
     var last_phys_addr = 0
@@ -113,13 +111,31 @@ export default function MemoryManager({MRs, setMRs, getNodeData, graph }) {
     const i = MR.index
     if (i < 0) {
       setMRs([...MRs, {name: 'Untitled', phys_addr: MR.phys_addr, size: MR.size, page_size: MR.page_size, page_count: null, nodes: []}])
+      const prev_mr = MRWithAttrs.find(item => item.phys_addr + item.size == MR.phys_addr)
+      setIndexOfMR(prev_mr.index + 1)
+      console.log("set index to", prev_mr)
     } else {
       setIndexOfMR(i)
-      updatePhysAddr(MRs[i].phys_addr)
     }
+    const display_value = '0x' + (MR.phys_addr).toString(16)
+    setPhysAddr(display_value)
+    updateAttrValues()
+
+    setEditorOpen(true)
   }
 
-  const createMR = () => {
+  const editMR = () => {
+    // TODO: fix invalid modification, e.g. overlapped with over MRs
+    setMRs(oldMRs => {
+      const newMRs = oldMRs.map((MR, index) => {
+        if (index === indexOfMR) {
+          const values = form.getFieldsValue()
+          return {...MR, ...values, phys_addr: parseInt(physAddr, 16), size: values.size * parseInt(sizeUnit)}
+        }
+        return MR
+      })
+      return newMRs
+    })
   }
 
   const getMRClassNames = (num_mappings) => {
@@ -130,8 +146,7 @@ export default function MemoryManager({MRs, setMRs, getNodeData, graph }) {
   }
 
   const updatePhysAddr = (value) => {
-    const display_value = '0x' + (value).toString(16)
-    setPhysAddr(display_value)
+    setPhysAddr(value)
   }
 
   useEffect(() => {
@@ -164,8 +179,7 @@ export default function MemoryManager({MRs, setMRs, getNodeData, graph }) {
             <div
               className={'memory-region ' + MR.type}
               style={ {width: MRWidth + 'px', left: i * MRWidth + 'px' } }
-              onClick={() => {selectMR(MR)}}
-              onDoubleClick={() => {setEditorOpen(true)}}
+              onDoubleClick={() => {selectMR(MR);}}
               key={i}
               >
             </div>
@@ -177,7 +191,7 @@ export default function MemoryManager({MRs, setMRs, getNodeData, graph }) {
         centered
         open={editorOpen}
         forceRender
-        onOk={(e) => {e.stopPropagation();setEditorOpen(false)}}
+        onOk={(e) => {e.stopPropagation();setEditorOpen(false);editMR()}}
         onCancel={(e) => {e.stopPropagation();setEditorOpen(false)}}
       >
         <Form
