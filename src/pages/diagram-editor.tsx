@@ -113,6 +113,23 @@ export const DiagramEditor = ({ board, dtb }) => {
     },
   }
 
+  const openDiagram = async() => {
+    fetch('test.system.vis').then(response =>
+      response.arrayBuffer()
+    ).then(bytes => {
+      const typedArray = new Uint8Array(bytes)
+      var enc = new TextDecoder("utf-8")
+      const jsonString = enc.decode(typedArray)
+      const json = JSON.parse(jsonString)
+      globalGraph.fromJSON(json)
+    })
+  }
+
+  const saveDiagram = () => {
+    const data = globalGraph.toJSON()
+    console.log(JSON.stringify(data))
+  }
+
   const openSDFEditor = () => {
     setSDFEditorOpen(true)
     setToGenerateSDF(true)
@@ -503,8 +520,8 @@ export const DiagramEditor = ({ board, dtb }) => {
         </ToolbarGroup>
         <ToolbarGroup>
           <Item name="previewDiagram" icon={<FileImageOutlined />} tooltip="Preview Diagram"></Item>
-          <Item name="uploadeSDF" icon={<FolderOpenOutlined />} tooltip="Open Diagram"></Item>
-          <Item name="downloadDiagram" icon={<SaveOutlined />} tooltip="Save Diagram"></Item>
+          <Item name="uploadeSDF" icon={<FolderOpenOutlined />} tooltip="Open Diagram" onClick={openDiagram}></Item>
+          <Item name="downloadDiagram" icon={<SaveOutlined />} tooltip="Save Diagram" onClick={saveDiagram}></Item>
         </ToolbarGroup>
         <ToolbarGroup>
           <Item name="editSDF" icon={<EditOutlined />} tooltip="Edit SDF" onClick={openSDFEditor}></Item>
@@ -520,8 +537,6 @@ export const DiagramEditor = ({ board, dtb }) => {
         node_id={currentNodeID}
         nodeEditorOpen={nodeEditorOpen}
         setNodeEditorOpen={setNodeEditorOpen}
-        getNodeData={getNodeData}
-        updateNodeData={updateNodeData}
         component={currentNode}
         MRs={MRs}
         updateMappings={updateMappings}

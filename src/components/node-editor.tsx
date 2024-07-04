@@ -4,7 +4,7 @@ import MappingTable from './mapping-table'
 import IrqTable from './irq-table'
 import { AttrsForm } from './attrs-form'
 
-export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen, getNodeData, updateNodeData, MRs, component, updateMappings }) {
+export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen, MRs, component, updateMappings }) {
   const [ width, setWidth ] = useState(350)
   // const data = getNodeData(node_id)
   const data = component?.getData()
@@ -35,7 +35,7 @@ export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen,
           {
             key: '2',
             label: 'Mappings',
-            children: <MappingTable getNodeData={getNodeData} updateNodeData={updateNodeData} MRs={MRs} component={component} updateMappings={updateMappings} />,
+            children: <MappingTable MRs={MRs} component={component} updateMappings={updateMappings} />,
           },
           {
             key: '3',

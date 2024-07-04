@@ -16,7 +16,7 @@ export interface SysMapItem extends SysMap {
 //   children: React.ReactNode
 // }
 
-export default function MappingTable({ getNodeData, updateNodeData, MRs, component, updateMappings }) {
+export default function MappingTable({ MRs, component, updateMappings }) {
   const [form] = Form.useForm()
   const [editingKey, setEditingKey] = useState('')
   const [data, setData] = useState<SysMapItem[]>([])
@@ -100,9 +100,6 @@ export default function MappingTable({ getNodeData, updateNodeData, MRs, compone
     })
     component?.updateData({mappings: newData})
     updateMappings()
-    //    updateNodeData(node_id, {
-    //      mappings: newData
-    //    })
   }
 
   const save = async (key: React.Key) => {

@@ -76,10 +76,10 @@ const group_attrs = {
 
 export const VMComponentInit: SystemComponentInit = {
   preview_attrs: vm_preview_attrs,
-  createNode: (subsystem: Group | null) => {
+  createNode: (subsystem: string | null) => {
     const group = new Group(group_attrs)
 
-    const new_component = new VMComponent(group, subsystem)
+    const new_component = new VMComponent(subsystem)
     group.data = {
       component: new_component,
       parent: false,
@@ -91,8 +91,6 @@ export const VMComponentInit: SystemComponentInit = {
 
 export class VMComponent implements SystemComponent {
   component_json: any;
-  graph: Graph;
-  node: Group;
 
   data: VMDataModel = {
     node_id: '',
@@ -119,10 +117,9 @@ export class VMComponent implements SystemComponent {
     { name: 'pp', type: 'boolean', required: true },
   ]
 
-  constructor(node: Group, subsystem: Group | null) {
+  constructor(subsystem: string | null) {
     this.data.color = randColor()
     this.data.subsystem = subsystem
-    this.node = node
   }
 
   public getData = () => {
@@ -150,14 +147,14 @@ export class VMComponent implements SystemComponent {
   // Update style if attributes are modified, e.g. PD names
   // Render children nodes if exist
   public updateData = (new_data : any) => {
-    if (this.node) {
-      this.data = {...this.data, ...new_data}
-      this.node.setAttrs({ label: { text: this.data.attrs.name } })
-    }
+    this.data = {...this.data, ...new_data}
+    // if (this.node) {
+    //    this.node.setAttrs({ label: { text: this.data.attrs.name } })
+    // }
   }
 
   // Generate JSON for the component
-  public getJson = () => {
+  public getJson = (node?: Group) => {
     const mappings = parseMapJson(this.data.mappings)
     const json = {
       ...this.data.attrs,

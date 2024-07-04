@@ -9,7 +9,7 @@ export interface SystemComponentJsonFormat {}
 export interface DataModel {
   node_id : string;
   attrs: object;
-  subsystem: Group | null;
+  subsystem: string | null;
 }
 
 export interface EditableAttrs {
@@ -98,7 +98,7 @@ export const parseMapJson = (mappings: SysMapItem[]) => {
 
 export interface SystemComponentInit {
   preview_attrs: object,
-  createNode: (subsystem: Group | null) => Group
+  createNode: (subsystem: string | null) => Group
 }
 
 export interface SystemComponent {
@@ -119,5 +119,5 @@ export interface SystemComponent {
   updateData: (new_data : object) => void
 
   // Generate JSON for the component
-  getJson: () => object
+  getJson: (node?: Group) => object
 }

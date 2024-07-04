@@ -111,10 +111,10 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
       const component : PDComponent = node.data.component
       return node.parent == null || component.isPartOfSubsystem()
     })
-    attrJson.pds = PDs?.map(pd => pd.data.component.getJson()) ?? []
+    attrJson.pds = PDs?.map(pd => pd.data.component.getJson(pd)) ?? []
 
     const sddf_subsystems = globalGraph?.getNodes().filter(node => node.data.component.getType() == 'sddf_subsystem')
-    attrJson.sddf_subsystems = sddf_subsystems?.map(subsystem => subsystem.data.component.getJson()) ?? []
+    attrJson.sddf_subsystems = sddf_subsystems?.map(subsystem => subsystem.data.component.getJson(subsystem)) ?? []
 
     const channels = globalGraph?.getEdges().filter(edge => edge.data.type == "channel")
     attrJson.channels = getChannelJson(channels)

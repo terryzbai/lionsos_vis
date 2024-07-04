@@ -89,7 +89,7 @@ export const SerialComponentInit: SystemComponentInit = {
       },
     })
 
-    const new_component = new SerialComponent(group)
+    const new_component = new SerialComponent(group.id)
     group.data = {
       component: new_component,
       parent: true,
@@ -101,8 +101,7 @@ export const SerialComponentInit: SystemComponentInit = {
 
 export class SerialComponent implements SystemComponent {
   component_json: any;
-  graph: Graph;
-  node: Group;
+
   children: {
     driver: Group | null,
     mux_tx: Group | null,
@@ -136,8 +135,8 @@ export class SerialComponent implements SystemComponent {
     { name: 'data_region_size', type: 'number', required: true }
   ];
 
-  constructor(node: Group) {
-    this.node = node
+  constructor(node_id: string) {
+    this.data.node_id = node_id
   }
 
   public getData = () => {
@@ -164,41 +163,42 @@ export class SerialComponent implements SystemComponent {
     const driver_component = this.children.driver.data.component
     driver_component.updateData({
       attrs: {...driver_component.getAttrValues(), name: this.data.attrs.driver_name},
-      subsystem: this,
+      subsystem: this.data.node_id,
     })
 
     const mux_tx_component = this.children.mux_tx.data.component
     mux_tx_component.updateData({
       attrs: {...mux_tx_component.getAttrValues(), name: this.data.attrs.serial_mux_tx},
-      subsystem: this,
+      subsystem: this.data.node_id,
     })
 
     const mux_rx_component = this.children.mux_rx.data.component
     mux_rx_component.updateData({
       attrs: {...mux_rx_component.getAttrValues(), name: this.data.attrs.serial_mux_rx},
-      subsystem: this,
+      subsystem: this.data.node_id,
     })
   }
 
   public renderChildrenNodes = (graph: Graph) => {
-    const serial_system = this.node
+    const node = graph.getNodes().find(node => node.id === this.data.node_id)
+    const serial_system = node
     const {x, y} = serial_system.getPosition()
 
     // Add serial driver
-    const serial_driver = PDComponentInit.createNode(serial_system)
+    const serial_driver = PDComponentInit.createNode(this.data.node_id)
     serial_driver.position(x + 280, y + 100)
     serial_system.addChild(serial_driver)
     this.children.driver = serial_driver
 
     // Add mux_tx PD
-    const mux_tx = PDComponentInit.createNode(serial_system)
+    const mux_tx = PDComponentInit.createNode(this.data.node_id)
     mux_tx.position(x + 40, y + 40)
     serial_system.addChild(mux_tx)
     serial_system.data.mux_tx = mux_tx.id
     this.children.mux_tx = mux_tx
 
     // Add mux_rx PD
-    const mux_rx = PDComponentInit.createNode(serial_system)
+    const mux_rx = PDComponentInit.createNode(this.data.node_id)
     mux_rx.position(x + 40, y + 180)
     serial_system.addChild(mux_rx)
     serial_system.data.mux_rx = mux_rx.id
@@ -214,10 +214,8 @@ export class SerialComponent implements SystemComponent {
   // Update style if attributes are modified, e.g. PD names
   // Render children nodes if exist
   public updateData = (new_data : any) => {
-    if (this.node) {
-      this.data = {...this.data, ...new_data}
-      this.syncChildrenData()
-    }
+    this.data = {...this.data, ...new_data}
+    this.syncChildrenData()
   }
 
   // Generate JSON for the component
