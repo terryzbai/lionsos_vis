@@ -115,7 +115,7 @@ export default function MemoryManager({MRs, setMRs, getNodeData, graph }) {
   const selectMR = (MR) => {
     const i = MR.index
     if (i < 0) {
-      setMRs([...MRs, {name: 'Untitled', phys_addr: MR.phys_addr, size: MR.size, page_size: MR.page_size, page_count: null, nodes: []}])
+      setMRs([...MRs, {name: 'untitled', phys_addr: MR.phys_addr, size: MR.size, page_size: MR.page_size, page_count: null, nodes: []}])
       const prev_mr = MRWithAttrs.find(item => item.phys_addr + item.size == MR.phys_addr)
       setIndexOfMR(prev_mr ? prev_mr.index + 1 : 0)
     } else {

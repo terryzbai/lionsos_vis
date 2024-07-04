@@ -121,11 +121,11 @@ export default function MappingTable({ MRs, component, updateMappings }) {
   const handleAdd = () => {
     const newData: SysMapItem = {
       key: data ? data.length.toString() : '0',
-      mr: `Default`,
+      mr: `default`,
       vaddr: 0,
       perms: 'rw',
       cached: false,
-      setvar_vaddr: `Default`
+      setvar_vaddr: `default`
     }
 
     setData([...data, newData])

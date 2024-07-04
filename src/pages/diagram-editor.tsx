@@ -467,6 +467,14 @@ export const DiagramEditor = ({ board, dtb }) => {
           target_node: targetNode,
           target_end_id: '1',
         }
+        const sourceComponent = sourceNode.data.component
+        const targetComponent = targetNode.data.component
+        if (sourceComponent.getType() == 'sddf_subsystem' && targetComponent.getType() == 'PD') {
+          sourceComponent.addClient(targetComponent.getAttrValues().name)
+        }
+        if (sourceComponent.getType() == 'PD' && targetComponent.getType() == 'sddf_subsystem') {
+          targetComponent.addClient(sourceComponent.getAttrValues().name)
+        }
       } else if (!sourceNode && targetNode && edge.data?.source_node) {
         // Reset source
         edge.setSource(edge.data?.source_node)

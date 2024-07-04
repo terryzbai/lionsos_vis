@@ -75,11 +75,11 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
       const pd2 = edge.data.target_node?.data.component
 
       if (pd1.getType() == 'sddf_subsystem' && pd2.getType() == 'PD') {
-        pd1.addClient(pd2.getAttrValues().name)
+        //        pd1.addClient(pd2.getAttrValues().name)
         return ''
       }
       if (pd2.getType() == 'sddf_subsystem' && pd1.getType() == 'PD') {
-        pd2.addClient(pd1.getAttrValues().name)
+        //        pd2.addClient(pd1.getAttrValues().name)
         return ''
       }
 
