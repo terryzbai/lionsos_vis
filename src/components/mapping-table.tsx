@@ -93,6 +93,7 @@ export default function MappingTable({ getNodeData, updateNodeData, MRs, compone
   }
 
   const syncNodeData = () => {
+    // TODO: component provide interface for updating mappings
     const newData = data?.map(mapping => {
       const { key, ...rest } = mapping
       return rest

@@ -140,6 +140,9 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
     setSDFText(resultString)
     setSDF(resultString)
     setToGenerateSDF(false)
+    // TODO: update MRs
+    // TODO: update IRQs
+    // TODO: update mappings
   }
 
   const readDeviceConfig = async (config_paths, setStateFunc) => {

@@ -1,6 +1,7 @@
 import { Drawer, Tabs } from 'antd'
 import { useState } from 'react'
 import MappingTable from './mapping-table'
+import IrqTable from './irq-table'
 import { AttrsForm } from './attrs-form'
 
 export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen, getNodeData, updateNodeData, MRs, component, updateMappings }) {
@@ -17,7 +18,7 @@ export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen,
         setWidth(800)
         break
       case '3':
-        setWidth(500)
+        setWidth(600)
         break
     }
   }
@@ -39,7 +40,7 @@ export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen,
           {
             key: '3',
             label: 'IRQs',
-            children: 'Irq Table',
+            children: <IrqTable></IrqTable>,
           },
         ]} onChange={onchange}/>
         
