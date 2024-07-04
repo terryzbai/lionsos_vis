@@ -6,16 +6,6 @@ export interface SysMapItem extends SysMap {
   key: string
 }
 
-// interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
-//   editing: boolean
-//   dataIndex: string
-//   title: any
-//   inputType: 'number' | 'text' | 'boolean'
-//   record: SysMapItem
-//   index: number
-//   children: React.ReactNode
-// }
-
 export default function MappingTable({ MRs, component, updateMappings }) {
   const [form] = Form.useForm()
   const [editingKey, setEditingKey] = useState('')

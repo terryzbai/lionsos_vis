@@ -11,6 +11,7 @@ import { Group } from '../group'
 import { Graph } from "@antv/x6";
 import { randColor } from '../../utils/helper'
 import { SysMapItem } from '../mapping-table'
+import { SysIrq } from '../irq-table'
 
 interface PDDataModel extends DataModel {
   type: 'PD',
@@ -24,6 +25,7 @@ interface PDDataModel extends DataModel {
     prog_img: string,
   },
   mappings: SysMapItem[],
+  irqs: SysIrq[],
 }
 
 export const pd_preview_attrs = {
@@ -111,6 +113,7 @@ export class PDComponent implements SystemComponent {
       prog_img: 'default.elf',
     },
     mappings: [],
+    irqs: [],
     subsystem: null,
   };
 
@@ -158,6 +161,7 @@ export class PDComponent implements SystemComponent {
   // Render children nodes if exist
   public updateData = (new_data : any) => {
     this.data = {...this.data, ...new_data}
+    // TODO: update component labels in diagram-editor.tsx
     //   if (this.node) {
     //     this.node.setAttrs({ label: { text: this.data.attrs.name } })
     //   }
@@ -179,7 +183,7 @@ export class PDComponent implements SystemComponent {
       children: children ? children : [],
       type: this.data.type,
       maps: mappings,
-      irqs: [],
+      irqs: this.data.irqs,
     }
   }
 }

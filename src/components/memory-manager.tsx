@@ -96,7 +96,12 @@ export default function MemoryManager({MRs, setMRs, getNodeData, graph }) {
       <>
       Addr: {'0x' + MR.phys_addr.toString(16)} - {'0x' + (MR.phys_addr + MR.size).toString(16)}
       {MR.nodes?.map(node_id => {
-        const node_data = getNodeData(node_id)
+        const component = getComponentByID(graph, node_id)
+        if (component == null) {
+          console.log("Invalid node_id")
+          return ''
+        }
+        const node_data = component.getData()
         return (
           <div key={node_id}>
             {node_data?.attrs.name}
@@ -113,7 +118,6 @@ export default function MemoryManager({MRs, setMRs, getNodeData, graph }) {
       setMRs([...MRs, {name: 'Untitled', phys_addr: MR.phys_addr, size: MR.size, page_size: MR.page_size, page_count: null, nodes: []}])
       const prev_mr = MRWithAttrs.find(item => item.phys_addr + item.size == MR.phys_addr)
       setIndexOfMR(prev_mr ? prev_mr.index + 1 : 0)
-      console.log("set index to", prev_mr)
     } else {
       setIndexOfMR(i)
     }

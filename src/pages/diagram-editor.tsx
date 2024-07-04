@@ -121,6 +121,7 @@ export const DiagramEditor = ({ board, dtb }) => {
       var enc = new TextDecoder("utf-8")
       const jsonString = enc.decode(typedArray)
       const json = JSON.parse(jsonString)
+      // TODO: figure out how to recover diagram
       globalGraph.fromJSON(json)
     })
   }

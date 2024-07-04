@@ -12,7 +12,7 @@ interface SysIrqItem extends SysIrq {
     irq_label: string
 }
 
-export default function IrqTable() {
+export default function IrqTable({ component }) {
   const [ form ] = Form.useForm()
   const [ devices, setDevices ] = useState([])
   const [ data, setData ] = useState([])
@@ -157,12 +157,18 @@ export default function IrqTable() {
     setEditingKey('')
   }
 
-  const syncNodeData = () => {}
+  const syncNodeData = () => {
+    const newData = data?.map(irq_record => {
+      const { key, irq_label , ...rest } = irq_record
+      return rest
+    })
+    component?.updateData({irqs: newData})
+  }
 
   const handleAdd = () => {
     const newData: SysIrqItem = {
       key: data ? data.length.toString() : '0',
-      irq: 1,
+      irq: 32,
       id_: 1,
       trigger: 'level',
       irq_label: 'serial-32'
@@ -170,7 +176,6 @@ export default function IrqTable() {
 
     setData([...data, newData])
     // TODO: update irqs for component
-    syncNodeData()
   }
 
   const save = async (key: React.Key) => {
@@ -207,7 +212,8 @@ export default function IrqTable() {
 
   useEffect(() => {
     // TODO: fetch available devides and irq numbers
-  })
+    syncNodeData()
+  }, [data])
 
   return (
     <div>

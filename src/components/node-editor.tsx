@@ -40,7 +40,7 @@ export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen,
           {
             key: '3',
             label: 'IRQs',
-            children: <IrqTable></IrqTable>,
+            children: <IrqTable component={component}></IrqTable>,
           },
         ]} onChange={onchange}/>
         
