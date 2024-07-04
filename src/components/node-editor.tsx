@@ -1,11 +1,13 @@
 import { Drawer, Tabs } from 'antd'
 import { useState } from 'react'
 import MappingTable from './mapping-table'
-import AttrsForm from './attrs-form'
+import IrqTable from './irq-table'
+import { AttrsForm } from './attrs-form'
 
-export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen, getNodeData, updateNodeData, MRs }) {
+export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen, getNodeData, updateNodeData, MRs, component, updateMappings }) {
   const [ width, setWidth ] = useState(350)
-  const data = getNodeData(node_id)
+  // const data = getNodeData(node_id)
+  const data = component?.getData()
 
   const onchange = (key : any) => {
     switch (key) {
@@ -16,7 +18,7 @@ export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen,
         setWidth(800)
         break
       case '3':
-        setWidth(500)
+        setWidth(600)
         break
     }
   }
@@ -28,17 +30,17 @@ export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen,
           {
             key: '1',
             label: 'Attrs',
-            children: <AttrsForm node_id={node_id} setNodeEditorOpen={setNodeEditorOpen} getNodeData={getNodeData} updateNodeData={updateNodeData} />,
+            children: <AttrsForm setNodeEditorOpen={setNodeEditorOpen} component={component} />,
           },
           {
             key: '2',
             label: 'Mappings',
-            children: <MappingTable node_id={node_id} getNodeData={getNodeData} updateNodeData={updateNodeData} MRs={MRs} />,
+            children: <MappingTable getNodeData={getNodeData} updateNodeData={updateNodeData} MRs={MRs} component={component} updateMappings={updateMappings} />,
           },
           {
             key: '3',
             label: 'IRQs',
-            children: 'Irq Table',
+            children: <IrqTable></IrqTable>,
           },
         ]} onChange={onchange}/>
         

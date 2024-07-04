@@ -1,7 +1,8 @@
-import { useEffect } from 'react'
+import { FunctionComponent, useEffect } from 'react'
 import { InputNumber, Form, Input, Button, Checkbox } from 'antd'
+import { SystemComponent } from './os-components/component-interface'
 
-const getFormItem = (attr) => {
+export const getFormItem = (attr) => {
   const inputType = attr?.type
   const attrName = attr?.name
 
@@ -25,9 +26,15 @@ const getFormItem = (attr) => {
   )
 }
 
-export default function AttrsForm({ node_id, setNodeEditorOpen, getNodeData, updateNodeData }) {
-  const node_data = getNodeData(node_id)
-  const node_attrs = node_data?.attrs
+interface AttrsFromPros {
+  setNodeEditorOpen: Function;
+  component: SystemComponent;
+}
+
+export const AttrsForm: FunctionComponent<AttrsFromPros> = ({ setNodeEditorOpen, component }) => {
+  const node_attrs = component?.getData().attrs
+
+  const editable_attrs = component?.editable_attrs
   const [ form ] = Form.useForm(null)
 
   const saveNodeData = (data : any) => {
@@ -37,9 +44,7 @@ export default function AttrsForm({ node_id, setNodeEditorOpen, getNodeData, upd
       new_data[key] = data[key]
     })
 
-    updateNodeData(node_id, {
-      attrs: new_data
-    })
+    component.updateData({ attrs: new_data })
 
     setNodeEditorOpen(false)
   }
@@ -50,7 +55,7 @@ export default function AttrsForm({ node_id, setNodeEditorOpen, getNodeData, upd
 
   return (
     <>
-      <div style={ {width: '50%', height: '10px', margin: '10px', backgroundColor: node_data?.color}}></div>  
+      {component?.renderUnchangableNodes()}
       <Form
         name="basic"
         form={ form }
@@ -59,68 +64,12 @@ export default function AttrsForm({ node_id, setNodeEditorOpen, getNodeData, upd
         initialValues={ node_attrs }
         layout="vertical"
         onFinish={saveNodeData}
-        // onFinishFailed={onFinishFailed}
         autoComplete="off"
       >
-        {node_data?.editable_attrs.map(attr => {
+        {editable_attrs?.map(attr => {
           return getFormItem(attr)
-        })}
-        {/* <Form.Item
-          label="Name"
-          name="name"
-          rules={[{ required: true }]}
-          hidden={ node_attrs && !('name' in node_attrs) }
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label="ID"
-          name="id"
-          hidden={ node_attrs && !('id' in node_attrs) }
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label="Priority"
-          name="priority"
-          hidden={ node_attrs && !('priority' in node_attrs) }
-          rules={[{ required: false }]}
-        >
-          <InputNumber min={1} max={256} />
-        </Form.Item>
-        <Form.Item
-          label="Budget"
-          name="budget"
-          hidden={ node_attrs && !('budget' in node_attrs) }
-          rules={[{ required: false }]}
-        >
-          <InputNumber min={1} max={256} />
-        </Form.Item>
-        <Form.Item
-          label="Period"
-          name="period"
-          hidden={ !(node_attrs?.period) }
-          rules={[{ required: false }]}
-        >
-          <InputNumber min={1} max={256} />
-        </Form.Item>
-        <Form.Item
-          label="pp"
-          name="pp"
-          valuePropName="checked"
-          hidden={ node_attrs && !('pp' in node_attrs) }
-          rules={[{ required: false }]}
-        >
-          <Checkbox />
-        </Form.Item>
-        <Form.Item
-          label="Program Image"
-          name="prog_img"
-          hidden={ node_attrs && !('prog_img' in node_attrs) }
-          rules={[{ required: false }]}
-        >
-          <Input />
-        </Form.Item> */}
+        })
+        }
         <Button htmlType="submit" type="primary">
           Save
         </Button>

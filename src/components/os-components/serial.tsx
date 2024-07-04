@@ -1,78 +1,48 @@
-import { common_attrs, common_ports, addChannel } from "./common"
+import {
+  SystemComponentInit,
+  SystemComponent,
+  DataModel,
+  EditableAttrs,
+  common_attrs,
+  common_ports
+} from "./component-interface";
 import { Group } from '../group'
-import { newPDNode } from "./pd"
-import { Graph } from "@antv/x6"
-import { reassignEdgesForComponent } from '../../utils/helper'
-import { EditableAttrs } from "./common"
+import { Graph } from "@antv/x6";
+import { PDComponentInit } from "./pd"
 
-interface serial_system_json_format {
-  class: string,
-  client1: string,
-  client2: string,
-  device_node: string,
-  driver_name: string,
-  mux_tx_name: string,
-  mux_rx_name: string,
-  data_region_size: number,
+interface SerialDataModel extends DataModel {
+  type: 'sddf_subsystem',
+  attrs: {
+    class: string,
+    clients: string[],
+    device_node: string,
+    driver_name: string,
+    serial_mux_tx: string,
+    serial_mux_rx: string,
+    data_region_size: number,
+  },
 }
 
-const serial_default_json : serial_system_json_format = {
-  class: 'serial',
-  client1: '',
-  client2: '',
-  device_node: '',
-  driver_name: 'serial_driver',
-  mux_tx_name: 'serial_mux_tx',
-  mux_rx_name: 'serial_mux_rx',
-  data_region_size: 0x1000,
-}
-
-const serial_system_editable_attrs : Array<EditableAttrs> = [
-  { name: 'name', type: 'string', required: true },
-  { name: 'data_region_size', type: 'number', required: true }
-]
-
-const updateSubsystem = (graph: Graph, serial_system : Group) => {
-  const serial_driver = graph.getCellById(serial_system.data.driver)
-  serial_driver.setAttrs({ label: { text: serial_driver.data.attrs.name } })
-
-  const mux_tx = graph.getCellById(serial_system.data.mux_tx)
-  mux_tx.setAttrs({ label: { text: mux_tx.data.attrs.name } })
-
-  const mux_rx = graph.getCellById(serial_system.data.mux_rx)
-  mux_rx.setAttrs({ label: { text: mux_rx.data.attrs.name } })
-
-  reassignEdgesForComponent(graph)
-}
-
-const renderChildrenNodes = (graph : Graph, serial_system : Group) => {
-  const {x, y} = serial_system.getPosition()
-
-  // Add serial driver
-  const serial_driver = newPDNode()
-  serial_driver.position(x + 280, y + 100)
-  serial_driver.data.attrs.name = serial_default_json.driver_name
-  serial_driver.data.subsystem = serial_system
-  serial_system.addChild(serial_driver)
-  serial_system.data.driver = serial_driver.id
-
-  // Add mux_tx PD
-  const mux_tx = newPDNode()
-  mux_tx.position(x + 40, y + 40)
-  mux_tx.data.attrs.name = serial_default_json.mux_tx_name
-  mux_tx.data.subsystem = serial_system
-  serial_system.addChild(mux_tx)
-  serial_system.data.mux_tx = mux_tx.id
-  
-  // Add mux_rx PD
-  const mux_rx = newPDNode()
-  mux_rx.position(x + 40, y + 180)
-  mux_rx.data.attrs.name = serial_default_json.mux_rx_name
-  mux_rx.data.subsystem = serial_system
-  serial_system.addChild(mux_rx)
-  serial_system.data.mux_rx = mux_rx.id
-
-  updateSubsystem(graph, serial_system)
+const serial_preview_attrs = {
+  ...common_attrs,
+  shape: 'rect',
+  width: 80,
+  height: 40,
+  label: 'Serial',
+  data: {
+    name: 'Serial',
+    cellType: 'group',
+  },
+  attrs: {
+    text: {
+      textAnchor: "middle",
+    },
+    body: {
+      fill: '#ffd591',
+      stroke: '#ffa940',
+      strokeWidth: 1,
+    },
+  },
 }
 
 const group_attrs = {
@@ -80,12 +50,7 @@ const group_attrs = {
   shape: 'rect',
   width: 500,
   height: 320,
-  data: {
-    type: 'sddf_subsystem',
-    renderChildrenNodes: renderChildrenNodes,
-    attrs: serial_default_json,
-    editable_attrs: serial_system_editable_attrs
-  },
+  data: {},
   attrs: {
     label: {
       text: 'Serial System',
@@ -108,38 +73,155 @@ const group_attrs = {
   ...common_ports
 }
 
-const newSerialGroup = () => {
-  const group = new Group(group_attrs)
+export const SerialComponentInit: SystemComponentInit = {
+  preview_attrs: serial_preview_attrs,
+  createNode: () => {
+    const group = new Group(group_attrs)
+    group.addPort({
+      id: 'port_1',
+      group: 'bottom',
+      attrs: {
+        circle: {
+          magnet: true,
+          stroke: '#8f8f8f',
+          r: 5,
+        },
+      },
+    })
 
-  return group
+    const new_component = new SerialComponent(group)
+    group.data = {
+      component: new_component,
+      parent: true,
+    }
+
+    return group
+  }
 }
 
-const serial_preview_attrs = {
-  ...common_attrs,
-  shape: 'rect',
-  width: 80,
-  height: 40,
-  label: 'Serial',
-  data: {
-    name: 'Serial',
-    cellType: 'group',
-    newNode: newSerialGroup
-  },
-  attrs: {
-    text: {
-      textAnchor: "middle",
+export class SerialComponent implements SystemComponent {
+  component_json: any;
+  graph: Graph;
+  node: Group;
+  children: {
+    driver: Group | null,
+    mux_tx: Group | null,
+    mux_rx: Group | null,
+  } = {
+    driver: null,
+    mux_tx: null,
+    mux_rx: null,
+  }
+
+  data: SerialDataModel = {
+    node_id: '',
+    type: 'sddf_subsystem',
+    attrs: {
+      class: 'serial',
+      clients: [],
+      device_node: '',
+      driver_name: 'serial_driver',
+      serial_mux_tx: 'serial_mux_tx',
+      serial_mux_rx: 'serial_mux_rx',
+      data_region_size: 0x1000,
     },
-    body: {
-      fill: '#ffd591',
-      stroke: '#ffa940',
-      strokeWidth: 1,
-    },
-  },
-}
+    subsystem: null,
+  };
 
-const getSerialJson = (serial_system : Group) => {
-  console.log(serial_system)
-  return []
-}
+  editable_attrs: EditableAttrs[] = [
+    { name: 'driver_name', type: 'string', required: true },
+    { name: 'driver_node', type: 'string', required: true },
+    { name: 'serial_mux_tx', type: 'string', required: true },
+    { name: 'serial_mux_rx', type: 'string', required: true },
+    { name: 'data_region_size', type: 'number', required: true }
+  ];
 
-export { serial_preview_attrs, getSerialJson }
+  constructor(node: Group) {
+    this.node = node
+  }
+
+  public getData = () => {
+    return this.data
+  }
+
+  public getType = () => {
+    return this.data.type
+  }
+
+  public getMappings = () => {
+    return []
+  }
+
+  public getAttrValues = () => {
+    return this.data.attrs
+  }
+
+  public addClient = (node_id: string) => {
+    this.data.attrs.clients.push(node_id)
+  }
+
+  private syncChildrenData = () => {
+    const driver_component = this.children.driver.data.component
+    driver_component.updateData({
+      attrs: {...driver_component.getAttrValues(), name: this.data.attrs.driver_name},
+      subsystem: this,
+    })
+
+    const mux_tx_component = this.children.mux_tx.data.component
+    mux_tx_component.updateData({
+      attrs: {...mux_tx_component.getAttrValues(), name: this.data.attrs.serial_mux_tx},
+      subsystem: this,
+    })
+
+    const mux_rx_component = this.children.mux_rx.data.component
+    mux_rx_component.updateData({
+      attrs: {...mux_rx_component.getAttrValues(), name: this.data.attrs.serial_mux_rx},
+      subsystem: this,
+    })
+  }
+
+  public renderChildrenNodes = (graph: Graph) => {
+    const serial_system = this.node
+    const {x, y} = serial_system.getPosition()
+
+    // Add serial driver
+    const serial_driver = PDComponentInit.createNode(serial_system)
+    serial_driver.position(x + 280, y + 100)
+    serial_system.addChild(serial_driver)
+    this.children.driver = serial_driver
+
+    // Add mux_tx PD
+    const mux_tx = PDComponentInit.createNode(serial_system)
+    mux_tx.position(x + 40, y + 40)
+    serial_system.addChild(mux_tx)
+    serial_system.data.mux_tx = mux_tx.id
+    this.children.mux_tx = mux_tx
+
+    // Add mux_rx PD
+    const mux_rx = PDComponentInit.createNode(serial_system)
+    mux_rx.position(x + 40, y + 180)
+    serial_system.addChild(mux_rx)
+    serial_system.data.mux_rx = mux_rx.id
+    this.children.mux_rx = mux_rx
+
+    this.syncChildrenData()
+  }
+
+  public renderUnchangableNodes = () => {
+    return <></>
+  }
+
+  // Update style if attributes are modified, e.g. PD names
+  // Render children nodes if exist
+  public updateData = (new_data : any) => {
+    if (this.node) {
+      this.data = {...this.data, ...new_data}
+      this.syncChildrenData()
+    }
+  }
+
+  // Generate JSON for the component
+  public getJson = () => {
+    return this.data.attrs
+  }
+}

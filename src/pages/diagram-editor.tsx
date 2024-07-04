@@ -11,7 +11,7 @@ import { stencilRender, stencil_group } from '../components/nodes'
 import MemoryManager from '../components/memory-manager'
 import ChannelEditor from '../components/channel-editor'
 import TemplateList from '../components/template-list'
-import { MemoryRegion } from '../utils/element'
+import { MemoryRegion } from '../components/memory-manager'
 import { channelLabelConfig, getValidEndID, randColor, closestBorder, reassignEdgesForComponent } from '../utils/helper'
 import SDFGenerator from '../components/sdf-generator'
 import '@antv/x6-react-components/es/menu/style/index.css'
@@ -30,11 +30,12 @@ import {
   DownloadOutlined,
   UploadOutlined,
 } from '@ant-design/icons'
+import { SystemComponent } from '../components/os-components/component-interface'
 
-const Item = Toolbar.Item // eslint-disable-line
-const ToolbarGroup = Toolbar.Group // eslint-disable-line
+const Item = Toolbar.Item             // eslint-disable-line
+const ToolbarGroup = Toolbar.Group    // eslint-disable-line
 
-export const DiagramEditor = () => {
+export const DiagramEditor = ({ board, dtb }) => {
   const refGraphContainer = React.createRef<HTMLDivElement>()
   const refStencilContainer = React.createRef<HTMLDivElement>()
   const refTextarea = React.useRef<HTMLTextAreaElement>()
@@ -45,14 +46,15 @@ export const DiagramEditor = () => {
   const [ channelEditorOpen, setChannelEditorOpen ] = useState(false)
   const [ currentEdgeID, setCurrentEdgeID ] = useState('')
   const [ currentNodeID, setCurrentNodeID ] = useState('')
+  const [ currentNode, setCurrentNode ] = useState<SystemComponent>(null)
   const [ toGenerateSDF, setToGenerateSDF ] = useState<boolean>(false)
   const [ SDFText, setSDFText ] = useState('')
   const [ MRs, setMRs] = useState<Array<MemoryRegion>>([
-    {name: 'uart', phys_addr: 0x9000000, size: 0x1000, page_size: 1, page_count: null, nodes: []},
-    {name: 'shared_buffer', phys_addr: 0x9001000, size: 0x1000, page_size: 1, page_count: null, nodes: []},
-    {name: 'guest_ram', phys_addr: 0x10000000, size: 0x200000, page_size: 1, page_count: null, nodes: []},
-    {name: 'ethernet', phys_addr: 0xa003000, size: 0x1000, page_size: 1, page_count: null, nodes: []},
-    {name: 'gic_vcpu', phys_addr: 0x8040000, size: 0x1000, page_size: 1, page_count: null, nodes: []}
+    //    {name: 'uart', phys_addr: 0x9000000, size: 0x1000, page_size: 1, page_count: null, nodes: []},
+    //    {name: 'shared_buffer', phys_addr: 0x9001000, size: 0x1000, page_size: 1, page_count: null, nodes: []},
+    //    {name: 'guest_ram', phys_addr: 0x10000000, size: 0x200000, page_size: 1, page_count: null, nodes: []},
+    //    {name: 'ethernet', phys_addr: 0xa003000, size: 0x1000, page_size: 1, page_count: null, nodes: []},
+    //    {name: 'gic_vcpu', phys_addr: 0x8040000, size: 0x1000, page_size: 1, page_count: null, nodes: []}
   ])
 
   var ctrlPressed = false
@@ -107,7 +109,7 @@ export const DiagramEditor = () => {
     stencilGraphHeight: 0,
     groups: stencil_group,
     getDropNode(node) {
-      return node.data?.newNode()
+      return node.data?.createNode()
     },
   }
 
@@ -122,15 +124,12 @@ export const DiagramEditor = () => {
     setTemplateListOpen(true)
   }
 
-  const focusChange = () => {
-    console.log(refTextarea.current.selectionStart)
-  }
-
   const updateMappings = () => {
     const nodes = globalGraph.getNodes()
     const newMRs = MRs.map((MR) => {
       const new_mappings = nodes.map((node) => {
-        const node_mappings = node.data.mappings.map(mapping => mapping.mr)
+        const component = node.data.component
+        const node_mappings = component?.getMappings().map(mapping => mapping.mr)
         if (node_mappings.includes(MR.name)) {
           return node.id
         }
@@ -245,10 +244,11 @@ export const DiagramEditor = () => {
 
     stencilRender(graph, stencil)
 
-    graph.on('node:dblclick', ({ node }) => {
-      console.log(node.id)
+    graph.on('node:dblclick', ({ node, e }) => {
+      setCurrentNode(node.data.component)
       setCurrentNodeID(node.id)
       setNodeEditorOpen(true)
+      e.stopPropagation()
     })
 
     graph.on('node:mouseenter', ({ node }) => {
@@ -339,9 +339,7 @@ export const DiagramEditor = () => {
     })
 
     graph.on('node:added', ({ node }) => {
-      if (node.data.renderChildrenNodes) {
-        node.data.renderChildrenNodes(graph, node)
-      }
+      node.data.component.renderChildrenNodes(graph)
     })
 
     const embedPadding = 40
@@ -490,7 +488,7 @@ export const DiagramEditor = () => {
 
   return (
     <div>
-      <MemoryManager MRs={MRs} setMRs={setMRs} getNodeData={getNodeData} />
+      <MemoryManager MRs={MRs} setMRs={setMRs} getNodeData={getNodeData} graph={globalGraph} />
       <Toolbar className="toolbar" >
         <ToolbarGroup>
           <Item name="zoomIn" tooltip="Zoom In (Cmd +)" icon={<ZoomInOutlined />} />
@@ -524,7 +522,9 @@ export const DiagramEditor = () => {
         setNodeEditorOpen={setNodeEditorOpen}
         getNodeData={getNodeData}
         updateNodeData={updateNodeData}
+        component={currentNode}
         MRs={MRs}
+        updateMappings={updateMappings}
         />
       <ChannelEditor
         channelEditorOpen={channelEditorOpen}
@@ -546,12 +546,11 @@ export const DiagramEditor = () => {
           ref={refTextarea}
           value={SDFText}
           onChange={() => console.log('111')}
-          onClick={focusChange}
           style={ {width: '100%', height: '500px'} }>
         </textarea>
       </Modal>
       <TemplateList templateListOpen={templateListOpen} setTemplateListOpen={setTemplateListOpen} graph={globalGraph}></TemplateList>
-      <SDFGenerator globalGraph={globalGraph} toGenerateSDF={toGenerateSDF} setToGenerateSDF={setToGenerateSDF} setSDFText={setSDFText} MRs={MRs} />
+      <SDFGenerator globalGraph={globalGraph} toGenerateSDF={toGenerateSDF} setToGenerateSDF={setToGenerateSDF} setSDFText={setSDFText} MRs={MRs} board={board} dtb={dtb} />
     </div>
   )
 }

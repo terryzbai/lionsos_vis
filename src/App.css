@@ -145,3 +145,7 @@
   height: 300px;
   background-color: gray;
 }
+
+.arch-config-bar {
+  padding: 10px;
+}

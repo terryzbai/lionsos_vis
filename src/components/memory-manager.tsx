@@ -1,7 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Popover, Modal, Form, Input, InputNumber, Button, Select } from 'antd'
-import { MemoryRegion } from '../utils/element'
+import { getComponentByID } from '../utils/helper'
 import '../App.css'
+
+export interface MemoryRegion {
+	name: string
+	size: number
+	phys_addr: number
+	page_size?: number
+	page_count?: number
+	nodes: string[]
+}
 
 const { Option } = Select
 
@@ -23,34 +32,22 @@ interface FreeMRStatus {
 
 const maxPhyAddr = 0xffffffff
 
-export default function MemoryManager({MRs, setMRs, getNodeData }) {
+export default function MemoryManager({MRs, setMRs, getNodeData, graph }) {
   const [ freeMRStatus, setFreeMRStatus ] = useState<FreeMRStatus>({
     phys_addr: 0,
     size: 0,
     visibility: "hidden"
   })
   const refMRContainer = React.createRef<HTMLDivElement>()
-  const [ indexOfMR, setIndexOfMR ] = useState<number | null>(null)
   const [ form ] = Form.useForm(null)
-  const [ editorOpen, _setEditorOpen ] = useState<boolean>(false)
-  const [ widthOfMRBar, setWidthOfMRBar ] = useState<number>(window.innerWidth - 20)
-  const myStateRef = useRef(editorOpen)
-  const [ barConfig, setBarConfig ] = useState({
-    min_phyaddr: 0,
-    max_phyaddr: 0xffffffff,
-    min_mr_width: 20,         // pixels
-    max_free_width: 20,       // pixels
-  })
-  const [ MRWithAttrs, setMRWithAttrs ] = useState<Array<MemoryRegion & {width: number, left: number}>>([])
-
-  const setEditorOpen = data => {
-    myStateRef.current = data
-    _setEditorOpen(data)
-  }
-
+  const [ indexOfMR, setIndexOfMR ] = useState<number | null>(null)
+  const [ editorOpen, setEditorOpen ] = useState<boolean>(false)
+  const [ MRWithAttrs, setMRWithAttrs ] = useState<Array<MemoryRegion & {type: string, index: number}>>([])
+  const [ MRWidth, setMRWidth ] = useState<number>(0)
+  const [ physAddr, setPhysAddr ] = useState<string>('')
   const [ sizeUnit, setSizeUnit ] = useState('1')
   const sizeUnits = (
-    <Select value={sizeUnit} onChange={setSizeUnit}>
+    <Select value={sizeUnit} onChange={setSizeUnit} style={{ width: 100 }}>
       <Option value="11073741824">GB</Option>
       <Option value="1048576">MB</Option>
       <Option value="1024">KB</Option>
@@ -58,186 +55,40 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
     </Select>
   )
 
-  const dragStatus : DragStatus = {
-    op: null,
-    startX: 0,
-    startLeft: 0,
-    startPhyAddr: 0,
-    startWidth: 0,
-    indexOfMR: null,
-    rangeLimit: null
-  }
+  const updateAttrValues = () => {
+    if (MRs == null) return
 
-  const selectMR = (e, i : number) => {
-    removeSelection()
-    dragStatus.indexOfMR = i
-    setIndexOfMR(i)
-  }
+    MRs.sort((a, b) => a.phys_addr - b.phys_addr);
 
-  const removeSelection = () => {
-    if (myStateRef.current) return
-
-    dragStatus.indexOfMR = null
-    setIndexOfMR(null)
-  }
-
-  const getRangeLimit = (targetX : number) => {
-    const range_limit = {
-      min: 0,
-      max: 99999
-    }
-
-    MRs.map(mr => {
-      if (mr.phys_addr <= targetX && mr.phys_addr + mr.size >= targetX) return
-
-      if (mr.phys_addr > targetX && mr.phys_addr + mr.size < range_limit.max) {
-        range_limit.max = mr.phys_addr
-      }
-      if (mr.phys_addr < targetX && mr.phys_addr + mr.size > range_limit.min) {
-        range_limit.min = mr.phys_addr + mr.size
-      }
-    })
-
-    return range_limit
-  }
-
-  const displayAvailableMR = (e, index : number | null) => {
-    if (index != null) return
-    if (indexOfMR != null) return
-
-    if (e.target.classList.contains("mem-bar")) {
-      const rangeLimit = getRangeLimit(e.nativeEvent.offsetX)
-      const phys_addr = Math.max(e.nativeEvent.offsetX - 40, rangeLimit.min)
-      setFreeMRStatus({
-        visibility: "visible",
-        phys_addr: phys_addr,
-        size: Math.min(rangeLimit.max - phys_addr, 100)
-      })
-    }
-  }
-
-  const hideAvailableMR = () => {
-    setFreeMRStatus({
+    var index = 0
+    var last_phys_addr = 0
+    var tempMRWithAttrs = []
+    var type = ''
+    const free_mr = {
+      name: '',
+      size: 0,
       phys_addr: 0,
-      visibility: "hidden",
-      size: 0
+      nodes: [],
+      type: 'free-mr',
+      index: -1,
+    }
+    MRs.forEach(MR => {
+      if (last_phys_addr != MR.phys_addr) {
+        tempMRWithAttrs.push({...free_mr, phys_addr: last_phys_addr, size: MR.phys_addr - last_phys_addr})
+      }
+      if (MR.nodes.length === 1) type = 'allocated-mr'
+      if (MR.nodes.length === 0) type = 'unallocated-mr'
+      if (MR.nodes.length > 1) type = 'shared-mr'
+      last_phys_addr = MR.phys_addr + MR.size
+      tempMRWithAttrs.push({...MR, type: type, index: index})
+      index += 1
     })
-  }
-  
-  const createMR = () => {
-    setMRs([...MRs, {name: 'Untitled', phys_addr: freeMRStatus.phys_addr, size: freeMRStatus.size, page_size: 1, page_count: null, nodes: []}])
-    console.log("create MR", MRs)
-    hideAvailableMR()
-  }
-
-  const editMR = () => {
-    console.log("edit MR", form.getFieldsValue(), sizeUnit)
-    setMRs(oldMRs => {
-      const newMRs = oldMRs.map((MR, index) => {
-        if (index === indexOfMR) {
-          const values = form.getFieldsValue()
-          return {...values, size: values.size * parseInt(sizeUnit)}
-        }
-        return MR
-      })
-      return newMRs
-    })
-  }
-
-  const startDrag = (e, i : number) => {
-    if (i !== indexOfMR) return
-
-    const this_mr = e.target
-
-    dragStatus.indexOfMR = i
-    dragStatus.startX = e.clientX
-    dragStatus.startLeft = MRs[i].left
-    dragStatus.startPhyAddr = MRs[i].phys_addr
-    dragStatus.rangeLimit = getRangeLimit(MRs[i].phys_addr + 1)
-    dragStatus.startWidth = MRs[i].size
-
-    const BORDER_SIZE = 5
-    const relative_x = e.nativeEvent.offsetX
-
-    if (relative_x > parseFloat(this_mr.style.width) - BORDER_SIZE) {
-      dragStatus.op = "right"
-      document.documentElement.style.cursor = 'ew-resize'
-    } else if (relative_x < BORDER_SIZE) {
-      dragStatus.op = "left"
-      document.documentElement.style.cursor = 'ew-resize'
-    } else {
-      dragStatus.op = "middle"
-      document.documentElement.style.cursor = 'grab'
+    if (maxPhyAddr != last_phys_addr) {
+      tempMRWithAttrs.push({...free_mr, phys_addr: last_phys_addr, size: maxPhyAddr - last_phys_addr})
     }
-
-    document.addEventListener('mousemove', handleDrag)
-    document.addEventListener('mouseup', endDrag, { once: true })
-  }
-
-  // Handle dragging
-  const handleDrag = (e) => {
-    const currentMR = MRs[dragStatus.indexOfMR]
-    if (dragStatus.op === "middle") {
-      const newphys_addr = Math.min(
-        Math.max(e.clientX - dragStatus.startX + dragStatus.startLeft, dragStatus.rangeLimit.min),
-        dragStatus.rangeLimit.max - currentMR.size
-      )
-      setMRs(oldMRs => {
-        const newMRs = oldMRs.map((MR, index) => {
-          if (index === dragStatus.indexOfMR) {
-            return {...MR, phys_addr: newphys_addr}
-          }
-          return MR
-        })
-        return newMRs
-      })
-    } else if (dragStatus.op === "left") {
-      const newphys_addr = Math.min(
-        Math.max(e.clientX - dragStatus.startX + dragStatus.startLeft, dragStatus.rangeLimit.min),
-        currentMR.phys_addr + currentMR.size - currentMR.page_size
-      )
-      const newSize = currentMR.phys_addr + currentMR.size - newphys_addr
-      setMRs(oldMRs => {
-        const newMRs = oldMRs.map((MR, index) => {
-          if (index === dragStatus.indexOfMR) {
-            return {...MR, phys_addr: newphys_addr, size: newSize}
-          }
-          return MR
-        })
-        return newMRs
-      })
-    } else if (dragStatus.op === "right") {
-      const newSize = Math.min(
-        Math.max(e.clientX - dragStatus.startX + dragStatus.startWidth, currentMR.page_size),
-        dragStatus.rangeLimit.max - currentMR.phys_addr
-      )
-      setMRs(oldMRs => {
-        const newMRs = oldMRs.map((MR, index) => {
-          if (index === dragStatus.indexOfMR) {
-            return {...MR, size: newSize}
-          }
-          return MR
-        })
-        return newMRs
-      })
-    }
-  }
-
-  // End dragging
-  const endDrag = () => {
-    dragStatus.op = null
-    dragStatus.indexOfMR = null
-
-    document.removeEventListener("mousemove", handleDrag, false)
-    document.documentElement.style.cursor = 'auto'
-  }
-
-  const backgroundColor = (MR) => {
-    if (MR.nodes?.length === 0) return ''
-    if (MR.nodes?.length === 1) {
-      return getNodeData(MR.nodes[0])?.color
-    }
-    return '#FFFFFF'
+    setMRWithAttrs(tempMRWithAttrs)
+    const bar_width = refMRContainer.current?.clientWidth
+    setMRWidth(bar_width / tempMRWithAttrs.length)
   }
 
   const popoverContent = (MR) => {
@@ -256,6 +107,37 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
     )
   }
 
+  const selectMR = (MR) => {
+    const i = MR.index
+    if (i < 0) {
+      setMRs([...MRs, {name: 'Untitled', phys_addr: MR.phys_addr, size: MR.size, page_size: MR.page_size, page_count: null, nodes: []}])
+      const prev_mr = MRWithAttrs.find(item => item.phys_addr + item.size == MR.phys_addr)
+      setIndexOfMR(prev_mr ? prev_mr.index + 1 : 0)
+      console.log("set index to", prev_mr)
+    } else {
+      setIndexOfMR(i)
+    }
+    const display_value = '0x' + (MR.phys_addr).toString(16)
+    setPhysAddr(display_value)
+    updateAttrValues()
+
+    setEditorOpen(true)
+  }
+
+  const editMR = () => {
+    // TODO: fix invalid modification, e.g. overlapped with over MRs
+    setMRs(oldMRs => {
+      const newMRs = oldMRs.map((MR, index) => {
+        if (index === indexOfMR) {
+          const values = form.getFieldsValue()
+          return {...MR, ...values, phys_addr: parseInt(physAddr, 16), size: values.size * parseInt(sizeUnit)}
+        }
+        return MR
+      })
+      return newMRs
+    })
+  }
+
   const getMRClassNames = (num_mappings) => {
     if (num_mappings == null) return 'unallocated-mr'
     if (num_mappings === 1) return 'allocated-mr'
@@ -263,76 +145,17 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
     if (num_mappings > 1) return 'shared-mr'
   }
 
-  const deleteMR = () => {
-    MRs.splice(indexOfMR, 1)
-    setEditorOpen(false)
+  const updatePhysAddr = (value) => {
+    setPhysAddr(value)
   }
 
-  const updateBarRange = () => {
-    let min_phyaddr = maxPhyAddr
-    let max_phyaddr = 0
-    MRs.map(mr => {
-      min_phyaddr = Math.min(min_phyaddr, mr.phys_addr)
-      max_phyaddr = Math.max(max_phyaddr, mr.phys_addr + mr.size)
-    })
-
-    const diff = max_phyaddr - min_phyaddr
-
-    setBarConfig({...barConfig, min_phyaddr: min_phyaddr - (diff * 0.1), max_phyaddr: max_phyaddr + (diff * 0.1) })
-  }
-
-  const getWidth = (size : number) => {
-    const width = Math.max(size / (barConfig.max_phyaddr - barConfig.min_phyaddr) * widthOfMRBar, barConfig.min_mr_width)
-    return width
-  }
-
-  const updateAttrValues = () => {
-    let min_phyaddr = maxPhyAddr
-    let max_phyaddr = 0
-    MRs.map(mr => {
-      min_phyaddr = Math.min(min_phyaddr, mr.phys_addr)
-      max_phyaddr = Math.max(max_phyaddr, mr.phys_addr + mr.size)
-    })
-    const diff = max_phyaddr - min_phyaddr
-    min_phyaddr = min_phyaddr - (diff * 0.1)
-    max_phyaddr = max_phyaddr + (diff * 0.1)
-
-    let tempAttrValues: Array<MemoryRegion & { width: number, left: number}> = []
-    for (let mr of MRs) {
-      const width_i = getWidth(mr.size)
-      let left_i = (mr.phys_addr - min_phyaddr) / (max_phyaddr - min_phyaddr) * widthOfMRBar
-
-      for (let tempVal of tempAttrValues) {
-        if (tempVal.left < left_i && tempVal.left + tempVal.width > left_i) {
-          left_i = tempVal.left + tempVal.width
-        }
-      }
-      tempAttrValues.push({...mr, width: width_i, left: left_i})
-    }
-    return tempAttrValues
-  }
-
-  const resizeWindow = () => {
-    setWidthOfMRBar(refMRContainer.current?.clientWidth)
-  }
-
-  useEffect(() => {
-    document.addEventListener('mousedown', removeSelection)
-    window.addEventListener('resize', resizeWindow)
-    resizeWindow()
-
-    updateBarRange()
-    setMRWithAttrs(updateAttrValues())
-  }, [])
-  
   useEffect(() => {
     form.setFieldsValue(MRs[indexOfMR])
     form.setFieldValue('size', MRs[indexOfMR]?.size / parseInt(sizeUnit))
   })
 
   useEffect(() => {
-    updateBarRange()
-    setMRWithAttrs(updateAttrValues())
+    updateAttrValues()
   }, [MRs])
 
   useEffect(() => {
@@ -349,28 +172,20 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
   }, [editorOpen])
 
   return (
-    <div className='mem-bar' onMouseMove={(e) => displayAvailableMR(e, dragStatus.indexOfMR)} onMouseLeave={hideAvailableMR} ref={refMRContainer}>
+    <div className='mem-bar' ref={refMRContainer}>
       {MRWithAttrs.map((MR, i) => {
         return (
           <Popover placement="bottom" title={MR.name} content={popoverContent(MR)} key={i}>
-            <div 
-              className={'memory-region ' + getMRClassNames(MR.nodes?.length) + (i === indexOfMR ? ' selected-mr' : '')}
-              style={ {width: getWidth(MR.size) + 'px', left: MR.left, backgroundColor: backgroundColor(MR) } } 
-              onMouseEnter={hideAvailableMR}
-              onMouseDown={(e) => {e.stopPropagation();startDrag(e, i)}}
-              onClick={(e) => {selectMR(e, i)}}
-              onDoubleClick={() => {setEditorOpen(true)}}
+            <div
+              className={'memory-region ' + MR.type}
+              style={ {width: MRWidth + 'px', left: i * MRWidth + 'px' } }
+              onDoubleClick={() => {selectMR(MR);}}
               key={i}
               >
-              </div>
+            </div>
           </Popover>
         )
       })}
-      <div
-        className='free-mr'
-        style={ {width: freeMRStatus.size + 'px', left: freeMRStatus.phys_addr + 'px', visibility: freeMRStatus.visibility} }
-        onDoubleClick={createMR}
-      >DblClick to new</div>
       <Modal
         title="Edit memory region"
         centered
@@ -386,7 +201,6 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
           style={{ maxWidth: 600 }}
           initialValues={ MRs[indexOfMR] }
           layout="vertical"
-          onFinish={editMR}
           autoComplete="off"
         >
           <Form.Item
@@ -405,10 +219,9 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
           </Form.Item>
           <Form.Item
             label="phys_addr"
-            name="phys_addr"
             rules={[{ required: true }]}
           >
-            <InputNumber min={1} />
+            <Input onChange={e => {updatePhysAddr(e.target.value)}} value={physAddr}/>
           </Form.Item>
           <Form.Item
             label="page_size"
@@ -424,7 +237,7 @@ export default function MemoryManager({MRs, setMRs, getNodeData }) {
           >
             <InputNumber min={1} max={256} />
           </Form.Item>
-          <Button htmlType="button" type='primary' danger onClick={deleteMR}>
+          <Button htmlType="button" type='primary' danger>
             Delete
           </Button>
         </Form>

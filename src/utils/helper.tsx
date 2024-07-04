@@ -174,3 +174,9 @@ export const reassignEdgesForComponent = (graph : Graph) => {
     }
   })
 }
+
+export const getComponentByID = (graph, node_id) => {
+  const node = graph?.getNodes().find(node => node.id === node_id)
+
+  return node?.data.component
+}

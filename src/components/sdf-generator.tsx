@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import init, {greet} from "validator-wasm"
-import { getSerialJson } from "./os-components/serial"
+import init, { greet } from "validator-wasm"
+import { PDComponent } from "./os-components/pd"
 
-const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText, MRs }) => {
+const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText, MRs, board, dtb }) => {
   const [sdfGenWasm, setSdfGenWasm] = useState(null)
   const [instance, setInstance] = useState(null)
-  const [dtb, setDtb] = useState(null)
   const [drivers, setDrivers] = useState(null)
   const [deviceClass, setDeviceClass] = useState(null)
   const [SDF, setSDF] = useState("")
@@ -72,19 +71,31 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
     if (edges == null) return []
 
     const channels = edges.map(edge => {
+      const pd1 = edge.data.source_node?.data.component
+      const pd2 = edge.data.target_node?.data.component
+
+      if (pd1.getType() == 'sddf_subsystem' && pd2.getType() == 'PD') {
+        pd1.addClient(pd2.getAttrValues().name)
+        return ''
+      }
+      if (pd2.getType() == 'sddf_subsystem' && pd1.getType() == 'PD') {
+        pd2.addClient(pd1.getAttrValues().name)
+        return ''
+      }
+
       return {
-        pd1: edge.data.source_node?.data.attrs.name,
-        pd2: edge.data.target_node?.data.attrs.name,
+        pd1: pd1.getAttrValues().name,
+        pd2: pd2.getAttrValues().name,
         pd1_end_id: parseInt(edge.data.source_end_id),
         pd2_end_id: parseInt(edge.data.target_end_id),
       }
-    })
+    }).filter(channel => channel != '')
     return channels
   }
 
   const generateSDF = () => {
     const attrJson = {
-      board: "qemu_arm_virt",
+      board: board,
       dtb: Array.from(dtb),
       drivers: drivers,
       deviceClasses: deviceClass,
@@ -94,17 +105,23 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
       sddf_subsystems: [],
     }
 
-    const PDs = globalGraph?.getNodes().filter(node => node.data.type == "PD").filter(node => {
-      return node.parent == null || node.parent?.data.type == 'sddf_subsystem'
+    const PDs = globalGraph?.getNodes().filter(node => {
+      return node.data.component.getType() == "PD"
+    }).filter(node => {
+      const component : PDComponent = node.data.component
+      return node.parent == null || component.isPartOfSubsystem()
     })
+    attrJson.pds = PDs?.map(pd => pd.data.component.getJson()) ?? []
+
+    const sddf_subsystems = globalGraph?.getNodes().filter(node => node.data.component.getType() == 'sddf_subsystem')
+    attrJson.sddf_subsystems = sddf_subsystems?.map(subsystem => subsystem.data.component.getJson()) ?? []
+
     const channels = globalGraph?.getEdges().filter(edge => edge.data.type == "channel")
-    const sddf_subsystems = globalGraph?.getNodes().filter(node => node.data.type == 'sddf_subsystem')
-    
-    attrJson.pds = getPDJson(PDs)
     attrJson.channels = getChannelJson(channels)
+
     attrJson.mrs = getMRJson(MRs)
-    attrJson.sddf_subsystems = getSerialJson(sddf_subsystems)
     console.log(attrJson)
+
     const inputString = JSON.stringify(attrJson)
     const inputBuffer = new TextEncoder().encode(inputString)
     
@@ -123,6 +140,9 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
     setSDFText(resultString)
     setSDF(resultString)
     setToGenerateSDF(false)
+    // TODO: update MRs
+    // TODO: update IRQs
+    // TODO: update mappings
   }
 
   const readDeviceConfig = async (config_paths, setStateFunc) => {
@@ -177,14 +197,6 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
       })
     })
 
-    fetch('qemu_arm_virt.dtb').then(response =>
-      response.arrayBuffer()
-    ).then(bytes => {
-      const typedArray = new Uint8Array(bytes)
-      setDtb(typedArray)
-      console.log("DTB has been loaded.")
-    })
-
     readDeviceConfig(driver_paths, setDrivers)
     readDeviceConfig(device_class_paths, setDeviceClass)
   }, [])
@@ -198,7 +210,7 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
 
   return (
     <>
-    Hello
+
     <br />
     <button onClick={handleTest}>handle Test</button>
 
