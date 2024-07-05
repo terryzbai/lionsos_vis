@@ -52,6 +52,7 @@
   },
   "devDependencies": {
     "@types/wicg-file-system-access": "^2023.10.5",
+    "fast-xml-parser": "^4.4.0",
     "kaitai-struct": "^0.10.0"
   }
 }

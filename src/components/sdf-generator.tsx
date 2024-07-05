@@ -39,34 +39,6 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
     return mrs
   }
 
-  const getMapJson = (mappings) => {
-    return mappings.map(map => {
-      console.log(map)
-      return {
-        ...map,
-        perm_r: map.perms.includes('r'),
-        perm_w: map.perms.includes('w'),
-        perm_x: map.perms.includes('x'),
-      }
-    })
-  }
-
-  const getPDJson = (PDs) => {
-    if (PDs == null) return []
-
-    const pds = PDs.map(PD => {
-      const children = getPDJson(PD.children)
-      return {
-        ...PD.data.attrs,
-        children: children,
-        type: PD.data.type,
-        maps: getMapJson(PD.data.mappings),
-        irqs: PD.data.irqs
-      }
-    })
-    return pds
-  }
-
   const getChannelJson = (edges) => {
     if (edges == null) return []
 
@@ -75,11 +47,9 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
       const pd2 = edge.data.target_node?.data.component
 
       if (pd1.getType() == 'sddf_subsystem' && pd2.getType() == 'PD') {
-        //        pd1.addClient(pd2.getAttrValues().name)
         return ''
       }
       if (pd2.getType() == 'sddf_subsystem' && pd1.getType() == 'PD') {
-        //        pd2.addClient(pd1.getAttrValues().name)
         return ''
       }
 
@@ -140,9 +110,6 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
     setSDFText(resultString)
     setSDF(resultString)
     setToGenerateSDF(false)
-    // TODO: update MRs
-    // TODO: update IRQs
-    // TODO: update mappings
   }
 
   const readDeviceConfig = async (config_paths, setStateFunc) => {

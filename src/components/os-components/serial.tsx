@@ -159,22 +159,22 @@ export class SerialComponent implements SystemComponent {
     this.data.attrs.clients.push(node_id)
   }
 
-  private syncChildrenData = () => {
+  private syncChildrenData = (graph: Graph) => {
     // TODO: replace group as component
     const driver_component = this.children.driver.data.component
-    driver_component.updateData({
+    driver_component.updateData(graph, {
       attrs: {...driver_component.getAttrValues(), name: this.data.attrs.driver_name},
       subsystem: this.data.node_id,
     })
 
     const mux_tx_component = this.children.mux_tx.data.component
-    mux_tx_component.updateData({
+    mux_tx_component.updateData(graph, {
       attrs: {...mux_tx_component.getAttrValues(), name: this.data.attrs.serial_mux_tx},
       subsystem: this.data.node_id,
     })
 
     const mux_rx_component = this.children.mux_rx.data.component
-    mux_rx_component.updateData({
+    mux_rx_component.updateData(graph, {
       attrs: {...mux_rx_component.getAttrValues(), name: this.data.attrs.serial_mux_rx},
       subsystem: this.data.node_id,
     })
@@ -205,7 +205,7 @@ export class SerialComponent implements SystemComponent {
     serial_system.data.mux_rx = mux_rx.id
     this.children.mux_rx = mux_rx
 
-    this.syncChildrenData()
+    this.syncChildrenData(graph)
   }
 
   public renderUnchangableNodes = () => {
@@ -214,9 +214,9 @@ export class SerialComponent implements SystemComponent {
 
   // Update style if attributes are modified, e.g. PD names
   // Render children nodes if exist
-  public updateData = (new_data : any) => {
+  public updateData = (graph: Graph, new_data : any) => {
     this.data = {...this.data, ...new_data}
-    this.syncChildrenData()
+    this.syncChildrenData(graph)
   }
 
   // Generate JSON for the component

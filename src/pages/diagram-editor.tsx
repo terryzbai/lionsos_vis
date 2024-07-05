@@ -31,6 +31,7 @@ import {
   UploadOutlined,
 } from '@ant-design/icons'
 import { SystemComponent } from '../components/os-components/component-interface'
+import { XMLParser } from 'fast-xml-parser'
 
 const Item = Toolbar.Item             // eslint-disable-line
 const ToolbarGroup = Toolbar.Group    // eslint-disable-line
@@ -55,6 +56,7 @@ export const DiagramEditor = ({ board, dtb }) => {
     //    {name: 'ethernet', phys_addr: 0xa003000, size: 0x1000, page_size: 1, page_count: null, nodes: []},
     //    {name: 'gic_vcpu', phys_addr: 0x8040000, size: 0x1000, page_size: 1, page_count: null, nodes: []}
   ])
+  const [ MRSDF, setMRSDF ] = useState<Array<any>>([])
 
   var ctrlPressed = false
 
@@ -468,9 +470,11 @@ export const DiagramEditor = ({ board, dtb }) => {
         const sourceComponent = sourceNode.data.component
         const targetComponent = targetNode.data.component
         if (sourceComponent.getType() == 'sddf_subsystem' && targetComponent.getType() == 'PD') {
+          // TODO: pass node_id to client array, and get the pd_name when generating SDF
           sourceComponent.addClient(targetComponent.getAttrValues().name)
         }
         if (sourceComponent.getType() == 'PD' && targetComponent.getType() == 'sddf_subsystem') {
+          // TODO: pass node_id to client array, and get the pd_name when generating SDF
           targetComponent.addClient(sourceComponent.getAttrValues().name)
         }
       } else if (!sourceNode && targetNode && edge.data?.source_node) {
@@ -511,12 +515,22 @@ export const DiagramEditor = ({ board, dtb }) => {
   }, [])
 
   useEffect(() => {
-    console.log('SDF changed')
+    const parser = new XMLParser({ignoreAttributes: false, attributeNamePrefix : ""})
+    const parsedData = parser.parse(SDFText)
+    console.log(parsedData)
+
+    // TODO: update MRs
+    const newMRSDF = parsedData.system?.memory_region ?? []
+    setMRSDF([].concat(newMRSDF))
+
+    // TODO: update IRQs
+
+    // TODO: update mappings
   }, [SDFText])
 
   return (
     <div>
-      <MemoryManager MRs={MRs} setMRs={setMRs} getNodeData={getNodeData} graph={globalGraph} />
+      <MemoryManager MRSDF={MRSDF} MRs={MRs} setMRs={setMRs} getNodeData={getNodeData} graph={globalGraph} />
       <Toolbar className="toolbar" >
         <ToolbarGroup>
           <Item name="zoomIn" tooltip="Zoom In (Cmd +)" icon={<ZoomInOutlined />} />

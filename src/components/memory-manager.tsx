@@ -4,12 +4,12 @@ import { getComponentByID } from '../utils/helper'
 import '../App.css'
 
 export interface MemoryRegion {
-	name: string
-	size: number
-	phys_addr: number
-	page_size?: number
-	page_count?: number
-	nodes: string[]
+  name: string
+  size: number
+  phys_addr: number
+  page_size?: number
+  page_count?: number
+  nodes: string[]
 }
 
 const { Option } = Select
@@ -32,7 +32,7 @@ interface FreeMRStatus {
 
 const maxPhyAddr = 0xffffffff
 
-export default function MemoryManager({MRs, setMRs, getNodeData, graph }) {
+export default function MemoryManager({MRSDF, MRs, setMRs, getNodeData, graph }) {
   const [ freeMRStatus, setFreeMRStatus ] = useState<FreeMRStatus>({
     phys_addr: 0,
     size: 0,
@@ -159,8 +159,30 @@ export default function MemoryManager({MRs, setMRs, getNodeData, graph }) {
   })
 
   useEffect(() => {
+    console.log("update MRs")
     updateAttrValues()
   }, [MRs])
+
+  useEffect(() => {
+    console.log(MRSDF)
+    const newMRs : MemoryRegion[] = MRSDF.map(MR => {
+      if (!MR.phys_addr) {
+        return ''
+      }
+
+      return {
+        name: MR.name,
+        size: parseInt(MR.size, 16),
+        phys_addr: parseInt(MR.phys_addr, 16),
+        page_size: parseInt(MR.page_size, 16),
+        page_count: MR.page_count ? parseInt(MR.page_count, 16) : null,
+        nodes: []
+      }
+    }).filter(MR => MR != '')
+    console.log(newMRs)
+    console.log(MRs)
+    setMRs(newMRs)
+  }, [MRSDF])
 
   useEffect(() => {
     const size = MRs[indexOfMR]?.size
