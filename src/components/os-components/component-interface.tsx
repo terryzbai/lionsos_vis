@@ -116,7 +116,7 @@ export interface SystemComponent {
   
   // Update style if attributes are modified, e.g. PD names
   // Render children nodes if exist
-  updateData: (new_data : object) => void
+  updateData: (graph: Graph, new_data : object) => void
 
   // Generate JSON for the component
   getJson: (node?: Group) => object

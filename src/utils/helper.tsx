@@ -180,3 +180,10 @@ export const getComponentByID = (graph, node_id) => {
 
   return node?.data.component
 }
+
+
+export const getNodeByID = (graph, node_id) => {
+  const node = graph?.getNodes().find(node => node.id === node_id)
+
+  return node
+}

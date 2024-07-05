@@ -3,10 +3,12 @@ import { useState } from 'react'
 import MappingTable from './mapping-table'
 import IrqTable from './irq-table'
 import { AttrsForm } from './attrs-form'
+import { getComponentByID } from '../utils/helper'
+import { Graph } from '@antv/x6'
 
-export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen, MRs, component, updateMappings }) {
+export default function NodeEditor({ graph, node_id, nodeEditorOpen, setNodeEditorOpen, MRs, updateMappings }) {
   const [ width, setWidth ] = useState(350)
-  // const data = getNodeData(node_id)
+  const component = getComponentByID(graph, node_id)
   const data = component?.getData()
 
   const onchange = (key : any) => {
@@ -30,17 +32,17 @@ export default function NodeEditor({ node_id, nodeEditorOpen, setNodeEditorOpen,
           {
             key: '1',
             label: 'Attrs',
-            children: <AttrsForm setNodeEditorOpen={setNodeEditorOpen} component={component} />,
+            children: <AttrsForm graph={graph} setNodeEditorOpen={setNodeEditorOpen} component={component} />,
           },
           {
             key: '2',
             label: 'Mappings',
-            children: <MappingTable MRs={MRs} component={component} updateMappings={updateMappings} />,
+            children: <MappingTable graph={graph} MRs={MRs} component={component} updateMappings={updateMappings} />,
           },
           {
             key: '3',
             label: 'IRQs',
-            children: <IrqTable component={component}></IrqTable>,
+            children: <IrqTable graph={graph} component={component}></IrqTable>,
           },
         ]} onChange={onchange}/>
         

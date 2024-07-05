@@ -160,6 +160,7 @@ export class SerialComponent implements SystemComponent {
   }
 
   private syncChildrenData = () => {
+    // TODO: replace group as component
     const driver_component = this.children.driver.data.component
     driver_component.updateData({
       attrs: {...driver_component.getAttrValues(), name: this.data.attrs.driver_name},

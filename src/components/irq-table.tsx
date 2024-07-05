@@ -12,7 +12,7 @@ interface SysIrqItem extends SysIrq {
     irq_label: string
 }
 
-export default function IrqTable({ component }) {
+export default function IrqTable({ graph, component }) {
   const [ form ] = Form.useForm()
   const [ devices, setDevices ] = useState([])
   const [ data, setData ] = useState([])

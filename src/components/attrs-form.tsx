@@ -1,6 +1,7 @@
 import { FunctionComponent, useEffect } from 'react'
 import { InputNumber, Form, Input, Button, Checkbox } from 'antd'
 import { SystemComponent } from './os-components/component-interface'
+import { Graph } from '@antv/x6'
 
 export const getFormItem = (attr) => {
   const inputType = attr?.type
@@ -27,11 +28,12 @@ export const getFormItem = (attr) => {
 }
 
 interface AttrsFromPros {
+  graph: Graph;
   setNodeEditorOpen: Function;
   component: SystemComponent;
 }
 
-export const AttrsForm: FunctionComponent<AttrsFromPros> = ({ setNodeEditorOpen, component }) => {
+export const AttrsForm: FunctionComponent<AttrsFromPros> = ({ graph, setNodeEditorOpen, component }) => {
   const node_attrs = component?.getData().attrs
 
   const editable_attrs = component?.editable_attrs
@@ -44,7 +46,7 @@ export const AttrsForm: FunctionComponent<AttrsFromPros> = ({ setNodeEditorOpen,
       new_data[key] = data[key]
     })
 
-    component.updateData({ attrs: new_data })
+    component.updateData(graph, { attrs: new_data })
 
     setNodeEditorOpen(false)
   }

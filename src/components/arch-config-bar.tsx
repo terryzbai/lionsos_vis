@@ -18,7 +18,6 @@ const ArchConfigBar = ({ board, setBoard, dtb, setDtb }) => {
       const typedArray = new Uint8Array(bytes)
       setDtb(typedArray)
       // TODO: verify if a valid dtb is loaded
-      console.log(board + "'s DTB has been loaded.")
     })
   }, [board])
 

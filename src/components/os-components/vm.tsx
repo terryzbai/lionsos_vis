@@ -11,6 +11,7 @@ import { Group } from '../group'
 import { Graph } from "@antv/x6";
 import { randColor } from '../../utils/helper'
 import { SysMapItem } from '../mapping-table'
+import { getNodeByID } from '../../utils/helper'
 
 interface VMDataModel extends DataModel {
   type: 'VM',
@@ -56,7 +57,7 @@ const group_attrs = {
   data: {},
   attrs: {
     label: {
-      text: 'UntitledVM',
+      text: 'untitled_vm',
       fontSize: 14,
       fill: "#000000",
     },
@@ -79,7 +80,7 @@ export const VMComponentInit: SystemComponentInit = {
   createNode: (subsystem: string | null) => {
     const group = new Group(group_attrs)
 
-    const new_component = new VMComponent(subsystem)
+    const new_component = new VMComponent(group.id, subsystem)
     group.data = {
       component: new_component,
       parent: false,
@@ -97,7 +98,7 @@ export class VMComponent implements SystemComponent {
     type: 'VM',
     color: '#FFFFFF',
     attrs: {
-      name: 'UntitledVM',
+      name: 'untitled_vm',
       id: 0,
       priority: 0,
       budget: 0,
@@ -117,9 +118,10 @@ export class VMComponent implements SystemComponent {
     { name: 'pp', type: 'boolean', required: true },
   ]
 
-  constructor(subsystem: string | null) {
+  constructor(node_id: string, subsystem: string | null) {
     this.data.color = randColor()
     this.data.subsystem = subsystem
+    this.data.node_id = node_id
   }
 
   public getData = () => {
@@ -146,11 +148,12 @@ export class VMComponent implements SystemComponent {
 
   // Update style if attributes are modified, e.g. PD names
   // Render children nodes if exist
-  public updateData = (new_data : any) => {
+  public updateData = (graph : Graph, new_data : any) => {
     this.data = {...this.data, ...new_data}
-    // if (this.node) {
-    //    this.node.setAttrs({ label: { text: this.data.attrs.name } })
-    // }
+    const this_node = getNodeByID(graph, this.data.node_id)
+    if (this_node) {
+       this_node.setAttrs({ label: { text: this.data.attrs.name } })
+    }
   }
 
   // Generate JSON for the component

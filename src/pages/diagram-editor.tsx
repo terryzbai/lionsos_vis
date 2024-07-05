@@ -46,7 +46,6 @@ export const DiagramEditor = ({ board, dtb }) => {
   const [ channelEditorOpen, setChannelEditorOpen ] = useState(false)
   const [ currentEdgeID, setCurrentEdgeID ] = useState('')
   const [ currentNodeID, setCurrentNodeID ] = useState('')
-  const [ currentNode, setCurrentNode ] = useState<SystemComponent>(null)
   const [ toGenerateSDF, setToGenerateSDF ] = useState<boolean>(false)
   const [ SDFText, setSDFText ] = useState('')
   const [ MRs, setMRs] = useState<Array<MemoryRegion>>([
@@ -263,7 +262,6 @@ export const DiagramEditor = ({ board, dtb }) => {
     stencilRender(graph, stencil)
 
     graph.on('node:dblclick', ({ node, e }) => {
-      setCurrentNode(node.data.component)
       setCurrentNodeID(node.id)
       setNodeEditorOpen(true)
       e.stopPropagation()
@@ -512,6 +510,10 @@ export const DiagramEditor = ({ board, dtb }) => {
 
   }, [])
 
+  useEffect(() => {
+    console.log('SDF changed')
+  }, [SDFText])
+
   return (
     <div>
       <MemoryManager MRs={MRs} setMRs={setMRs} getNodeData={getNodeData} graph={globalGraph} />
@@ -543,10 +545,10 @@ export const DiagramEditor = ({ board, dtb }) => {
         <div className="app-content" ref={refGraphContainer} />
       </div>
       <NodeEditor
+        graph={globalGraph}
         node_id={currentNodeID}
         nodeEditorOpen={nodeEditorOpen}
         setNodeEditorOpen={setNodeEditorOpen}
-        component={currentNode}
         MRs={MRs}
         updateMappings={updateMappings}
         />

@@ -12,6 +12,7 @@ import { Graph } from "@antv/x6";
 import { randColor } from '../../utils/helper'
 import { SysMapItem } from '../mapping-table'
 import { SysIrq } from '../irq-table'
+import { getNodeByID } from '../../utils/helper'
 
 interface PDDataModel extends DataModel {
   type: 'PD',
@@ -55,7 +56,7 @@ const group_attrs = {
   data: {},
   attrs: {
     label: {
-      text: 'UntitledPD',
+      text: 'untitled_pd',
       fontSize: 16,
       fill: "#000000",
     },
@@ -89,7 +90,7 @@ export const PDComponentInit: SystemComponentInit = {
       },
     })
 
-    const new_component = new PDComponent(subsystem)
+    const new_component = new PDComponent(group.id, subsystem)
     group.data = {
       component: new_component,
       parent: true,
@@ -105,7 +106,7 @@ export class PDComponent implements SystemComponent {
     type: 'PD',
     color: '#FFFFFF',
     attrs: {
-      name: 'UntitledPD',
+      name: 'untitled_pd',
       priority: 0,
       budget: 0,
       period: 0,
@@ -126,9 +127,10 @@ export class PDComponent implements SystemComponent {
     { name: 'prog_img', type: 'string', required: true },
   ];
 
-  constructor(subsystem: string | null) {
+  constructor(node_id: string, subsystem: string | null) {
     this.data.color = randColor()
     this.data.subsystem = subsystem
+    this.data.node_id = node_id
   }
 
   public getData = () => {
@@ -159,12 +161,13 @@ export class PDComponent implements SystemComponent {
 
   // Update style if attributes are modified, e.g. PD names
   // Render children nodes if exist
-  public updateData = (new_data : any) => {
+  public updateData = (graph : Graph, new_data : any) => {
     this.data = {...this.data, ...new_data}
-    // TODO: update component labels in diagram-editor.tsx
-    //   if (this.node) {
-    //     this.node.setAttrs({ label: { text: this.data.attrs.name } })
-    //   }
+    const this_node = getNodeByID(graph, this.data.node_id)
+    console.log(this.data.node_id, this_node)
+    if (this_node) {
+       this_node.setAttrs({ label: { text: this.data.attrs.name } })
+    }
   }
 
   // Generate JSON for the component

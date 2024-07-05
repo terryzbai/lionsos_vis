@@ -6,7 +6,7 @@ export interface SysMapItem extends SysMap {
   key: string
 }
 
-export default function MappingTable({ MRs, component, updateMappings }) {
+export default function MappingTable({ graph, MRs, component, updateMappings }) {
   const [form] = Form.useForm()
   const [editingKey, setEditingKey] = useState('')
   const [data, setData] = useState<SysMapItem[]>([])
@@ -88,7 +88,7 @@ export default function MappingTable({ MRs, component, updateMappings }) {
       const { key, ...rest } = mapping
       return rest
     })
-    component?.updateData({mappings: newData})
+    component?.updateData(graph, {mappings: newData})
     updateMappings()
   }
 
