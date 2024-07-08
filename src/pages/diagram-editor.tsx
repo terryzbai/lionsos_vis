@@ -62,8 +62,25 @@ export const DiagramEditor = ({ board, dtb }) => {
   var ctrlPressed = false
 
   const graph_config = {
+    panning: true,
+    mousewheel: true,
     background: {
       color: '#F2F7FA',
+    },
+    grid: {
+      visible: true,
+      type: 'doubleMesh',
+      args: [
+        {
+          color: '#eee',
+          thickness: 1,
+        },
+        {
+          color: '#ddd',
+          thickness: 1,
+          factor: 4,
+        },
+      ],
     },
     connecting: {
       allowEdge: true,
@@ -124,7 +141,16 @@ export const DiagramEditor = ({ board, dtb }) => {
       const jsonString = enc.decode(typedArray)
       const json = JSON.parse(jsonString)
 
-      const cells = json.cells
+      const load_order = {
+        "PD": 0,
+        "VM": 1,
+        "sddf_subsystem": 2,
+        "channel": 3,
+      }
+      const cells = json.cells.sort((a, b) => {
+        return load_order[a.data.type] - load_order[b.data.type]
+      })
+      console.log(cells)
       cells.map(cell => {
         restoreCell(globalGraph, cell)
       })
@@ -208,7 +234,6 @@ export const DiagramEditor = ({ board, dtb }) => {
     if (edge) {
       edge.data.source_end_id = new_data.source_end_id
       edge.data.target_end_id = new_data.target_end_id
-      console.log(edge, new_data)
     } else {
       console.log("Invalid edge_id")
     }
@@ -374,7 +399,7 @@ export const DiagramEditor = ({ board, dtb }) => {
       node.data.component.renderChildrenNodes(graph)
     })
 
-    const embedPadding = 40
+    const embedPadding = 20
     graph.on('node:change:position', ({ node, options }) => {
       reassignEdgesForComponent(graph)
 

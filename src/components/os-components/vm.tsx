@@ -85,10 +85,13 @@ export const VMComponentInit: SystemComponentInit = {
       component: new_component,
       parent: false,
     }
+    group.setAttrs({ label: { text: new_component.data.attrs.name } })
 
     return group
   }
 }
+
+var next_id_in_name = 1;
 
 export class VMComponent implements SystemComponent {
   component_json: any;
@@ -122,6 +125,8 @@ export class VMComponent implements SystemComponent {
     this.data.color = randColor()
     this.data.subsystem = subsystem
     this.data.node_id = node_id
+    this.data.attrs.name = 'vm' + next_id_in_name
+    next_id_in_name += 1
   }
 
   public getData = () => {

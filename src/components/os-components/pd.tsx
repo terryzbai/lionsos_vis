@@ -12,7 +12,7 @@ import { Graph } from "@antv/x6";
 import { randColor } from '../../utils/helper'
 import { SysMapItem } from '../mapping-table'
 import { SysIrq } from '../irq-table'
-import { getNodeByID } from '../../utils/helper'
+import { getNodeByID, ContiguousIntList } from '../../utils/helper'
 
 interface PDDataModel extends DataModel {
   type: 'PD',
@@ -51,8 +51,8 @@ export const pd_preview_attrs = {
 const group_attrs = {
   ...common_attrs,
   shape: 'rect',
-  width: 200,
-  height: 120,
+  width: 160,
+  height: 80,
   data: {},
   attrs: {
     label: {
@@ -96,10 +96,13 @@ export const PDComponentInit: SystemComponentInit = {
       component: new_component,
       parent: true,
     }
+    group.setAttrs({ label: { text: new_component.data.attrs.name } })
 
     return group
   }
 }
+
+var next_id_in_name = 1;
 
 export class PDComponent implements SystemComponent {
   data: PDDataModel = {
@@ -107,7 +110,7 @@ export class PDComponent implements SystemComponent {
     type: 'PD',
     color: '#FFFFFF',
     attrs: {
-      name: 'untitled_pd',
+      name: '',
       priority: 0,
       budget: 0,
       period: 0,
@@ -132,6 +135,8 @@ export class PDComponent implements SystemComponent {
     this.data.color = randColor()
     this.data.subsystem = subsystem
     this.data.node_id = node_id
+    this.data.attrs.name = 'pd' + next_id_in_name
+    next_id_in_name += 1
   }
 
   public getData = () => {

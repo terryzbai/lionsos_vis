@@ -187,3 +187,60 @@ export const getNodeByID = (graph, node_id) => {
 
   return node
 }
+
+export class ContiguousIntList {
+    private available: Set<number>;
+    private used: Set<number>;
+
+    constructor(start: number, end: number) {
+        this.available = new Set<number>();
+        this.used = new Set<number>();
+        for (let i = start; i <= end; i++) {
+            this.available.add(i);
+        }
+    }
+
+    /**
+     * Get the minimal value from the available list.
+     * @returns {number | null} The minimal value or null if no values are available.
+     */
+    getMinValue(): number | null {
+        if (this.available.size === 0) {
+            return null;
+        }
+
+        const minValue = Math.min(...Array.from(this.available));
+        this.available.delete(minValue);
+        this.used.add(minValue);
+        return minValue;
+    }
+
+    /**
+     * Release a value back to the available list.
+     * @param {number} value The value to be released.
+     */
+    releaseValue(value: number): void {
+        if (this.used.has(value)) {
+            this.used.delete(value);
+            this.available.add(value);
+        } else {
+            console.warn(`Value ${value} was not found in the used list.`);
+        }
+    }
+
+    /**
+     * Get the current state of available values.
+     * @returns {number[]} Array of available values.
+     */
+    getAvailableValues(): number[] {
+        return Array.from(this.available).sort((a, b) => a - b);
+    }
+
+    /**
+     * Get the current state of used values.
+     * @returns {number[]} Array of used values.
+     */
+    getUsedValues(): number[] {
+        return Array.from(this.used).sort((a, b) => a - b);
+    }
+}

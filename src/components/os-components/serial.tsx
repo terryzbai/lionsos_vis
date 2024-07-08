@@ -9,6 +9,7 @@ import {
 import { Group } from '../group'
 import { Graph } from "@antv/x6";
 import { PDComponentInit } from "./pd"
+import { getComponentByID, getNodeByID } from '../../utils/helper'
 
 interface SerialDataModel extends DataModel {
   type: 'sddf_subsystem',
@@ -22,9 +23,9 @@ interface SerialDataModel extends DataModel {
     data_region_size: number,
   },
   children: {
-      driver: Group | null,
-      mux_tx: Group | null,
-      mux_rx: Group | null,
+      driver: string | null,
+      mux_tx: string | null,
+      mux_rx: string | null,
   }
 }
 
@@ -93,8 +94,8 @@ const group_attrs = {
 
 export const SerialComponentInit: SystemComponentInit = {
   preview_attrs: serial_preview_attrs,
-  createNode: (attrs: any) => {
-    const group = new Group(group_attrs)
+  createNode: (subsystem: string | null, attrs?: any) => {
+    const group = new Group({ ...group_attrs, ...attrs })
     const new_component = new SerialComponent(group.id)
     group.data = {
       component: new_component,
@@ -161,19 +162,20 @@ export class SerialComponent implements SystemComponent {
 
   private syncChildrenData = (graph: Graph) => {
     // TODO: replace group as component
-    const driver_component = this.data.children.driver.data.component
+    //
+    const driver_component = getComponentByID(graph, this.data.children.driver)
     driver_component.updateData(graph, {
       attrs: {...driver_component.getAttrValues(), name: this.data.attrs.driver_name},
       subsystem: this.data.node_id,
     })
 
-    const mux_tx_component = this.data.children.mux_tx.data.component
+    const mux_tx_component = getComponentByID(graph, this.data.children.mux_tx)
     mux_tx_component.updateData(graph, {
       attrs: {...mux_tx_component.getAttrValues(), name: this.data.attrs.serial_mux_tx},
       subsystem: this.data.node_id,
     })
 
-    const mux_rx_component = this.data.children.mux_rx.data.component
+    const mux_rx_component = getComponentByID(graph, this.data.children.mux_rx)
     mux_rx_component.updateData(graph, {
       attrs: {...mux_rx_component.getAttrValues(), name: this.data.attrs.serial_mux_rx},
       subsystem: this.data.node_id,
@@ -189,21 +191,21 @@ export class SerialComponent implements SystemComponent {
     const serial_driver = PDComponentInit.createNode(this.data.node_id)
     serial_driver.position(x + 280, y + 100)
     serial_system.addChild(serial_driver)
-    this.data.children.driver = serial_driver
+    this.data.children.driver = serial_driver.id
 
     // Add mux_tx PD
     const mux_tx = PDComponentInit.createNode(this.data.node_id)
     mux_tx.position(x + 40, y + 40)
     serial_system.addChild(mux_tx)
     serial_system.data.mux_tx = mux_tx.id
-    this.data.children.mux_tx = mux_tx
+    this.data.children.mux_tx = mux_tx.id
 
     // Add mux_rx PD
     const mux_rx = PDComponentInit.createNode(this.data.node_id)
     mux_rx.position(x + 40, y + 180)
     serial_system.addChild(mux_rx)
     serial_system.data.mux_rx = mux_rx.id
-    this.data.children.mux_rx = mux_rx
+    this.data.children.mux_rx = mux_rx.id
 
     this.syncChildrenData(graph)
   }
@@ -231,10 +233,9 @@ export class SerialComponent implements SystemComponent {
   }
 
   public restoreDiagram = (graph: Graph, data: any) => {
-    const node_id = this.data.node_id
-    const subsystem = this.data.subsystem
+    this.data.node_id = data.node_id
+    this.data.subsystem = data.subsystem
     this.updateData(graph, data)
-    this.data.node_id = node_id
     this.syncChildrenData(graph)
   }
 }
