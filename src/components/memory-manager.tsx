@@ -159,12 +159,10 @@ export default function MemoryManager({MRSDF, MRs, setMRs, getNodeData, graph })
   })
 
   useEffect(() => {
-    console.log("update MRs")
     updateAttrValues()
   }, [MRs])
 
   useEffect(() => {
-    console.log(MRSDF)
     const newMRs : MemoryRegion[] = MRSDF.map(MR => {
       if (!MR.phys_addr) {
         return ''
@@ -179,8 +177,6 @@ export default function MemoryManager({MRSDF, MRs, setMRs, getNodeData, graph })
         nodes: []
       }
     }).filter(MR => MR != '')
-    console.log(newMRs)
-    console.log(MRs)
     setMRs(newMRs)
   }, [MRSDF])
 

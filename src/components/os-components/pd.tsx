@@ -71,14 +71,9 @@ const group_attrs = {
       strokeWidth: 1,
     },
   },
-  ...common_ports
-}
-
-export const PDComponentInit: SystemComponentInit = {
-  preview_attrs: pd_preview_attrs,
-  createNode: (subsystem: string | null) => {
-    const group = new Group(group_attrs)
-    group.addPort({
+  ports: {
+    groups: common_ports.ports.groups,
+    items: [{
       id: 'port_1',
       group: 'bottom',
       attrs: {
@@ -88,8 +83,14 @@ export const PDComponentInit: SystemComponentInit = {
           r: 5,
         },
       },
-    })
+    }],
+  }
+}
 
+export const PDComponentInit: SystemComponentInit = {
+  preview_attrs: pd_preview_attrs,
+  createNode: (subsystem: string | null, attrs?: any) => {
+    const group = new Group({ ...group_attrs, ...attrs})
     const new_component = new PDComponent(group.id, subsystem)
     group.data = {
       component: new_component,
@@ -164,7 +165,6 @@ export class PDComponent implements SystemComponent {
   public updateData = (graph : Graph, new_data : any) => {
     this.data = {...this.data, ...new_data}
     const this_node = getNodeByID(graph, this.data.node_id)
-    console.log(this.data.node_id, this_node)
     if (this_node) {
        this_node.setAttrs({ label: { text: this.data.attrs.name } })
     }
@@ -188,5 +188,19 @@ export class PDComponent implements SystemComponent {
       maps: mappings,
       irqs: this.data.irqs,
     }
+  }
+
+  public saveDiagram = () => {
+    return {
+      data: this.data
+    }
+  }
+
+  public restoreDiagram = (graph: Graph, data: any) => {
+    const node_id = this.data.node_id
+    const subsystem = this.data.subsystem
+    this.data.node_id = node_id
+    this.data.subsystem = subsystem
+    this.updateData(graph, data)
   }
 }

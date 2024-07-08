@@ -98,7 +98,7 @@ export const parseMapJson = (mappings: SysMapItem[]) => {
 
 export interface SystemComponentInit {
   preview_attrs: object,
-  createNode: (subsystem: string | null) => Group
+  createNode: (subsystem: string | null, attrs?: any) => Group
 }
 
 export interface SystemComponent {

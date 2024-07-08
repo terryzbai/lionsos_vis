@@ -18,6 +18,7 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
     {class: "serial", path: "drivers/serial/imx/config.json"},
     {class: "serial", path: "drivers/serial/arm/config.json"},
   ]
+  const sddf_github_api_url ="https://api.github.com/repos/au-ts/sddf/git/trees/862feed2485d5a6f5f31f80664dd6ad5374b757c:"
 
   const device_class_paths = [
     {class: "network", path: "network/config.json"},

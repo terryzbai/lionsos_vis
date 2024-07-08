@@ -32,6 +32,7 @@ import {
 } from '@ant-design/icons'
 import { SystemComponent } from '../components/os-components/component-interface'
 import { XMLParser } from 'fast-xml-parser'
+import { restoreCell, saveCell } from '../components/nodes'
 
 const Item = Toolbar.Item             // eslint-disable-line
 const ToolbarGroup = Toolbar.Group    // eslint-disable-line
@@ -122,14 +123,27 @@ export const DiagramEditor = ({ board, dtb }) => {
       var enc = new TextDecoder("utf-8")
       const jsonString = enc.decode(typedArray)
       const json = JSON.parse(jsonString)
-      // TODO: figure out how to recover diagram
-      globalGraph.fromJSON(json)
+
+      const cells = json.cells
+      cells.map(cell => {
+        restoreCell(globalGraph, cell)
+      })
+      reassignEdgesForComponent(globalGraph)
+      setMRs(json.mrs)
     })
   }
 
   const saveDiagram = () => {
-    const data = globalGraph.toJSON()
-    console.log(JSON.stringify(data))
+    const graphObject = globalGraph.toJSON()
+    console.log(graphObject)
+    const cells = graphObject.cells.map(cell => {
+      return saveCell(cell)
+    })
+    console.log(MRs)
+    console.log(JSON.stringify({
+      cells: cells,
+      mrs: MRs
+    }))
   }
 
   const openSDFEditor = () => {
@@ -456,7 +470,6 @@ export const DiagramEditor = ({ board, dtb }) => {
       const targetNode = edge.getTargetNode()
 
       // TODO: replace all '1' with getFreeEndID()
-
       edge.attr('line/targetMarker', { tagName: 'circle', r: 2 })
       edge.attr('line/sourceMarker', { tagName: 'circle', r: 2 })
       if (sourceNode && targetNode) {
@@ -517,7 +530,6 @@ export const DiagramEditor = ({ board, dtb }) => {
   useEffect(() => {
     const parser = new XMLParser({ignoreAttributes: false, attributeNamePrefix : ""})
     const parsedData = parser.parse(SDFText)
-    console.log(parsedData)
 
     // TODO: update MRs
     const newMRSDF = parsedData.system?.memory_region ?? []

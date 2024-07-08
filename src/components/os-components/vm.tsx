@@ -77,8 +77,8 @@ const group_attrs = {
 
 export const VMComponentInit: SystemComponentInit = {
   preview_attrs: vm_preview_attrs,
-  createNode: (subsystem: string | null) => {
-    const group = new Group(group_attrs)
+  createNode: (subsystem: string | null, attrs?: any) => {
+    const group = new Group({ ...group_attrs, ...attrs})
 
     const new_component = new VMComponent(group.id, subsystem)
     group.data = {
@@ -166,5 +166,19 @@ export class VMComponent implements SystemComponent {
       // irqs: PD.data.irqs
     }
     return json
+  }
+
+  public saveDiagram = () => {
+    return {
+      data: this.data
+    }
+  }
+
+  public restoreDiagram = (graph: Graph, data: any) => {
+    const node_id = this.data.node_id
+    const subsystem = this.data.subsystem
+    this.updateData(graph, data)
+    this.data.node_id = node_id
+    this.data.subsystem = subsystem
   }
 }
