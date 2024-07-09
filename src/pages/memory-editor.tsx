@@ -88,7 +88,6 @@ export const MemoryEditor = ({ MRs, setMRs }) => {
     const newMRs = [...MRs]
     const index = data.findIndex((item) => key === item.key)
     newMRs.splice(index, 1)
-    console.log(newMRs)
     setMRs(newMRs)
   };
 
@@ -224,7 +223,6 @@ export const MemoryEditor = ({ MRs, setMRs }) => {
   })
 
   useEffect(() => {
-    console.log("MRs", MRs)
     const newData : MemoryRegionItem[] = MRs.map(MR => {
       return {
         ...MR,

@@ -43,6 +43,7 @@ export default function MemoryManager({MRSDF, MRs, setMRs, getNodeData, graph })
   const [ indexOfMR, setIndexOfMR ] = useState<number | null>(null)
   const [ editorOpen, setEditorOpen ] = useState<boolean>(false)
   const [ MRWithAttrs, setMRWithAttrs ] = useState<Array<MemoryRegion & {type: string, index: number}>>([])
+  const [ barWidth, setBarWidth ] = useState<number>(0)
   const [ MRWidth, setMRWidth ] = useState<number>(0)
   const [ physAddr, setPhysAddr ] = useState<string>('')
   const [ sizeUnit, setSizeUnit ] = useState('1')
@@ -87,8 +88,7 @@ export default function MemoryManager({MRSDF, MRs, setMRs, getNodeData, graph })
       tempMRWithAttrs.push({...free_mr, phys_addr: last_phys_addr, size: maxPhyAddr - last_phys_addr})
     }
     setMRWithAttrs(tempMRWithAttrs)
-    const bar_width = refMRContainer.current?.clientWidth
-    setMRWidth(bar_width / tempMRWithAttrs.length)
+    setMRWidth(barWidth / tempMRWithAttrs.length)
   }
 
   const popoverContent = (MR) => {
@@ -159,8 +159,6 @@ export default function MemoryManager({MRSDF, MRs, setMRs, getNodeData, graph })
   })
 
   useEffect(() => {
-    console.log("update MRs")
-    console.log(MRs)
     updateAttrValues()
   }, [MRs])
 
@@ -194,6 +192,10 @@ export default function MemoryManager({MRSDF, MRs, setMRs, getNodeData, graph })
       setSizeUnit((1).toString())
     }
   }, [editorOpen])
+
+  useEffect(() => {
+    setBarWidth(refMRContainer.current?.clientWidth)
+  }, [refMRContainer.current])
 
   return (
     <div className='mem-bar' ref={refMRContainer}>
