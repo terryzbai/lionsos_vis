@@ -8,7 +8,6 @@ const ArchConfigBar = ({ board, setBoard, dtb, setDtb }) => {
 
   const board_list = [
     { value: 'qemu_arm_virt', label: 'qemu_arm_virt' },
-    { value: 'odroid4', label: 'odroid4' },
   ]
 
   useEffect(() => {

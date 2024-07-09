@@ -159,6 +159,8 @@ export default function MemoryManager({MRSDF, MRs, setMRs, getNodeData, graph })
   })
 
   useEffect(() => {
+    console.log("update MRs")
+    console.log(MRs)
     updateAttrValues()
   }, [MRs])
 

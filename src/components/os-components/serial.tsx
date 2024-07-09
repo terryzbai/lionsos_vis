@@ -54,8 +54,8 @@ const serial_preview_attrs = {
 const group_attrs = {
   ...common_attrs,
   shape: 'rect',
-  width: 500,
-  height: 320,
+  width: 400,
+  height: 240,
   data: {},
   attrs: {
     label: {
@@ -161,8 +161,7 @@ export class SerialComponent implements SystemComponent {
   }
 
   private syncChildrenData = (graph: Graph) => {
-    // TODO: replace group as component
-    //
+
     const driver_component = getComponentByID(graph, this.data.children.driver)
     driver_component.updateData(graph, {
       attrs: {...driver_component.getAttrValues(), name: this.data.attrs.driver_name},
@@ -189,20 +188,20 @@ export class SerialComponent implements SystemComponent {
 
     // Add serial driver
     const serial_driver = PDComponentInit.createNode(this.data.node_id)
-    serial_driver.position(x + 280, y + 100)
+    serial_driver.position(x + 220, y + 80)
     serial_system.addChild(serial_driver)
     this.data.children.driver = serial_driver.id
 
     // Add mux_tx PD
     const mux_tx = PDComponentInit.createNode(this.data.node_id)
-    mux_tx.position(x + 40, y + 40)
+    mux_tx.position(x + 20, y + 40)
     serial_system.addChild(mux_tx)
     serial_system.data.mux_tx = mux_tx.id
     this.data.children.mux_tx = mux_tx.id
 
     // Add mux_rx PD
     const mux_rx = PDComponentInit.createNode(this.data.node_id)
-    mux_rx.position(x + 40, y + 180)
+    mux_rx.position(x + 20, y + 140)
     serial_system.addChild(mux_rx)
     serial_system.data.mux_rx = mux_rx.id
     this.data.children.mux_rx = mux_rx.id

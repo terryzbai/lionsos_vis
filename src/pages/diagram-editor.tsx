@@ -37,7 +37,7 @@ import { restoreCell, saveCell } from '../components/nodes'
 const Item = Toolbar.Item             // eslint-disable-line
 const ToolbarGroup = Toolbar.Group    // eslint-disable-line
 
-export const DiagramEditor = ({ board, dtb }) => {
+export const DiagramEditor = ({ board, dtb, MRs, setMRs }) => {
   const refGraphContainer = React.createRef<HTMLDivElement>()
   const refStencilContainer = React.createRef<HTMLDivElement>()
   const refTextarea = React.useRef<HTMLTextAreaElement>()
@@ -50,13 +50,6 @@ export const DiagramEditor = ({ board, dtb }) => {
   const [ currentNodeID, setCurrentNodeID ] = useState('')
   const [ toGenerateSDF, setToGenerateSDF ] = useState<boolean>(false)
   const [ SDFText, setSDFText ] = useState('')
-  const [ MRs, setMRs] = useState<Array<MemoryRegion>>([
-    //    {name: 'uart', phys_addr: 0x9000000, size: 0x1000, page_size: 1, page_count: null, nodes: []},
-    //    {name: 'shared_buffer', phys_addr: 0x9001000, size: 0x1000, page_size: 1, page_count: null, nodes: []},
-    //    {name: 'guest_ram', phys_addr: 0x10000000, size: 0x200000, page_size: 1, page_count: null, nodes: []},
-    //    {name: 'ethernet', phys_addr: 0xa003000, size: 0x1000, page_size: 1, page_count: null, nodes: []},
-    //    {name: 'gic_vcpu', phys_addr: 0x8040000, size: 0x1000, page_size: 1, page_count: null, nodes: []}
-  ])
   const [ MRSDF, setMRSDF ] = useState<Array<any>>([])
 
   var ctrlPressed = false
