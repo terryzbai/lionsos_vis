@@ -599,6 +599,7 @@ export const DiagramEditor = ({ board, dtb, MRs, setMRs }) => {
         updateMappings={updateMappings}
         />
       <ChannelEditor
+        graph={globalGraph}
         channelEditorOpen={channelEditorOpen}
         setChannelEditorOpen={setChannelEditorOpen}
         edge_id={currentEdgeID}

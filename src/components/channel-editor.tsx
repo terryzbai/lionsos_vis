@@ -1,9 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useState  } from 'react'
 import { Modal, Form, InputNumber, Input } from 'antd'
 
-export default function ChannelEditor({ channelEditorOpen, setChannelEditorOpen, edge_id, getEdgeData, updateEdgeData, getNodeData }) {
+export default function ChannelEditor({ graph, channelEditorOpen, setChannelEditorOpen, edge_id, getEdgeData, updateEdgeData, getNodeData }) {
   const [ form ] = Form.useForm(null)
-  const data = getEdgeData(edge_id)
+  const [ data, setData ] = useState(null)
+  const [ sourceName, setSourceName ] = useState('')
+  const [ targetName, setTargetName ] = useState('')
 
   const saveEdge = () => {
     updateEdgeData(edge_id, form.getFieldsValue())
@@ -11,6 +13,13 @@ export default function ChannelEditor({ channelEditorOpen, setChannelEditorOpen,
   }
 
   useEffect(() => {
+    const edge = graph?.getCellById(edge_id)
+    if (edge) {
+      setData(edge.data)
+      console.log(edge.data)
+      setSourceName(edge.data.source_node.data.component.getAttrValues().name)
+      setTargetName(edge.data.target_node.data.component.getAttrValues().name)
+    }
     form.setFieldsValue(data)
   })
 
@@ -31,7 +40,6 @@ export default function ChannelEditor({ channelEditorOpen, setChannelEditorOpen,
         initialValues={ data }
         layout="vertical"
         onFinish={saveEdge}
-        // onFinishFailed={onFinishFailed}
         autoComplete="off"
       >
         <Form.Item
@@ -43,7 +51,7 @@ export default function ChannelEditor({ channelEditorOpen, setChannelEditorOpen,
           <Input />
         </Form.Item>
         <Form.Item
-          label={getNodeData(data?.source_node)?.attrs.name + "-end_id"}
+          label={sourceName + "-end_id"}
           name="source_end_id"
           rules={[{ required: true }]}
         >
@@ -58,7 +66,7 @@ export default function ChannelEditor({ channelEditorOpen, setChannelEditorOpen,
           <Input />
         </Form.Item>
         <Form.Item
-          label={getNodeData(data?.target_node)?.attrs.name + "-end_id"}
+          label={targetName + "-end_id"}
           name="target_end_id"
           rules={[{ required: true }]}
         >

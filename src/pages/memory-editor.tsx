@@ -5,7 +5,7 @@ import { SysMap } from '../utils/element'
 interface MemoryRegion {
   name: string
   size: number
-  phys_addr: number
+  phys_addr?: number
   page_size?: number
   page_count?: number
   nodes: string[]
@@ -14,7 +14,7 @@ interface MemoryRegion {
 interface MemoryRegionItem extends MemoryRegion {
   key: string
   size_str: string
-  phys_addr_str: string
+  phys_addr_str?: string
 }
 
 type IsOptional<T, K extends keyof T> = {} extends Pick<T, K> ? true : false;
@@ -154,12 +154,12 @@ export const MemoryEditor = ({ MRs, setMRs }) => {
       required: true,
     },
     {
-      title: 'phys_addr *',
+      title: 'phys_addr',
       dataIndex: 'phys_addr_str',
       width: '15%',
       editable: true,
       dataType: 'string',
-      required: true,
+      required: false,
     },
     {
       title: 'page_size',
@@ -223,11 +223,11 @@ export const MemoryEditor = ({ MRs, setMRs }) => {
   })
 
   useEffect(() => {
-    const newData : MemoryRegionItem[] = MRs.map(MR => {
+    const newData : MemoryRegionItem[] = MRs.map((MR, index) => {
       return {
         ...MR,
-        key: MRs ? MRs.length.toString() : '0',
-        phys_addr_str: '0x' + (MR.phys_addr).toString(16),
+        key: index.toString(),
+        phys_addr_str: MR.phys_addr ? '0x' + (MR.phys_addr).toString(16) : null,
         size_str: '0x' + (MR.size).toString(16)
       }
     })
