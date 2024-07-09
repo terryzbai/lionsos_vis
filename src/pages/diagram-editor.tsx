@@ -389,7 +389,9 @@ export const DiagramEditor = ({ board, dtb, MRs, setMRs }) => {
     })
 
     graph.on('node:added', ({ node }) => {
-      node.data.component.renderChildrenNodes(graph)
+      if (node.children == null) {
+        node.data.component.renderChildrenNodes(graph)
+      }
     })
 
     const embedPadding = 20

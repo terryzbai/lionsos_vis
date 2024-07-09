@@ -182,6 +182,11 @@ export class SerialComponent implements SystemComponent {
   }
 
   public renderChildrenNodes = (graph: Graph) => {
+    console.log(this.data.children)
+    if (this.data.children.driver) {
+      return
+    }
+
     const node = graph.getNodes().find(node => node.id === this.data.node_id)
     const serial_system = node
     const {x, y} = serial_system.getPosition()
