@@ -29,11 +29,11 @@ export default function IrqTable({ graph, component }) {
     children,
     ...restProps
   }) => {
-    const trigger_options = ['edge', 'level']
+    const trigger_options = ["edge", "level"]
     const trigger_option_items = trigger_options.map(trigger => {
       return {value: trigger, label: trigger}
     })
-    const irq_options = ['serial-32']
+    const irq_options = ["serial-32"]
     const irq_option_items = irq_options.map(option => {
       const irq = option.split('-')
       return {value: irq[1], label: option}
@@ -157,25 +157,27 @@ export default function IrqTable({ graph, component }) {
     setEditingKey('')
   }
 
-  const syncNodeData = () => {
-    const newData = data?.map(irq_record => {
+  const syncNodeData = (newData) => {
+    const newIrqs = newData?.map(irq_record => {
       const { key, irq_label , ...rest } = irq_record
       return rest
     })
-    component?.updateData({irqs: newData})
+    component?.updateData(graph, {irqs: newIrqs})
   }
 
   const handleAdd = () => {
-    const newData: SysIrqItem = {
-      key: data ? data.length.toString() : '0',
+    const newIrq: SysIrqItem = {
+      key: data ? data.length.toString() : "0",
       irq: 32,
       id_: 1,
-      trigger: 'level',
-      irq_label: 'serial-32'
+      trigger: "level",
+      irq_label: "serial-32"
     }
 
-    setData([...data, newData])
+    const newData = [...data, newIrq]
+    setData(newData)
     // TODO: update irqs for component
+    syncNodeData(newData)
   }
 
   const save = async (key: React.Key) => {
@@ -198,22 +200,25 @@ export default function IrqTable({ graph, component }) {
         setEditingKey('')
       }
 
-      // syncNodeData()
+      syncNodeData(newData)
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo)
     }
+
   }
 
   const deleteIrq = (key: React.Key) => {
     const newData = data.filter((item) => item.key !== key)
     setData(newData)
-    syncNodeData()
+    syncNodeData(newData)
   };
 
   useEffect(() => {
-    // TODO: fetch available devides and irq numbers
-    syncNodeData()
-  }, [data])
+    const originData = component?.getData().irqs.map((irq, index) => {
+      return {...irq, key: index.toString(), irq_label: 'serial-32'}
+    })
+    setData(originData)
+  }, [component])
 
   return (
     <div>

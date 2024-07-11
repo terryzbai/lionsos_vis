@@ -2,12 +2,11 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Typography, Checkbox, TableProps, Form, Select, InputNumber, Table, Button, Input } from 'antd'
 import { SysMap } from '../utils/element'
 
-interface MemoryRegion {
+export interface MemoryRegion {
   name: string
   size: number
   phys_addr?: number
   page_size?: number
-  page_count?: number
   nodes: string[]
 }
 
@@ -101,7 +100,7 @@ export const MemoryEditor = ({ MRs, setMRs }) => {
       const row = (await form.validateFields()) as MemoryRegionItem
 
       row.size = parseInt(row.size_str, 16)
-      row.phys_addr = parseInt(row.phys_addr_str, 16)
+      row.phys_addr = row.phys_addr_str ? parseInt(row.phys_addr_str, 16) : null
 
       const { key, phys_addr_str, size_str, ...newMR } = row
       const newMRs = [...MRs]
@@ -112,13 +111,14 @@ export const MemoryEditor = ({ MRs, setMRs }) => {
           ...item,
           ...newMR,
         })
-        setMRs(newMRs)
         setEditingKey('')
       } else {
         newMRs.push(newMR)
         setEditingKey('')
       }
 
+      console.log(newMRs)
+      setMRs(newMRs)
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo)
     }
@@ -128,9 +128,7 @@ export const MemoryEditor = ({ MRs, setMRs }) => {
     const newMR : MemoryRegion = {
       name: `default`,
       size: 0,
-      phys_addr: 0,
       page_size: null,
-      page_count: null,
       nodes: [],
     }
     setMRs([...MRs, newMR])
@@ -167,14 +165,6 @@ export const MemoryEditor = ({ MRs, setMRs }) => {
       width: '10%',
       editable: true,
       dataType: 'select',
-      required: false,
-    },
-    {
-      title: 'page_count',
-      dataIndex: 'page_count',
-      width: '10%',
-      editable: true,
-      dataType: 'number',
       required: false,
     },
     {

@@ -75,20 +75,20 @@ export default function MappingTable({ graph, MRs, component, updateMappings }) 
   const deleteMapping = (key: React.Key) => {
     const newData = data.filter((item) => item.key !== key)
     setData(newData)
-    syncNodeData()
+    syncNodeData(newData)
   };
 
   const cancel = () => {
     setEditingKey('')
   }
 
-  const syncNodeData = () => {
+  const syncNodeData = (newData) => {
     // TODO: component provide interface for updating mappings
-    const newData = data?.map(mapping => {
+    const newMappings = newData?.map(mapping => {
       const { key, ...rest } = mapping
       return rest
     })
-    component?.updateData(graph, {mappings: newData})
+    component?.updateData(graph, {mappings: newMappings})
     updateMappings()
   }
 
@@ -112,14 +112,14 @@ export default function MappingTable({ graph, MRs, component, updateMappings }) 
         setEditingKey('')
       }
 
-      syncNodeData()
+      syncNodeData(newData)
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo)
     }
   }
 
   const handleAdd = () => {
-    const newData: SysMapItem = {
+    const newMapping: SysMapItem = {
       key: data ? data.length.toString() : '0',
       mr: `default`,
       vaddr: 0,
@@ -128,8 +128,9 @@ export default function MappingTable({ graph, MRs, component, updateMappings }) 
       setvar_vaddr: `default`
     }
 
-    setData([...data, newData])
-    syncNodeData()
+    const newData = [...data, newMapping]
+    setData(newData)
+    syncNodeData(newData)
   }
 
   const columns = [
@@ -216,15 +217,11 @@ export default function MappingTable({ graph, MRs, component, updateMappings }) 
   })
 
   useEffect(() => {
-    const originData = component.getData().mappings.map((mapping, index) => {
+    const originData = component?.getData().mappings.map((mapping, index) => {
       return {...mapping, key: index.toString()}
     })
     setData(originData)
   }, [component])
-
-  useEffect(() => {
-    syncNodeData()
-  }, [data])
 
   return (
     <div>

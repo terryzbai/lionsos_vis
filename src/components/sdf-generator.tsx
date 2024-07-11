@@ -4,6 +4,7 @@ import { PDComponent } from "./os-components/pd"
 
 const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText, MRs, board, dtb }) => {
   const [sdfGenWasm, setSdfGenWasm] = useState(null)
+  const [getDeviceTree, setGetDeviceTree] = useState(null)
   const [instance, setInstance] = useState(null)
   const [drivers, setDrivers] = useState(null)
   const [deviceClass, setDeviceClass] = useState(null)
@@ -28,13 +29,9 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
   const getMRJson = (MRs) => {
     if (MRs == null) return []
 
-    const mrs = MRs.map(map => {
-      return {
-        name: map.name,
-        size: parseInt(map.size),
-        phys_addr: parseInt(map.phys_addr),
-        page_size: parseInt(map.page_size),
-      }
+    const mrs = MRs.map(MR => {
+      const { nodes, ...rest } = MR
+      return rest
     })
 
     return mrs
@@ -145,9 +142,24 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
   }
 
   const handleValidation = () => {
-    init().then((_exports) => {
-      alert(greet(SDF))
-    });
+    const attrJson = {
+      dtb: Array.from(dtb),
+    }
+    console.log(attrJson)
+    const inputString = JSON.stringify(attrJson)
+    const inputBuffer = new TextEncoder().encode(inputString)
+
+    const inputPtr = 0
+    const resultPtr = inputPtr + inputBuffer.length
+    const memory_init = new Uint8Array(instance.exports.memory.buffer)
+    memory_init.set(inputBuffer, inputPtr)
+
+    const ret_len = getDeviceTree(inputPtr, inputBuffer.length, resultPtr)
+    console.log(ret_len)
+
+    const memory = new Uint8Array(instance.exports.memory.buffer)
+    const resultString = new TextDecoder().decode(memory.subarray(resultPtr, resultPtr + ret_len))
+    console.log("Result:\n", resultString)
   }
   
   useEffect(() => {
@@ -162,6 +174,7 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
       }).then(result => {
         setInstance(result.instance)
         setSdfGenWasm(() => result.instance.exports.jsonToXml)
+        setGetDeviceTree(() => result.instance.exports.getDeviceTree)
       })
     })
 

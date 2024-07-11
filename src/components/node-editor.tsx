@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Drawer, Tabs } from 'antd'
 import { useState } from 'react'
 import MappingTable from './mapping-table'

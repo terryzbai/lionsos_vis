@@ -74,6 +74,9 @@ export default function MemoryManager({MRSDF, MRs, setMRs, getNodeData, graph })
       index: -1,
     }
     MRs.forEach(MR => {
+      if (MR.phys_addr == null) {
+        return
+      }
       if (last_phys_addr != MR.phys_addr) {
         tempMRWithAttrs.push({...free_mr, phys_addr: last_phys_addr, size: MR.phys_addr - last_phys_addr})
       }
@@ -84,6 +87,7 @@ export default function MemoryManager({MRSDF, MRs, setMRs, getNodeData, graph })
       tempMRWithAttrs.push({...MR, type: type, index: index})
       index += 1
     })
+
     if (maxPhyAddr != last_phys_addr) {
       tempMRWithAttrs.push({...free_mr, phys_addr: last_phys_addr, size: maxPhyAddr - last_phys_addr})
     }
@@ -200,6 +204,10 @@ export default function MemoryManager({MRSDF, MRs, setMRs, getNodeData, graph })
   return (
     <div className='mem-bar' ref={refMRContainer}>
       {MRWithAttrs.map((MR, i) => {
+        if (MR.phys_addr == null) {
+          return <></>
+        }
+
         return (
           <Popover placement="bottom" title={MR.name} content={popoverContent(MR)} key={i}>
             <div

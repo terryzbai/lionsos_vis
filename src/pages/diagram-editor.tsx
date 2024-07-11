@@ -11,7 +11,7 @@ import { stencilRender, stencil_group } from '../components/nodes'
 import MemoryManager from '../components/memory-manager'
 import ChannelEditor from '../components/channel-editor'
 import TemplateList from '../components/template-list'
-import { MemoryRegion } from '../components/memory-manager'
+import { MemoryRegion } from './memory-editor'
 import { channelLabelConfig, getValidEndID, randColor, closestBorder, reassignEdgesForComponent } from '../utils/helper'
 import SDFGenerator from '../components/sdf-generator'
 import '@antv/x6-react-components/es/menu/style/index.css'
@@ -143,7 +143,6 @@ export const DiagramEditor = ({ board, dtb, MRs, setMRs }) => {
       const cells = json.cells.sort((a, b) => {
         return load_order[a.data.type] - load_order[b.data.type]
       })
-      console.log(cells)
       cells.map(cell => {
         restoreCell(globalGraph, cell)
       })
@@ -154,11 +153,9 @@ export const DiagramEditor = ({ board, dtb, MRs, setMRs }) => {
 
   const saveDiagram = () => {
     const graphObject = globalGraph.toJSON()
-    console.log(graphObject)
     const cells = graphObject.cells.map(cell => {
       return saveCell(cell)
     })
-    console.log(MRs)
     console.log(JSON.stringify({
       cells: cells,
       mrs: MRs
