@@ -2,12 +2,9 @@ import { useState, useEffect } from 'react';
 import init, { greet } from "validator-wasm"
 import { PDComponent } from "./os-components/pd"
 
-const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText, MRs, board, dtb }) => {
-  const [sdfGenWasm, setSdfGenWasm] = useState(null)
-  const [getDeviceTree, setGetDeviceTree] = useState(null)
-  const [instance, setInstance] = useState(null)
-  const [drivers, setDrivers] = useState(null)
-  const [deviceClass, setDeviceClass] = useState(null)
+const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText, MRs, board, dtb, wasmInstance }) => {
+  const [drivers, setDrivers] = useState([])
+  const [deviceClass, setDeviceClass] = useState([])
   const [SDF, setSDF] = useState("")
 
   const sDDFURL = `https://raw.githubusercontent.com/au-ts/sddf/862feed2485d5a6f5f31f80664dd6ad5374b757c/`
@@ -19,7 +16,12 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
     {class: "serial", path: "drivers/serial/imx/config.json"},
     {class: "serial", path: "drivers/serial/arm/config.json"},
   ]
-  const sddf_github_api_url ="https://api.github.com/repos/au-ts/sddf/git/trees/862feed2485d5a6f5f31f80664dd6ad5374b757c:"
+
+  const driver_configs = [
+    {class: "serial", path: "sddf_configs/serial_arm.json"},
+    {class: "serial", path: "sddf_configs/serial_arm.json"},
+  ]
+
 
   const device_class_paths = [
     {class: "network", path: "network/config.json"},
@@ -95,13 +97,13 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
     
     const inputPtr = 0
     const resultPtr = inputPtr + inputBuffer.length
-    const memory_init = new Uint8Array(instance.exports.memory.buffer)
+    const memory_init = new Uint8Array(wasmInstance.exports.memory.buffer)
     memory_init.set(inputBuffer, inputPtr)
 
-    const ret_len = sdfGenWasm(inputPtr, inputBuffer.length, resultPtr)
+    const ret_len = wasmInstance.exports.jsonToXml(inputPtr, inputBuffer.length, resultPtr)
     console.log(ret_len)
     
-    const memory = new Uint8Array(instance.exports.memory.buffer)
+    const memory = new Uint8Array(wasmInstance.exports.memory.buffer)
     const resultString = new TextDecoder().decode(memory.subarray(resultPtr, resultPtr + ret_len))
     console.log("Result:\n", resultString)
 
@@ -112,9 +114,8 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
 
   const readDeviceConfig = async (config_paths, setStateFunc) => {
     const fetchFileContent = async (entry) => {
-      const url = sDDFURL + entry.path
       try {
-        const response = await fetch(sDDFURL + entry.path)
+        const response = await fetch(entry.path)
         if (response.ok) {
           return {class: entry.class, content: await response.text()};
         }
@@ -137,49 +138,10 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
     fetchAllFiles()
   }
 
-  const handleTest = () => {
-    console.log(globalGraph.getCells())
-  }
-
-  const handleValidation = () => {
-    const attrJson = {
-      dtb: Array.from(dtb),
-    }
-    console.log(attrJson)
-    const inputString = JSON.stringify(attrJson)
-    const inputBuffer = new TextEncoder().encode(inputString)
-
-    const inputPtr = 0
-    const resultPtr = inputPtr + inputBuffer.length
-    const memory_init = new Uint8Array(instance.exports.memory.buffer)
-    memory_init.set(inputBuffer, inputPtr)
-
-    const ret_len = getDeviceTree(inputPtr, inputBuffer.length, resultPtr)
-    console.log(ret_len)
-
-    const memory = new Uint8Array(instance.exports.memory.buffer)
-    const resultString = new TextDecoder().decode(memory.subarray(resultPtr, resultPtr + ret_len))
-    console.log("Result:\n", resultString)
-  }
-  
   useEffect(() => {
-    fetch('gui_sdfgen.wasm').then(response =>
-      response.arrayBuffer()
-    ).then(bytes => {
-      const typedArray = new Uint8Array(bytes)
-      return WebAssembly.instantiate(typedArray, {
-        env: {
-          print: (result) => { console.log(`The result is ${result}`); }
-        }
-      }).then(result => {
-        setInstance(result.instance)
-        setSdfGenWasm(() => result.instance.exports.jsonToXml)
-        setGetDeviceTree(() => result.instance.exports.getDeviceTree)
-      })
-    })
-
-    readDeviceConfig(driver_paths, setDrivers)
-    readDeviceConfig(device_class_paths, setDeviceClass)
+    readDeviceConfig(driver_configs, setDrivers)
+    // readDeviceConfig(driver_paths, setDrivers)
+    // readDeviceConfig(device_class_paths, setDeviceClass)
   }, [])
 
   useEffect(() => {
@@ -191,13 +153,6 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
 
   return (
     <>
-
-    <br />
-    <button onClick={handleTest}>handle Test</button>
-
-    <br />
-    <br />
-    <button onClick={handleValidation}>Validate</button>
     </>
   )
 }

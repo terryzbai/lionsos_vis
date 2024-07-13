@@ -37,7 +37,7 @@ import { restoreCell, saveCell } from '../components/nodes'
 const Item = Toolbar.Item             // eslint-disable-line
 const ToolbarGroup = Toolbar.Group    // eslint-disable-line
 
-export const DiagramEditor = ({ board, dtb, MRs, setMRs }) => {
+export const DiagramEditor = ({ board, dtb, MRs, setMRs, wasmInstance }) => {
   const refGraphContainer = React.createRef<HTMLDivElement>()
   const refStencilContainer = React.createRef<HTMLDivElement>()
   const refTextarea = React.useRef<HTMLTextAreaElement>()
@@ -620,7 +620,7 @@ export const DiagramEditor = ({ board, dtb, MRs, setMRs }) => {
         </textarea>
       </Modal>
       <TemplateList templateListOpen={templateListOpen} setTemplateListOpen={setTemplateListOpen} graph={globalGraph}></TemplateList>
-      <SDFGenerator globalGraph={globalGraph} toGenerateSDF={toGenerateSDF} setToGenerateSDF={setToGenerateSDF} setSDFText={setSDFText} MRs={MRs} board={board} dtb={dtb} />
+      <SDFGenerator globalGraph={globalGraph} toGenerateSDF={toGenerateSDF} setToGenerateSDF={setToGenerateSDF} setSDFText={setSDFText} MRs={MRs} board={board} dtb={dtb} wasmInstance={wasmInstance} />
     </div>
   )
 }

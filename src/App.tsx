@@ -47,7 +47,6 @@ const App = () => {
 
     const memory = new Uint8Array(wasmInstance.exports.memory.buffer)
     const resultString = new TextDecoder().decode(memory.subarray(resultPtr, resultPtr + ret_len))
-    console.log("Result:\n", resultString)
 
     setDeviceTreeJson(JSON.parse(resultString))
   }
@@ -105,7 +104,7 @@ const App = () => {
           {
             key: '1',
             label: 'Design',
-            children: <DiagramEditor board={board} dtb={dtb} MRs={MRs} setMRs={setMRs}/>,
+            children: <DiagramEditor board={board} dtb={dtb} MRs={MRs} setMRs={setMRs} wasmInstance={wasmInstance} />,
           },
           {
             key: '2',
