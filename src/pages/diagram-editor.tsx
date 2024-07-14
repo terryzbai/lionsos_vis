@@ -472,8 +472,12 @@ export const DiagramEditor = ({ board, dtb, MRs, setMRs, wasmInstance }) => {
         {
           name: 'target-arrowhead',
         },
+        {
+          name: 'button-remove',
+          args: {distance: '50%'}
+        }
       ])
-      
+
       edge.setLabels(channelLabelConfig(edge.data?.source_end_id, edge.data?.target_end_id))
     })
 
@@ -483,22 +487,37 @@ export const DiagramEditor = ({ board, dtb, MRs, setMRs, wasmInstance }) => {
     })
 
     graph.on('edge:mouseup', ({ edge }) => {
-      const sourceNode = edge.getSourceNode()
-      const targetNode = edge.getTargetNode()
+      const old_source_node = edge.data?.source_node
+      const old_target_node = edge.data?.target_node
+
+      const new_source_node = edge.getSourceNode()
+      const new_target_node = edge.getTargetNode()
 
       // TODO: replace all '1' with getFreeEndID()
       edge.attr('line/targetMarker', { tagName: 'circle', r: 2 })
       edge.attr('line/sourceMarker', { tagName: 'circle', r: 2 })
-      if (sourceNode && targetNode) {
-        edge.data = { 
-          type: 'channel',
-          source_node: sourceNode,
-          source_end_id: '1',
-          target_node: targetNode,
-          target_end_id: '1',
+      if (new_source_node && new_target_node) {
+        if (old_source_node == null && old_target_node == null) {
+          edge.data = {
+            type: 'channel',
+            source_node: new_source_node,
+            source_end_id: '1',
+            target_node: new_target_node,
+            target_end_id: '1',
+          }
+        } else if (new_source_node != old_source_node) {
+          old_source_node?.removePort(old_source_node.id + edge.id)
+          edge.setSource(new_source_node)
+          edge.data.source_node = new_source_node
+          // TODO: assign a new channel id
+        } else if (new_target_node != old_target_node) {
+          old_target_node?.removePort(old_target_node.id + edge.id)
+          edge.setTarget(new_target_node)
+          edge.data.target_node = new_target_node
+          // TODO: assign a new channel id
         }
-        const sourceComponent = sourceNode.data.component
-        const targetComponent = targetNode.data.component
+        const sourceComponent = new_source_node.data.component
+        const targetComponent = new_target_node.data.component
         if (sourceComponent.getType() == 'sddf_subsystem' && targetComponent.getType() == 'PD') {
           // TODO: pass node_id to client array, and get the pd_name when generating SDF
           sourceComponent.addClient(targetComponent.getAttrValues().name)
@@ -507,28 +526,16 @@ export const DiagramEditor = ({ board, dtb, MRs, setMRs, wasmInstance }) => {
           // TODO: pass node_id to client array, and get the pd_name when generating SDF
           targetComponent.addClient(sourceComponent.getAttrValues().name)
         }
-      } else if (!sourceNode && targetNode && edge.data?.source_node) {
+      } else if (!new_source_node && new_target_node && old_source_node) {
         // Reset source
-        edge.setSource(edge.data?.source_node)
+        old_source_node?.removePort(old_source_node.id + edge.id)
+        edge.setSource(old_source_node)
         
-        edge.data = { 
-          type: 'channel',
-          source_node: edge.data.source_node,
-          source_end_id: edge.data.source_end_id,
-          target_node: targetNode,
-          target_end_id: '1',
-        }
-      } else if (sourceNode && !targetNode && edge.data?.target_node) {
+      } else if (new_source_node && !new_target_node && old_target_node) {
         // Reset target
-        edge.setTarget({ cell: edge.data?.target_node })
+        old_target_node?.removePort(old_target_node.id + edge.id)
+        edge.setTarget(old_target_node)
 
-        edge.data = { 
-          type: 'channel',
-          source_node: sourceNode,
-          source_end_id: '1',
-          target_node: edge.data.target_node,
-          target_end_id: edge.data.target_end_id,
-        }
       } else {
         // remove edge
         graph.removeEdge(edge.id)
@@ -562,25 +569,22 @@ export const DiagramEditor = ({ board, dtb, MRs, setMRs, wasmInstance }) => {
       <MemoryManager MRSDF={MRSDF} MRs={MRs} setMRs={setMRs} getNodeData={getNodeData} graph={globalGraph} />
       <Toolbar className="toolbar" >
         <ToolbarGroup>
-          <Item name="zoomIn" tooltip="Zoom In (Cmd +)" icon={<ZoomInOutlined />} />
-          <Item name="zoomOut" tooltip="Zoom Out (Cmd -)" icon={<ZoomOutOutlined />} />
+          <Item name="zoomIn" tooltip="Zoom In (Cmd +)" disabled={true} icon={<ZoomInOutlined />} />
+          <Item name="zoomOut" tooltip="Zoom Out (Cmd -)" disabled={true} icon={<ZoomOutOutlined />} />
         </ToolbarGroup>
         <ToolbarGroup>
-          <Item name="undo" tooltip="Undo (Cmd + Z)" icon={<UndoOutlined />} />
-          <Item name="redo" tooltip="Redo (Cmd + Shift + Z)" icon={<RedoOutlined />} />
+          <Item name="undo" tooltip="Undo (Cmd + Z)" disabled={true} icon={<UndoOutlined />} />
+          <Item name="redo" tooltip="Redo (Cmd + Shift + Z)" disabled={true} icon={<RedoOutlined />} />
         </ToolbarGroup>
         <ToolbarGroup>
-          <Item name="delete" icon={<DeleteOutlined />} disabled={true} tooltip="Delete (Delete)" />
-        </ToolbarGroup>
-        <ToolbarGroup>
-          <Item name="previewDiagram" icon={<FileImageOutlined />} tooltip="Preview Diagram"></Item>
+          <Item name="previewDiagram" icon={<FileImageOutlined />} disabled={true} tooltip="Preview Diagram"></Item>
           <Item name="uploadeSDF" icon={<FolderOpenOutlined />} tooltip="Open Diagram" onClick={openDiagram}></Item>
           <Item name="downloadDiagram" icon={<SaveOutlined />} tooltip="Save Diagram" onClick={saveDiagram}></Item>
         </ToolbarGroup>
         <ToolbarGroup>
           <Item name="editSDF" icon={<EditOutlined />} tooltip="Edit SDF" onClick={openSDFEditor}></Item>
-          <Item name="uploadeSDF" icon={<UploadOutlined />} tooltip="Upload SDF"></Item>
-          <Item name="downloadTemplates" icon={<DownloadOutlined />} tooltip="Download Templates" onClick={openTemplateList}></Item>
+          <Item name="uploadeSDF" icon={<UploadOutlined />} disabled={true} tooltip="Upload SDF"></Item>
+          <Item name="downloadTemplates" icon={<DownloadOutlined />} disabled={true} tooltip="Download Templates" onClick={openTemplateList}></Item>
         </ToolbarGroup>
       </Toolbar>
       <div className="stencil-app">

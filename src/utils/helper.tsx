@@ -159,10 +159,8 @@ export const reassignEdgesForComponent = (graph : Graph) => {
         { x: sourcePoint.x, y: sourcePoint.y }
       )
       const portId = edge.getTargetPortId()
-      
       const target_port = targetNode.id + edge.id
       if (portId === 'port_1' || portId == null) {
-        // TODO: use a better id for port
         targetNode.addPort({
           id: target_port,
           group: border,
