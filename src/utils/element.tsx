@@ -45,7 +45,7 @@ export interface SysMap {
 	vaddr: number
 	perms: string
 	cached: boolean
-	setvar_vaddr: string
+	setvar_vaddr?: string
 }
 
 export interface SysIrq {

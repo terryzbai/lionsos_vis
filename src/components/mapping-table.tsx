@@ -4,6 +4,7 @@ import { SysMap } from '../utils/element'
 
 export interface SysMapItem extends SysMap {
   key: string
+  vaddr_str: string
 }
 
 export default function MappingTable({ graph, MRs, component, updateMappings }) {
@@ -96,6 +97,7 @@ export default function MappingTable({ graph, MRs, component, updateMappings }) 
     try {
       const row = (await form.validateFields()) as SysMapItem
 
+      row.vaddr = parseInt(row.vaddr_str, 16)
       const newData = [...data]
       const index = newData.findIndex((item) => key === item.key)
       if (index > -1) {
@@ -123,6 +125,7 @@ export default function MappingTable({ graph, MRs, component, updateMappings }) 
       key: data ? data.length.toString() : '0',
       mr: `default`,
       vaddr: 0,
+      vaddr_str: '0x0',
       perms: 'rw',
       cached: false,
       setvar_vaddr: `default`
@@ -150,7 +153,7 @@ export default function MappingTable({ graph, MRs, component, updateMappings }) 
     },
     {
       title: 'vaddr',
-      dataIndex: 'vaddr',
+      dataIndex: 'vaddr_str',
       width: '20%',
       editable: true,
       dataType: 'string',
@@ -218,7 +221,10 @@ export default function MappingTable({ graph, MRs, component, updateMappings }) 
 
   useEffect(() => {
     const originData = component?.getData().mappings.map((mapping, index) => {
-      return {...mapping, key: index.toString()}
+      console.log(mapping)
+      const vaddr_str = mapping.vaddr
+      const vaddr = parseInt(mapping.vaddr, 16)
+      return {...mapping, key: index.toString(), vaddr_str: vaddr_str, vaddr: vaddr}
     })
     setData(originData)
   }, [component])
