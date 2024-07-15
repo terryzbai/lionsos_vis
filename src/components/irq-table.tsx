@@ -198,8 +198,10 @@ export default function IrqTable({ graph, component, devices }) {
     try {
       const row = (await form.validateFields()) as SysIrqItem
 
+      const trigger = devices[row.irq_index].irq.irq_trigger
+      const trigger_str = trigger == 0x01 ? "level" : "edge"
+      row.trigger = trigger_str
       row.irq = devices[row.irq_index].irq.irq_number
-      row.trigger = devices[row.irq_index].irq.irq_trigger
       const newData = [...data]
       const index = newData.findIndex((item) => key === item.key)
       if (index > -1) {
