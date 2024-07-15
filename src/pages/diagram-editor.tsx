@@ -37,7 +37,7 @@ import { restoreCell, saveCell } from '../components/nodes'
 const Item = Toolbar.Item             // eslint-disable-line
 const ToolbarGroup = Toolbar.Group    // eslint-disable-line
 
-export const DiagramEditor = ({ board, dtb, MRs, setMRs, wasmInstance }) => {
+export const DiagramEditor = ({ board, dtb, devices, MRs, setMRs, wasmInstance }) => {
   const refGraphContainer = React.createRef<HTMLDivElement>()
   const refStencilContainer = React.createRef<HTMLDivElement>()
   const refTextarea = React.useRef<HTMLTextAreaElement>()
@@ -126,7 +126,8 @@ export const DiagramEditor = ({ board, dtb, MRs, setMRs, wasmInstance }) => {
   }
 
   const openDiagram = async() => {
-    fetch('test.system.vis').then(response =>
+    // fetch('test.system.vis').then(response =>
+    fetch('samples/wordle.system').then(response =>
       response.arrayBuffer()
     ).then(bytes => {
       const typedArray = new Uint8Array(bytes)
@@ -596,6 +597,7 @@ export const DiagramEditor = ({ board, dtb, MRs, setMRs, wasmInstance }) => {
         node_id={currentNodeID}
         nodeEditorOpen={nodeEditorOpen}
         setNodeEditorOpen={setNodeEditorOpen}
+        devices={devices}
         MRs={MRs}
         updateMappings={updateMappings}
         />

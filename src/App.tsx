@@ -15,6 +15,7 @@ const App = () => {
   const [ board, setBoard ] = useState<string>('qemu_arm_virt')
   const [ dtb, setDtb ] = useState<Uint8Array>(null)
   const [ MRs, setMRs] = useState<Array<MemoryRegion>>([])
+  const [ devices, setDevices ] = useState([])
 
   const board_list = [
     { value: 'qemu_arm_virt', label: 'qemu_arm_virt' },
@@ -24,16 +25,31 @@ const App = () => {
     setBoard(value)
   };
 
+  const listDevices = (dt_json, tree_path) => {
+    const current_device_path = dt_json.name ? tree_path + '/' + dt_json.name : ''
+    const children_devices = dt_json.children ? dt_json.children.map(child_json => {
+      return listDevices(child_json, current_device_path)
+    }).filter(devices => devices.length) : []
+
+    const devices = children_devices.flat()
+    if (dt_json.irq) {
+      devices.push({
+        path: current_device_path,
+        irq: dt_json.irq,
+        compatibles: dt_json.compatibles
+      })
+    }
+    return devices
+  }
+
   const readDeviceTree = () => {
     if (wasmInstance == null) {
-      console.log('no wasm')
       return
     }
 
     const attrJson = {
       dtb: Array.from(dtb),
     }
-    console.log(attrJson)
     const inputString = JSON.stringify(attrJson)
     const inputBuffer = new TextEncoder().encode(inputString)
 
@@ -43,12 +59,14 @@ const App = () => {
     memory_init.set(inputBuffer, inputPtr)
 
     const ret_len = wasmInstance.exports.getDeviceTree(inputPtr, inputBuffer.length, resultPtr)
-    console.log(ret_len)
 
     const memory = new Uint8Array(wasmInstance.exports.memory.buffer)
     const resultString = new TextDecoder().decode(memory.subarray(resultPtr, resultPtr + ret_len))
 
-    setDeviceTreeJson(JSON.parse(resultString))
+    const dt_json = JSON.parse(resultString)
+    setDeviceTreeJson(dt_json)
+    const devices = listDevices(dt_json, '')
+    setDevices(devices)
   }
 
   const readDtb = () => {
@@ -57,8 +75,6 @@ const App = () => {
     ).then(bytes => {
       const typedArray = new Uint8Array(bytes)
       setDtb(typedArray)
-      // TODO: verify if a valid dtb is loaded
-      console.log('load Dtb')
     })
   }
 
@@ -79,9 +95,7 @@ const App = () => {
         setWasmInstance(result.instance)
       })
     })
-    console.log('load wasm')
     readDtb()
-
   }, []);
 
   return (
@@ -104,7 +118,7 @@ const App = () => {
           {
             key: '1',
             label: 'Design',
-            children: <DiagramEditor board={board} dtb={dtb} MRs={MRs} setMRs={setMRs} wasmInstance={wasmInstance} />,
+            children: <DiagramEditor board={board} dtb={dtb} devices={devices} MRs={MRs} setMRs={setMRs} wasmInstance={wasmInstance} />,
           },
           {
             key: '2',

@@ -7,7 +7,7 @@ import { AttrsForm } from './attrs-form'
 import { getComponentByID } from '../utils/helper'
 import { Graph } from '@antv/x6'
 
-export default function NodeEditor({ graph, node_id, nodeEditorOpen, setNodeEditorOpen, MRs, updateMappings }) {
+export default function NodeEditor({ graph, node_id, nodeEditorOpen, setNodeEditorOpen, devices, MRs, updateMappings }) {
   const [ width, setWidth ] = useState(350)
   const component = getComponentByID(graph, node_id)
   const data = component?.getData()
@@ -21,7 +21,7 @@ export default function NodeEditor({ graph, node_id, nodeEditorOpen, setNodeEdit
         setWidth(800)
         break
       case '3':
-        setWidth(600)
+        setWidth(800)
         break
     }
   }
@@ -43,7 +43,7 @@ export default function NodeEditor({ graph, node_id, nodeEditorOpen, setNodeEdit
           {
             key: '3',
             label: 'IRQs',
-            children: <IrqTable graph={graph} component={component}></IrqTable>,
+            children: <IrqTable graph={graph} component={component} devices={devices}></IrqTable>,
           },
         ]} onChange={onchange}/>
         

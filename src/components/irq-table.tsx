@@ -2,22 +2,22 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Typography, Checkbox, TableProps, Form, Select, InputNumber, Table, Button, Input } from 'antd'
 
 export interface SysIrq {
-	irq: number
-	id_: number
-	trigger: "edge" | "level"
+  irq: number
+  id_: number
+  trigger: "edge" | "level"
 }
 
 interface SysIrqItem extends SysIrq {
-    key: string
-    irq_label: string
+  key: string
+  irq_index: number
 }
 
-export default function IrqTable({ graph, component }) {
+export default function IrqTable({ graph, component, devices }) {
   const [ form ] = Form.useForm()
-  const [ devices, setDevices ] = useState([])
   const [ data, setData ] = useState([])
   const [ editingKey, setEditingKey ] = useState('')
   const isEditing = (record: SysIrqItem) => record.key === editingKey
+
 
   const EditableCell = ({
     editing,
@@ -33,10 +33,8 @@ export default function IrqTable({ graph, component }) {
     const trigger_option_items = trigger_options.map(trigger => {
       return {value: trigger, label: trigger}
     })
-    const irq_options = ["serial-32"]
-    const irq_option_items = irq_options.map(option => {
-      const irq = option.split('-')
-      return {value: irq[1], label: option}
+    const irq_option_items = devices.map((device, index) => {
+      return {value: index, label: device.path}
     })
 
     const filterOption = (input: string, option?: { label: string; value: string }) =>
@@ -44,11 +42,11 @@ export default function IrqTable({ graph, component }) {
 
     const inputNodes = {
       'irq': <Select
-              showSearch
-        placeholder="Select a person"
-        optionFilterProp="children"
-        filterOption={filterOption}
-        options={irq_option_items} />,
+               showSearch
+               placeholder="Select a device"
+               optionFilterProp="children"
+               filterOption={filterOption}
+               options={irq_option_items} />,
       'id': <InputNumber />,
       'trigger': <Select
         showSearch
@@ -84,25 +82,41 @@ export default function IrqTable({ graph, component }) {
 
   const columns = [
     {
-      title: 'irq_label',
-      dataIndex: 'irq_label',
-      width: '40%',
+      title: 'device',
+      dataIndex: 'irq_index',
+      width: '35%',
       editable: true,
       dataType: 'irq',
+      render: (_: any, record: SysIrqItem) => {
+        return <>{devices[record.irq_index].path}</>
+      }
     },
     {
-      title: 'id',
-      dataIndex: 'id_',
-      width: '20%',
-      editable: true,
-      dataType: 'id',
+      title: 'irq_number',
+      dataIndex: 'irq',
+      width: '10%',
+      dataType: 'number',
+      render: (_: any, record: SysIrqItem) => {
+        return <>{devices[record.irq_index].irq.irq_number}</>
+      }
     },
     {
       title: 'trigger',
       dataIndex: 'trigger',
       width: '15%',
-      editable: true,
       dataType: 'trigger',
+      render: (_: any, record: SysIrqItem) => {
+        const trigger = devices[record.irq_index].irq.irq_trigger
+        const trigger_str = trigger == 0x01 ? "level" : trigger == 0x04 ? "edge" : "Invalid"
+        return <>{trigger_str}</>
+      }
+    },
+    {
+      title: 'id',
+      dataIndex: 'id_',
+      width: '10%',
+      editable: true,
+      dataType: 'id',
     },
     {
       title: 'operation',
@@ -159,7 +173,7 @@ export default function IrqTable({ graph, component }) {
 
   const syncNodeData = (newData) => {
     const newIrqs = newData?.map(irq_record => {
-      const { key, irq_label , ...rest } = irq_record
+      const { key, irq_index , ...rest } = irq_record
       return rest
     })
     component?.updateData(graph, {irqs: newIrqs})
@@ -171,7 +185,7 @@ export default function IrqTable({ graph, component }) {
       irq: 32,
       id_: 1,
       trigger: "level",
-      irq_label: "serial-32"
+      irq_index: 0
     }
 
     const newData = [...data, newIrq]
@@ -184,6 +198,8 @@ export default function IrqTable({ graph, component }) {
     try {
       const row = (await form.validateFields()) as SysIrqItem
 
+      row.irq = devices[row.irq_index].irq.irq_number
+      row.trigger = devices[row.irq_index].irq.irq_trigger
       const newData = [...data]
       const index = newData.findIndex((item) => key === item.key)
       if (index > -1) {
@@ -215,7 +231,7 @@ export default function IrqTable({ graph, component }) {
 
   useEffect(() => {
     const originData = component?.getData().irqs.map((irq, index) => {
-      return {...irq, key: index.toString(), irq_label: 'serial-32'}
+      return {...irq, key: index.toString(), irq_index: 0}
     })
     setData(originData)
   }, [component])
