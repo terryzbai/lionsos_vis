@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Select, Space, Tabs } from 'antd';
+import { Input, Select, Space, Tabs } from 'antd';
 import { MemoryEditor } from './pages/memory-editor'
 import DeviceTreeViewer from './pages/device-tree-viewer'
 import './App.css'
@@ -12,6 +12,7 @@ const App = () => {
   const [ deviceTreeJson, setDeviceTreeJson ] = useState(null)
   const [ getDeviceTree, setGetDeviceTree ] = useState(null)
   const [ wasmInstance, setWasmInstance ] = useState(null)
+  const [ fileName, setFileName ] = useState('Untitled')
   const [ board, setBoard ] = useState<string>('qemu_arm_virt')
   const [ dtb, setDtb ] = useState<Uint8Array>(null)
   const [ MRs, setMRs] = useState<Array<MemoryRegion>>([])
@@ -102,11 +103,17 @@ const App = () => {
     readDtb()
   }, []);
 
+  const test = (e) => {
+    console.log(e)
+  }
+
   return (
     <div className="App">
       <div className="top-bar">LionsOS system composer</div>
       <div className="arch-config-bar">
         <Space wrap>
+          FileName:
+          <Input value={fileName} onChange={e => setFileName(e.target.value)} suffix=".system.vis"/>
           Board:
           <Select
             defaultValue={board}
@@ -114,7 +121,6 @@ const App = () => {
             onChange={switchBoard}
             options={board_list}
           />
-
         </Space>
       </div>
       <div className='system-container'>
@@ -122,7 +128,7 @@ const App = () => {
           {
             key: '1',
             label: 'Design',
-            children: <DiagramEditor board={board} dtb={dtb} devices={devices} MRs={MRs} setMRs={setMRs} wasmInstance={wasmInstance} />,
+            children: <DiagramEditor board={board} fileName={fileName} dtb={dtb} devices={devices} MRs={MRs} setMRs={setMRs} wasmInstance={wasmInstance} />,
           },
           {
             key: '2',

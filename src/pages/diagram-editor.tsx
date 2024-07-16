@@ -37,7 +37,7 @@ import { restoreCell, saveCell } from '../components/nodes'
 const Item = Toolbar.Item             // eslint-disable-line
 const ToolbarGroup = Toolbar.Group    // eslint-disable-line
 
-export const DiagramEditor = ({ board, dtb, devices, MRs, setMRs, wasmInstance }) => {
+export const DiagramEditor = ({ board, fileName, dtb, devices, MRs, setMRs, wasmInstance }) => {
   const refGraphContainer = React.createRef<HTMLDivElement>()
   const refStencilContainer = React.createRef<HTMLDivElement>()
   const refTextarea = React.useRef<HTMLTextAreaElement>()
@@ -153,15 +153,38 @@ export const DiagramEditor = ({ board, dtb, devices, MRs, setMRs, wasmInstance }
     })
   }
 
-  const saveDiagram = () => {
+  const saveDiagram = async () => {
     const graphObject = globalGraph.toJSON()
     const cells = graphObject.cells.map(cell => {
       return saveCell(cell)
     })
-    console.log(JSON.stringify({
+    const diagram_content = JSON.stringify({
       cells: cells,
       mrs: MRs
-    }))
+    })
+
+    const fileFullName = fileName + ".system.vis";
+
+    try {
+      // Open the directory picker
+      const dirHandle = await window.showDirectoryPicker();
+
+      // Create a new file handle in the selected directory
+      const fileHandle = await dirHandle.getFileHandle(fileFullName, { create: true });
+
+      // Create a writable stream
+      const writable = await fileHandle.createWritable();
+
+      // Write the content to the file
+      await writable.write(diagram_content);
+
+      // Close the writable stream
+      await writable.close();
+
+      alert('File saved successfully!');
+    } catch (error) {
+      console.error('Error saving file:', error);
+    }
   }
 
   const openSDFEditor = () => {
@@ -190,7 +213,6 @@ export const DiagramEditor = ({ board, dtb, devices, MRs, setMRs, wasmInstance }
         restoreCell(globalGraph, cell)
       })
       reassignEdgesForComponent(globalGraph)
-      console.log(json.mrs)
       setMRs(json.mrs)
     } catch (error) {
       console.error('Error reading file:', error);
