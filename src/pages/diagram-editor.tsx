@@ -125,9 +125,9 @@ export const DiagramEditor = ({ board, dtb, devices, MRs, setMRs, wasmInstance }
     },
   }
 
-  const openDiagram = async() => {
+  const openExampleDiagram = async() => {
     // fetch('test.system.vis').then(response =>
-    fetch('samples/wordle.system').then(response =>
+    fetch('examples/wordle.system').then(response =>
       response.arrayBuffer()
     ).then(bytes => {
       const typedArray = new Uint8Array(bytes)
@@ -168,6 +168,34 @@ export const DiagramEditor = ({ board, dtb, devices, MRs, setMRs, wasmInstance }
     setSDFEditorOpen(true)
     setToGenerateSDF(true)
   }
+
+  const openDiagram = async () => {
+    try {
+      // Open the file picker
+      const [fileHandle] = await window.showOpenFilePicker();
+      const file = await fileHandle.getFile();
+      const fileText = await file.text();
+      const json = JSON.parse(fileText)
+
+      const load_order = {
+        "PD": 0,
+        "VM": 1,
+        "sddf_subsystem": 2,
+        "channel": 3,
+      }
+      const cells = json.cells.sort((a, b) => {
+        return load_order[a.data.type] - load_order[b.data.type]
+      })
+      cells.map(cell => {
+        restoreCell(globalGraph, cell)
+      })
+      reassignEdgesForComponent(globalGraph)
+      console.log(json.mrs)
+      setMRs(json.mrs)
+    } catch (error) {
+      console.error('Error reading file:', error);
+    }
+  };
 
   const openTemplateList = () => {
     const PDs = globalGraph.getCells().filter(cell => cell.data.type === 'PD')
