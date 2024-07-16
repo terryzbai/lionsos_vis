@@ -221,10 +221,8 @@ export default function MappingTable({ graph, MRs, component, updateMappings }) 
 
   useEffect(() => {
     const originData = component?.getData().mappings.map((mapping, index) => {
-      console.log(mapping)
-      const vaddr_str = mapping.vaddr
-      const vaddr = parseInt(mapping.vaddr, 16)
-      return {...mapping, key: index.toString(), vaddr_str: vaddr_str, vaddr: vaddr}
+      const vaddr_str = '0x' + mapping.vaddr.toString(16)
+      return {...mapping, key: index.toString(), vaddr_str: vaddr_str}
     })
     setData(originData)
   }, [component])

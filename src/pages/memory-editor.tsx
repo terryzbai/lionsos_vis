@@ -18,11 +18,15 @@ interface MemoryRegionItem extends MemoryRegion {
 
 type IsOptional<T, K extends keyof T> = {} extends Pick<T, K> ? true : false;
 
-export const MemoryEditor = ({ MRs, setMRs }) => {
+export const MemoryEditor = ({ MRs, setMRs, pageSizeOptions }) => {
   const [form] = Form.useForm()
   const [editingKey, setEditingKey] = useState('')
   const [data, setData] = useState<MemoryRegionItem[]>(null)
   const isEditing = (record: MemoryRegionItem) => record.key === editingKey
+
+  const page_size_options = pageSizeOptions?.map(page_size => {
+    return { label: `${page_size.label} (0x${page_size.value.toString(16)})`, value: page_size.value }
+  })
 
   const EditableCell = ({
     editing,
@@ -34,14 +38,9 @@ export const MemoryEditor = ({ MRs, setMRs }) => {
     index,
     children,
     ...restProps
-  }) => {
+  }) =>{
     const perm_options = ['r', 'w', 'x']
 
-    const page_size_options = [
-      { label: "small", value: 0 },
-      { label: "medium", value: 1 },
-      { label: "large", value: 2 },
-    ]
 
     const inputNodes = {
       'number': <InputNumber />,
@@ -102,6 +101,7 @@ export const MemoryEditor = ({ MRs, setMRs }) => {
       row.size = parseInt(row.size_str, 16)
       row.phys_addr = row.phys_addr_str ? parseInt(row.phys_addr_str, 16) : null
 
+      console.log(row.page_size)
       const { key, phys_addr_str, size_str, ...newMR } = row
       const newMRs = [...MRs]
       const index = data.findIndex((item) => editing_key === item.key)
@@ -146,7 +146,7 @@ export const MemoryEditor = ({ MRs, setMRs }) => {
     {
       title: 'size *',
       dataIndex: 'size_str',
-      width: '15%',
+      width: '20%',
       editable: true,
       dataType: 'string',
       required: true,
@@ -154,7 +154,7 @@ export const MemoryEditor = ({ MRs, setMRs }) => {
     {
       title: 'phys_addr',
       dataIndex: 'phys_addr_str',
-      width: '15%',
+      width: '20%',
       editable: true,
       dataType: 'string',
       required: false,
@@ -162,10 +162,19 @@ export const MemoryEditor = ({ MRs, setMRs }) => {
     {
       title: 'page_size',
       dataIndex: 'page_size',
-      width: '10%',
+      width: '25%',
       editable: true,
       dataType: 'select',
       required: false,
+      render: (_: any, record: MemoryRegionItem) => {
+        const page_size = page_size_options.find(page_size => record.page_size == page_size.value)
+        console.log(page_size, record)
+        if (page_size == null) {
+          return <></>
+        }
+
+        return <>{page_size.label}</>
+      }
     },
     {
       title: 'operation',

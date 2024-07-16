@@ -16,6 +16,7 @@ const App = () => {
   const [ dtb, setDtb ] = useState<Uint8Array>(null)
   const [ MRs, setMRs] = useState<Array<MemoryRegion>>([])
   const [ devices, setDevices ] = useState([])
+  const [ pageSizeOptions, setPageSizeOptions ] = useState([])
 
   const board_list = [
     { value: 'qemu_arm_virt', label: 'qemu_arm_virt' },
@@ -48,6 +49,7 @@ const App = () => {
     }
 
     const attrJson = {
+      board: board,
       dtb: Array.from(dtb),
     }
     const inputString = JSON.stringify(attrJson)
@@ -58,15 +60,17 @@ const App = () => {
     const memory_init = new Uint8Array(wasmInstance.exports.memory.buffer)
     memory_init.set(inputBuffer, inputPtr)
 
-    const ret_len = wasmInstance.exports.getDeviceTree(inputPtr, inputBuffer.length, resultPtr)
+    const ret_len = wasmInstance.exports.fetchInitInfo(inputPtr, inputBuffer.length, resultPtr)
 
     const memory = new Uint8Array(wasmInstance.exports.memory.buffer)
     const resultString = new TextDecoder().decode(memory.subarray(resultPtr, resultPtr + ret_len))
 
-    const dt_json = JSON.parse(resultString)
-    setDeviceTreeJson(dt_json)
-    const devices = listDevices(dt_json, '')
+    const board_info_json = JSON.parse(resultString)
+    setDeviceTreeJson(board_info_json.device_tree)
+    const devices = listDevices(board_info_json.device_tree, '')
     setDevices(devices)
+    const page_size_options = board_info_json.page_size
+    setPageSizeOptions(page_size_options)
   }
 
   const readDtb = () => {
@@ -123,7 +127,7 @@ const App = () => {
           {
             key: '2',
             label: 'Memory Regions',
-            children: <MemoryEditor MRs={MRs} setMRs={setMRs} />,
+            children: <MemoryEditor MRs={MRs} setMRs={setMRs} pageSizeOptions={pageSizeOptions} />,
           },
           {
             key: '3',

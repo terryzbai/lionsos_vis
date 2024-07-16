@@ -234,7 +234,6 @@ export default function IrqTable({ graph, component, devices }) {
   useEffect(() => {
     const originData = component?.getData().irqs.map((irq, index) => {
       const irq_index = devices.indexOf(devices?.find(device => device.irq.irq_number == irq.irq))
-      console.log(irq_index)
       return {...irq, key: index.toString(), irq_index: irq_index}
     })
     setData(originData)
