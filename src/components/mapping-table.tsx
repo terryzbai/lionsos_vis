@@ -17,6 +17,7 @@ export default function MappingTable({ graph, MRs, component, updateMappings }) 
     editing,
     dataIndex,
     title,
+    required,
     inputType,
     record,
     index,
@@ -24,7 +25,7 @@ export default function MappingTable({ graph, MRs, component, updateMappings }) 
     ...restProps
   }) => {
     const perm_options = ['r', 'w', 'x']
- 
+
     const mr_options = MRs.map(MR => {
       return { value: MR.name, label: MR.name }
     })
@@ -53,7 +54,7 @@ export default function MappingTable({ graph, MRs, component, updateMappings }) 
             style={{ margin: 0 }}
             rules={[
               {
-                required: true,
+                required: required,
                 message: `Please Input ${title}!`,
               },
             ]}
@@ -98,6 +99,9 @@ export default function MappingTable({ graph, MRs, component, updateMappings }) 
       const row = (await form.validateFields()) as SysMapItem
 
       row.vaddr = parseInt(row.vaddr_str, 16)
+      if (row.setvar_vaddr == "") {
+        row.setvar_vaddr = null
+      }
       const newData = [...data]
       const index = newData.findIndex((item) => key === item.key)
       if (index > -1) {
@@ -128,7 +132,7 @@ export default function MappingTable({ graph, MRs, component, updateMappings }) 
       vaddr_str: '0x0',
       perms: 'rw',
       cached: false,
-      setvar_vaddr: `default`
+      setvar_vaddr: ``
     }
 
     const newData = [...data, newMapping]
@@ -142,6 +146,7 @@ export default function MappingTable({ graph, MRs, component, updateMappings }) 
       dataIndex: 'mr',
       width: '20%',
       editable: true,
+      required: true,
       dataType: 'select',
     },
     {
@@ -149,6 +154,7 @@ export default function MappingTable({ graph, MRs, component, updateMappings }) 
       dataIndex: 'perms',
       width: '5%',
       editable: true,
+      required: true,
       dataType: 'multichoice',
     },
     {
@@ -156,6 +162,7 @@ export default function MappingTable({ graph, MRs, component, updateMappings }) 
       dataIndex: 'vaddr_str',
       width: '20%',
       editable: true,
+      required: true,
       dataType: 'string',
     },
     {
@@ -163,6 +170,7 @@ export default function MappingTable({ graph, MRs, component, updateMappings }) 
       dataIndex: 'setvar_vaddr',
       width: '20%',
       editable: true,
+      required: false,
       dataType: 'string',
     },
     {
@@ -170,6 +178,7 @@ export default function MappingTable({ graph, MRs, component, updateMappings }) 
       dataIndex: 'cached',
       width: '5%',
       editable: true,
+      required: true,
       dataType: 'boolean',
       render: (_: any, record: SysMapItem) => {
         return <Checkbox defaultChecked={record.cached} disabled={true} />
@@ -214,6 +223,7 @@ export default function MappingTable({ graph, MRs, component, updateMappings }) 
         inputType: col.dataType,
         dataIndex: col.dataIndex,
         title: col.title,
+        required: col.required,
         editing: isEditing(record),
       }),
     }

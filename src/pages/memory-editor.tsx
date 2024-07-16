@@ -16,8 +16,6 @@ interface MemoryRegionItem extends MemoryRegion {
   phys_addr_str?: string
 }
 
-type IsOptional<T, K extends keyof T> = {} extends Pick<T, K> ? true : false;
-
 export const MemoryEditor = ({ MRs, setMRs, pageSizeOptions }) => {
   const [form] = Form.useForm()
   const [editingKey, setEditingKey] = useState('')
@@ -94,7 +92,6 @@ export const MemoryEditor = ({ MRs, setMRs, pageSizeOptions }) => {
   }
 
   const save = async (editing_key: React.Key) => {
-    type Test = IsOptional<MemoryRegionItem, 'page_size'>
     try {
       const row = (await form.validateFields()) as MemoryRegionItem
 
@@ -168,7 +165,6 @@ export const MemoryEditor = ({ MRs, setMRs, pageSizeOptions }) => {
       required: false,
       render: (_: any, record: MemoryRegionItem) => {
         const page_size = page_size_options.find(page_size => record.page_size == page_size.value)
-        console.log(page_size, record)
         if (page_size == null) {
           return <></>
         }
@@ -222,6 +218,7 @@ export const MemoryEditor = ({ MRs, setMRs, pageSizeOptions }) => {
   })
 
   useEffect(() => {
+    console.log(MRs)
     const newData : MemoryRegionItem[] = MRs.map((MR, index) => {
       return {
         ...MR,

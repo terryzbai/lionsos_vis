@@ -129,7 +129,7 @@ export default function MemoryManager({MRSDF, MRs, setMRs, getNodeData, graph })
     setPhysAddr(display_value)
     updateAttrValues()
 
-    setEditorOpen(true)
+    setEditorOpen(false) // Disable mr editing temporarily
   }
 
   const editMR = () => {
@@ -165,24 +165,6 @@ export default function MemoryManager({MRSDF, MRs, setMRs, getNodeData, graph })
   useEffect(() => {
     updateAttrValues()
   }, [MRs])
-
-  useEffect(() => {
-    const newMRs : MemoryRegion[] = MRSDF.map(MR => {
-      if (!MR.phys_addr) {
-        return ''
-      }
-
-      return {
-        name: MR.name,
-        size: parseInt(MR.size, 16),
-        phys_addr: parseInt(MR.phys_addr, 16),
-        page_size: parseInt(MR.page_size, 16),
-        page_count: MR.page_count ? parseInt(MR.page_count, 16) : null,
-        nodes: []
-      }
-    }).filter(MR => MR != '')
-    setMRs(newMRs)
-  }, [MRSDF])
 
   useEffect(() => {
     const size = MRs[indexOfMR]?.size

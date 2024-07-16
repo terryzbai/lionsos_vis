@@ -148,6 +148,7 @@ export const DiagramEditor = ({ board, dtb, devices, MRs, setMRs, wasmInstance }
         restoreCell(globalGraph, cell)
       })
       reassignEdgesForComponent(globalGraph)
+      console.log(json.mrs)
       setMRs(json.mrs)
     })
   }

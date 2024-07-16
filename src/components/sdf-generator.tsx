@@ -140,8 +140,6 @@ const SDFGenerator = ({ globalGraph, toGenerateSDF, setToGenerateSDF, setSDFText
 
   useEffect(() => {
     readDeviceConfig(driver_configs, setDrivers)
-    // readDeviceConfig(driver_paths, setDrivers)
-    // readDeviceConfig(device_class_paths, setDeviceClass)
   }, [])
 
   useEffect(() => {
