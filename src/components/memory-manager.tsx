@@ -190,11 +190,13 @@ export default function MemoryManager({MRSDF, MRs, setMRs, getNodeData, graph })
           return <></>
         }
 
+        const background_color = MR.nodes.length == 1 ? getComponentByID(graph, MR.nodes[0]).getData().color : null
+
         return (
           <Popover placement="bottom" title={MR.name} content={popoverContent(MR)} key={i}>
             <div
               className={'memory-region ' + MR.type}
-              style={ {width: MRWidth + 'px', left: i * MRWidth + 'px' } }
+              style={ {width: MRWidth + 'px', left: i * MRWidth + 'px', backgroundColor: background_color } }
               onDoubleClick={() => {selectMR(MR);}}
               key={i}
               >
