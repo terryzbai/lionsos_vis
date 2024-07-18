@@ -1,10 +1,45 @@
-# Getting Started with Create React App
+# Microkit Configuration Tool
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Features
 
-## Available Scripts
+- [x] System canvas
+  - [x] List available components (i.e. PDs/VMs/Subsystems) on the sidebar
+  - [x] Drag and drop to add components 
+  - [x] Edit and delete components
+  - [x] Connect components with channels
+  - [x] Edit and delete channels
+  - [x] Memory bar showing memory regions with specified physical address
+  - [x] Editable table for editing memory regions
+  - [x] Edit mappings with drop-down menu listing available memory regions
+  - [x] Edit IRQs with drop-down menu listing available devices
+  - [x] Zoom in/out
+- [x] Save and load diagram files
+  - [x] File picker for downloading and uploading
+  - [x] Filename editing
+  - [x] Save diagram as a json string
+  - [x] Read content of diagram
+  - [x] Load diagram on the canvas
+  - [x] Load memry regions
+- [x] Integration with SDF generator
+  - [x] Convert configurations to a JSON string
+  - [x] Build a WASM receiving a JSON string and return XML
+  - [x] Exported function in SDF generator to receive a JSON string from the GUI
+  - [x] Build system description regarding to the configuration JSON
+  - [x] Copy XML to the result memory
+- [x] Device tree viewer
+  - [x] Drop-down menu for board configuration
+  - [x] Read DTB files
+  - [x] Parse device tree json string
+  - [x] Render device tree in the viewer
+- [x] Integration with SDF verifier
+- [x] Header file template generation
+- [ ] Interface for importing subsystems
+  - [x] Interface that defines variables and operations of a component
+  - [x] Example of serial system that creates necessary MRs/Channels/PDs/IRQs if two clients are connected
+  - [ ] Simpler configuration for importing subsystems without implementation in SDF generator
+- [ ] Clean-up
 
-In the project directory, you can run:
+## Installation
 
 ### `npm start`
 
@@ -29,18 +64,3 @@ Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
