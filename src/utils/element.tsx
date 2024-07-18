@@ -1,12 +1,11 @@
 /* Ref: https://github.com/Ivan-Velickovic/microkit/blob/dev/tool/microkit/sysxml.py */
 
 export interface MemoryRegion {
-	name: string
-	size: number
-	phys_addr: number
-	page_size?: number
-	page_count?: number
-	nodes: string[]
+  name: string
+  size: number
+  phys_addr?: number
+  page_size?: number
+  nodes: string[]
 }
 
 export interface ProtectionDomain {

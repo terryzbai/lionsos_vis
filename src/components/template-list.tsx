@@ -12,7 +12,8 @@ export default function TemplateList({ templateListOpen, setTemplateListOpen, gr
 
   const toTemplateList = () => {
 
-    const PDs = graph?.getCells().filter(cell => cell.data.type === 'PD')
+    // TODO: fix it up
+    const PDs = [] // graph?.getCells().filter(cell => cell.data.type === 'PD')
     return PDs?.map(PD => {
       const edges = graph.getEdges()
       const channels = edges?.map(edge => {

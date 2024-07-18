@@ -4,7 +4,7 @@ import { MemoryEditor } from './pages/memory-editor'
 import DeviceTreeViewer from './pages/device-tree-viewer'
 import './App.css'
 import { DiagramEditor } from './pages/diagram-editor'
-import { MemoryRegion } from './pages/memory-editor'
+import { MemoryRegion } from './utils/element'
 
 const onChange = (key: any) => {}
   

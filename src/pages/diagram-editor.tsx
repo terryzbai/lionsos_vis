@@ -11,7 +11,7 @@ import { stencilRender, stencil_group } from '../components/nodes'
 import MemoryManager from '../components/memory-manager'
 import ChannelEditor from '../components/channel-editor'
 import TemplateList from '../components/template-list'
-import { MemoryRegion } from './memory-editor'
+import { MemoryRegion } from '../utils/element'
 import { channelLabelConfig, getValidEndID, randColor, closestBorder, reassignEdgesForComponent } from '../utils/helper'
 import SDFGenerator from '../components/sdf-generator'
 import '@antv/x6-react-components/es/menu/style/index.css'
@@ -32,6 +32,7 @@ import {
 } from '@ant-design/icons'
 import { SystemComponent } from '../components/os-components/component-interface'
 import { XMLParser } from 'fast-xml-parser'
+import { loadDiagramFromXml } from '../utils/translator'
 import { restoreCell, saveCell } from '../components/nodes'
 
 const Item = Toolbar.Item             // eslint-disable-line
@@ -187,11 +188,6 @@ export const DiagramEditor = ({ board, fileName, dtb, devices, MRs, setMRs, wasm
     }
   }
 
-  const openSDFEditor = () => {
-    setSDFEditorOpen(true)
-    setToGenerateSDF(true)
-  }
-
   const openDiagram = async () => {
     try {
       // Open the file picker
@@ -219,15 +215,36 @@ export const DiagramEditor = ({ board, fileName, dtb, devices, MRs, setMRs, wasm
     }
   };
 
+  const openSDFEditor = () => {
+    setSDFEditorOpen(true)
+    setToGenerateSDF(true)
+  }
+
+  const openSDF = async () => {
+    try {
+      // Open the file picker
+      const [fileHandle] = await window.showOpenFilePicker()
+      const file = await fileHandle.getFile()
+      const fileText = await file.text()
+
+      loadDiagramFromXml(globalGraph, fileText, updateMappings)
+      reassignEdgesForComponent(globalGraph)
+    } catch (error) {
+      console.error('Error reading file:', error);
+    }
+  }
+
   const openTemplateList = () => {
     const PDs = globalGraph.getCells().filter(cell => cell.data.type === 'PD')
     const PDNodes = PDs?.map(PD => {return {"name": PD.data.attrs.name, "node_id": PD.id}})
     setTemplateListOpen(true)
   }
 
-  const updateMappings = () => {
+  const updateMappings = (cached_mrs?) => {
+    const mrs = cached_mrs ? cached_mrs : MRs
     const nodes = globalGraph.getNodes()
-    const newMRs = MRs.map((MR) => {
+    const newMRs = mrs.map((MR) => {
+
       const new_mappings = nodes.map((node) => {
         const component = node.data.component
         const node_mappings = component?.getMappings().map(mapping => mapping.mr)
@@ -239,6 +256,7 @@ export const DiagramEditor = ({ board, fileName, dtb, devices, MRs, setMRs, wasm
 
       return { ...MR, nodes: new_mappings }
     })
+    console.log(newMRs)
     setMRs(newMRs)
   }
 
@@ -635,7 +653,7 @@ export const DiagramEditor = ({ board, fileName, dtb, devices, MRs, setMRs, wasm
         </ToolbarGroup>
         <ToolbarGroup>
           <Item name="editSDF" icon={<EditOutlined />} tooltip="Edit SDF" onClick={openSDFEditor}></Item>
-          <Item name="uploadeSDF" icon={<UploadOutlined />} disabled={true} tooltip="Upload SDF"></Item>
+          <Item name="uploadeSDF" icon={<UploadOutlined />} tooltip="Upload SDF" onClick={openSDF}></Item>
           <Item name="downloadTemplates" icon={<DownloadOutlined />} disabled={true} tooltip="Download Templates" onClick={openTemplateList}></Item>
         </ToolbarGroup>
       </Toolbar>

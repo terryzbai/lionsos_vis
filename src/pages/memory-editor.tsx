@@ -1,14 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Typography, Checkbox, TableProps, Form, Select, InputNumber, Table, Button, Input } from 'antd'
-import { SysMap } from '../utils/element'
+import { MemoryRegion, SysMap } from '../utils/element'
 
-export interface MemoryRegion {
-  name: string
-  size: number
-  phys_addr?: number
-  page_size?: number
-  nodes: string[]
-}
 
 interface MemoryRegionItem extends MemoryRegion {
   key: string

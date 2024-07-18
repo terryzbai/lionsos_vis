@@ -43,6 +43,7 @@
   - [x] Read DTB files
   - [x] Parse device tree json string
   - [x] Render device tree in the viewer
+- [ ] Load SDF and display diagram
 - [x] Integration with SDF verifier
   - [x] Build a WASM from microkit verifier
   - [x] Print out error messages
