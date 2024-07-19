@@ -19,71 +19,113 @@ const layoutInfo = (nodes) => {
   return grid
 }
 
+const parseMappings = (json_mappings: any) => {
+  // parse mappings
+  if (json_mappings == null) {
+    json_mappings = []
+  }
+  if (Array.isArray(json_mappings) == false) {
+    json_mappings = [json_mappings]
+  }
+
+  const mappings = json_mappings.map(mapping => {
+    const newMapping: SysMap = {
+      mr: mapping.mr,
+      vaddr: parseInt(mapping.vaddr.replace("_", ""), 16),
+      setvar_vaddr: mapping.setvar_vaddr,
+      perms: mapping.perms,
+      cached: (mapping.cached && mapping.cached == "true") ? true : false,
+    }
+    return newMapping
+  })
+  return mappings
+}
+
+const parseIrqs = (json_irqs: any) => {
+    // parse irqs
+    if (json_irqs == null) {
+      json_irqs = []
+    }
+    if (Array.isArray(json_irqs) == false) {
+      json_irqs = [json_irqs]
+    }
+
+  const irqs = json_irqs?.map(irq => {
+    const newIrq: SysIrq = {
+      irq: irq.irq,
+      id_: parseInt(irq.id),
+      trigger: irq.trigger
+    }
+    return newIrq
+  })
+
+  return irqs;
+}
+
+const parseVm = (json_vm: any) => {
+  if (json_vm == null) return null
+
+  console.log(json_vm)
+  const new_vm_attrs = {
+    name: json_vm.name,
+    id_: json_vm.id,
+    priority: parseInt(json_vm.priority),
+    budget: json_vm.budget ? parseInt(json_vm.budget) : 0,
+    period: json_vm.period ? parseInt(json_vm.period) : 0,
+  }
+
+  return {
+    attrs: new_vm_attrs,
+    mappings: parseMappings(json_vm.map),
+    irqs: parseIrqs(json_vm.irq),
+  }
+}
+
+const parsePds = (graph: Graph, json_pds: any[]) => {
+  const pds = json_pds.map(json_pd => {
+    // TODO: extend to a data type, PDDataModel in `pd.tsx` or ProtectionDomain in `element.tsx`
+    const new_pd_attrs = {
+      name: json_pd.name,
+      priority: parseInt(json_pd.priority),
+      budget: json_pd.budget ? parseInt(json_pd.budget) : 0,
+      period: json_pd.period ? parseInt(json_pd.period) : 0,
+      pp: (json_pd.pp && json_pd.pp == "true") ? true : false,
+      prog_img: json_pd.program_image.path
+    }
+
+    return {
+      attrs: new_pd_attrs,
+      mappings: parseMappings(json_pd.map),
+      irqs: parseIrqs(json_pd.irq),
+      vm: parseVm(json_pd.virtual_machine)
+    }
+  })
+
+  return pds
+}
+
 export const loadDiagramFromXml = (graph: Graph, xml: string, updateMappings: any) => {
   const parser = new XMLParser({ignoreAttributes: false, attributeNamePrefix : ""})
   const system_description = parser.parse(xml).system
   console.log(system_description)
 
-  const pds = system_description.protection_domain?.map(pd => {
-    // TODO: extend to a data type, PDDataModel in `pd.tsx` or ProtectionDomain in `element.tsx`
-    const new_pd_attrs = {
-      name: pd.name,
-      priority: parseInt(pd.priority),
-      budget: pd.budget ? parseInt(pd.budget) : 0,
-      period: pd.period ? parseInt(pd.period) : 0,
-      pp: (pd.pp && pd.pp == "true") ? true : false,
-      prog_img: pd.program_image.path
-    }
-
-    // parse mappings
-    if (pd.map == null) {
-      pd.map = []
-    }
-    if (Array.isArray(pd.map) == false) {
-      pd.map = [pd.map]
-    }
-    const mappings = pd.map?.map(mapping => {
-      const newMapping: SysMap = {
-        mr: mapping.mr,
-        vaddr: parseInt(mapping.vaddr.replace("_", ""), 16),
-        setvar_vaddr: mapping.setvar_vaddr,
-        perms: mapping.perms,
-        cached: (mapping.cached && mapping.cached == "true") ? true : false,
-      }
-      return newMapping
-    })
-
-    // parse irqs
-    if (pd.irq == null) {
-      pd.irq = []
-    }
-    if (Array.isArray(pd.irq) == false) {
-      pd.irq = [pd.irq]
-    }
-    const irqs = pd.irq?.map(irq => {
-      const newIrq: SysIrq = {
-        irq: irq.irq,
-        id_: parseInt(irq.id),
-        trigger: irq.trigger
-      }
-      return newIrq
-    })
-
-    return {
-      attrs: new_pd_attrs,
-      mappings: mappings,
-      irqs: irqs,
-    }
-  })
+  const pds = parsePds(graph, system_description.protection_domain ?? [])
 
   const grid = layoutInfo(pds)
   const nodes = pds.map((pd, index) => {
+    const { vm, ...data } = pd
     const new_node = PDComponentInit.createNode(null)
     new_node.position(grid[index].x, grid[index].y)
-
     graph.addNode(new_node)
 
-    new_node.data.component.updateData(graph, pd)
+    if (vm) {
+      const vm_node = VMComponentInit.createNode(null)
+      new_node.addChild(vm_node)
+      vm_node.position(20, 30, { relative: true })
+      vm_node.data.component.updateData(graph, vm)
+    }
+
+    new_node.data.component.updateData(graph, data)
     return new_node
   })
 
@@ -111,7 +153,7 @@ export const loadDiagramFromXml = (graph: Graph, xml: string, updateMappings: an
     return edge
   })
 
-  // Load MRs
+  // Parse MRs
   const MRs = system_description.memory_region?.map(mr => {
     const newMR: MemoryRegion = {
       name: mr.name,
