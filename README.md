@@ -17,9 +17,9 @@
   - [x] Evenly distribute connection ports on the component's border
 - [x] Memory region editing
   - [x] Memory bar showing memory regions with specified physical address
-  ~~- [x] Display relative size and position of memory regions on the bar~~
-  ~~- [x] Drag to move memory regions on the memory bar~~
-  ~~- [x] Resize memory region by dragging borders of memory regions~~
+  - [x] ~~Display relative size and position of memory regions on the bar~~
+  - [x] ~~Drag to move memory regions on the memory bar~~
+  - [x] ~~Resize memory region by dragging borders of memory regions~~
   - [x] Fill out memory regions with colour assigned for mapped components
   - [x] Evenly distribute memory regions on the memory bar
   - [x] Display mapped components when mouse is over the memory region
@@ -44,6 +44,7 @@
   - [x] Parse device tree json string
   - [x] Render device tree in the viewer
 - [ ] Load SDF and display diagram
+  - [ ] 
 - [x] Integration with SDF verifier
   - [x] Build a WASM from microkit verifier
   - [x] Print out error messages

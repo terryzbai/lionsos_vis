@@ -92,9 +92,10 @@ const App = () => {
   }, [board])
 
   useEffect(() => {
-    fetch('gui_sdfgen.wasm').then(response =>
-      response.arrayBuffer()
-    ).then(bytes => {
+    //fetch('gui_sdfgen.wasm').then(response =>
+    fetch('test_gui.wasm').then(response => {
+      return response.arrayBuffer()
+    }).then(bytes => {
       const typedArray = new Uint8Array(bytes)
       return WebAssembly.instantiate(typedArray, {}).then(result => {
         setWasmInstance(result.instance)
@@ -102,10 +103,6 @@ const App = () => {
     })
     readDtb()
   }, []);
-
-  const test = (e) => {
-    console.log(e)
-  }
 
   return (
     <div className="App">
