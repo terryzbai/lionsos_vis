@@ -92,8 +92,8 @@ const App = () => {
   }, [board])
 
   useEffect(() => {
-    //fetch('gui_sdfgen.wasm').then(response =>
-    fetch('test_gui.wasm').then(response => {
+    fetch('gui_sdfgen.wasm').then(response => {
+    // fetch('test_gui.wasm').then(response => {
       return response.arrayBuffer()
     }).then(bytes => {
       const typedArray = new Uint8Array(bytes)
